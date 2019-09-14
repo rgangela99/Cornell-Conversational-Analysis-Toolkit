@@ -29,3 +29,5 @@ examples/hyperconvo/.ipynb_checkpoints
 venv/
 *.iml
 venv-triadmotif/
+*checkpoint.ipynb
+.DS_Store
