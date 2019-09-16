@@ -79,8 +79,10 @@ class HyperConvo(Transformer):
                 if thread_root in root_to_tlc:
                     root_to_tlc[thread_root][tlc_id] = feats[tlc_id]
                 else:
-                    root_to_tlc[thread_root] = {tlc_id: feats[tlc_id]}
-
+                    try:
+                        root_to_tlc[thread_root] = {tlc_id: feats[tlc_id]}
+                    except KeyError as e:
+                        print(str(e))
             for root_id in root_to_tlc:
                 convo = corpus.get_conversation(root_id)
                 convo.add_meta("hyperconvo", root_to_tlc[root_id])
