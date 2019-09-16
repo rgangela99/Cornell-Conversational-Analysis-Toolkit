@@ -373,6 +373,14 @@ class Corpus:
         for v in self.conversations.values():
             yield v
 
+    def filter_conversations_by(self, func: Callable[[Conversation], bool]):
+        self.conversations = {convo_id: convo for convo_id, convo in self.conversations.items() if func(convo)}
+        utt_ids = set([utt for convo in self.conversations.values() for utt in convo.get_utterance_ids()])
+        self.utterances = {utt.id: utt for utt in self.utterances.values() if utt.id in utt_ids}
+        usernames = set([utt.user.name for utt in self.utterances])
+        self.all_users = {user.name: user for user in self.all_users.values() if user.name in usernames}
+        self.update_users_data()
+
     def filter_utterances_by(self, regular_kv_pairs: Optional[Dict]=None,
                              meta_kv_pairs: Optional[Dict]=None) -> None:
         """
@@ -394,7 +402,7 @@ class Corpus:
                 new_utterances[uid] = utterance
 
         self.utterances = new_utterances
-
+        self.update_users_data()
     #    def earliest_n_utterances(self, n, uts=None):
     #        """Returns the first n utterances (ordered by time)."""
     #        if uts is None:
