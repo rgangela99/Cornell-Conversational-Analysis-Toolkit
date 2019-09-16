@@ -74,6 +74,7 @@ class HyperConvo(Transformer):
 
             root_to_tlc = dict()
             for tlc_id, utts in threads.items():
+                if len(utts) < self.min_thread_len: continue
                 utt_id = next(iter(utts))
                 thread_root = utts[utt_id].root
                 if thread_root in root_to_tlc:
