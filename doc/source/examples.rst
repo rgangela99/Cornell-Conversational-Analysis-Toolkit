@@ -27,3 +27,7 @@ Hyperconvo
 ----------
 - `Categorizing and analyzing subreddits using Hyperconvo features <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/hyperconvo/demo.ipynb>`_
 - `Using Hyperconvo features to predict conversation growth on Reddit <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/hyperconvo/predictive_tasks.ipynb>`_
+
+User Convo Diversity
+---------------------
+- `User conversation attributes and diversity example on ChangeMyView <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/user-convo-attributes/user-convo-diversity-demo.ipynb>`_

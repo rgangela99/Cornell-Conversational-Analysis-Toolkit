@@ -24,6 +24,7 @@ Miscellaneous utility functions for managing datasets
    :maxdepth: 2
 
    Util <util.rst>
+   User Conversation Utilities <user_convo_helpers.rst>
 
 Conversational Analysis Modules
 -------------------------------
@@ -33,6 +34,7 @@ These are the main offerings of ConvoKit: standalone modules implementing variou
 .. toctree::
    :maxdepth: 2
 
+   Basic <basic.rst>
    Parser <parser.rst>
    Coordination <coordination.rst>
    QuestionTypology <questionTypology.rst>
@@ -40,3 +42,4 @@ These are the main offerings of ConvoKit: standalone modules implementing variou
    Hyperconvo <hyperconvo.rst>
    ThreadEmbedder <threadEmbedder.rst>
    CommunityEmbedder <communityEmbedder.rst>
+   UserConvoDiversity <userConvoDiversity.rst>

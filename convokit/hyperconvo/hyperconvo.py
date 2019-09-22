@@ -71,7 +71,6 @@ class HyperConvo(Transformer):
         else:  # threads start at top-level-comment
             # Construct top-level-comment to root mapping
             threads = corpus.utterance_threads(prefix_len=self.prefix_len, include_root=False)
-
             root_to_tlc = dict()
             for tlc_id, utts in threads.items():
                 if len(utts) < self.min_thread_len: continue
@@ -397,4 +396,3 @@ class HyperConvo(Transformer):
             threads_stats[root] = stats
 
         return threads_stats
-
