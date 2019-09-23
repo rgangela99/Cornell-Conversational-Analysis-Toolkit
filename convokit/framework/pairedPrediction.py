@@ -1,6 +1,6 @@
 from .framework import Framework
-from sklearn.pipeline import FeatureUnion, Pipeline
-from sklearn.preprocessing import normalize, StandardScaler, Normalizer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -14,12 +14,12 @@ class PairedPrediction(Framework):
         self.exclude_na = exclude_na
 
     def fit(self, X_train, y_train):
-        self.clf.fit(X_train, y_train)
+        print("Train accuracy: {:.4f}".format(self.clf.fit(X_train, y_train).score(X_train, y_train)))
         return self
 
     def predict(self, X_test, y_test):
         test_acc = self.clf.score(X_test, y_test)
-        print("Test accuracy of {:.4f}".format(test_acc))
+        print("Test accuracy: {:.4f}".format(test_acc))
 
     def print_extreme_coefs(self, feature_names: List[str], num_features: int = 5):
         coefs = self.clf.named_steps['logreg'].coef_[0].tolist()
@@ -28,6 +28,7 @@ class PairedPrediction(Framework):
 
         feats_coefs = sorted(list(zip(feature_names, coefs)), key=lambda x: x[1], reverse=True)
 
+        print()
         print("TOP {} FEATURES".format(num_features))
         for ft, coef in feats_coefs[:num_features]:
             print("{}: {:.3f}".format(ft, coef))
@@ -68,7 +69,7 @@ class PairedPrediction(Framework):
             flip = not flip
 
         if excluded > 0:
-            print("Excluded {} data point(s) that contained NaN values.")
+            print("Excluded {} data point(s) that contained NaN values.".format(excluded))
 
         return np.array(X), np.array(y)
 
