@@ -3,13 +3,13 @@ from convokit.model import Corpus
 
 class Framework(ABC):
 
-    def fit(self, *args) -> None:
+    def fit(self, *args):
         pass
 
     @abstractmethod
-    def predict(self, *args) -> None:
+    def predict(self, *args):
 
         pass
 
-    def fit_predict(self, *args) -> None:
+    def fit_predict(self, *args):
         pass

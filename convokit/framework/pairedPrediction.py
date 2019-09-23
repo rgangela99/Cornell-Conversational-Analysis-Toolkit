@@ -20,6 +20,7 @@ class PairedPrediction(Framework):
     def predict(self, X_test, y_test):
         test_acc = self.clf.score(X_test, y_test)
         print("Test accuracy: {:.4f}".format(test_acc))
+        return test_acc
 
     def print_extreme_coefs(self, feature_names: List[str], num_features: int = 5):
         coefs = self.clf.named_steps['logreg'].coef_[0].tolist()
@@ -51,8 +52,8 @@ class PairedPrediction(Framework):
 
         excluded = 0
         for idx in range(len(pos_ids)):
-            pos_feats = np.array(list(feats[pos_ids[idx]].values()))
-            neg_feats = np.array(list(feats[neg_ids[idx]].values()))
+            pos_feats = np.array(feats.loc[pos_ids[idx]])
+            neg_feats = np.array(feats.loc[neg_ids[idx]])
 
             if self.exclude_na and (np.isnan(pos_feats).any() or np.isnan(neg_feats).any()):
                 excluded += 1
