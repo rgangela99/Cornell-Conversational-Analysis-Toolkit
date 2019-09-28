@@ -78,7 +78,7 @@ class PairedPrediction(Framework):
         """
 
         :param feats: Features dataframe indexed by ids
-        :param pos_ids: Index ids that correspond to positive class (paired with neg_id at same list idnex)
+        :param pos_ids: Index ids that correspond to positive class (paired with neg_id at same list index)
         :param neg_ids: Index ids that correspond to negative class (paired with pos_id at same list index)
         :return:
         """
