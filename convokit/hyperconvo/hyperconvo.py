@@ -365,7 +365,7 @@ class HyperConvo(Transformer):
                     instance_layers = 1
                     for edges in instance.edges:
                         instance_layers *= len(edges)
-                    layer_count += instance_layers
+                layer_count += instance_layers
                 motif_dict[motif_type] = layer_count
         return threads_motifs
 
