@@ -255,20 +255,11 @@ class Hypergraph:
     def incoming_1to3_triad_motifs(self):
         motifs = []
         for C1 in self.hypernodes:
-<<<<<<< HEAD
             incoming = set(self.incoming_hypernodes(C1))
             for C2, C3 in itertools.permutations(incoming, 2):
                 if C2 in self.adj_out[C1]: continue
                 if C2 in self.adj_out[C3]: continue
                 if C3 in self.adj_out[C2]: continue
-
-=======
-            incoming = set(self.incoming_hypernodes(C1)) # C3->C1, C2->C1
-            for C2, C3 in itertools.permutations(incoming, 2): #note: permutations not combinations
-                if C2 in self.adj_out[C1]: continue # no C1->C2
-                if C2 in self.adj_out[C3]: continue # no C2->C3
-                if C3 in self.adj_out[C2]: continue # no C3->C2
->>>>>>> 5cfbb9020d5b651ffcf0bb585b6a6d563ba29e37
                 if C3 not in self.adj_out[C1]: continue
 
                 motifs += [TriadMotif((C1, C2, C3),
