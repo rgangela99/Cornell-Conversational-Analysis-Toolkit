@@ -1,7 +1,7 @@
 import itertools
 from typing import Tuple, List, Dict, Optional, Hashable, Collection
 
-class Hypergraph:
+class Hypergraph_0:
     """
     Represents a hypergraph, consisting of nodes, directed edges,
     hypernodes (each of which is a set of nodes) and hyperedges (directed edges
