@@ -256,9 +256,7 @@ class Hypergraph:
         motifs = []
         for C1 in self.hypernodes:
             incoming = set(self.incoming_hypernodes(C1))
-            outgoing = set(self.outgoing_hypernodes(C1))
-            incoming_only = incoming - outgoing # no edges C2->C1
-            for C2, C3 in itertools.permutations(incoming_only, 2):
+            for C2, C3 in itertools.permutations(incoming, 2):
                 if C2 in self.adj_out[C1]: continue
                 if C2 in self.adj_out[C3]: continue
                 if C3 in self.adj_out[C2]: continue
