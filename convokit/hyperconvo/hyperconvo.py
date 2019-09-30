@@ -356,6 +356,18 @@ class HyperConvo(Transformer):
                 motif_dict[motif_type] = len(instances)
         return threads_motifs
 
+    def retrieve_motif_counts_layered(self, corpus: Corpus):
+        threads_motifs = self.retrieve_motifs(corpus)
+        for thread_id, motif_dict in threads_motifs.items():
+            for motif_type, instances in motif_dict.items():
+                layer_count = 0
+                for instance in instances:
+                    instance_layers = 1
+                    for edges in instance.edges:
+                        instance_layers *= len(edges)
+                    layer_count += instance_layers
+                motif_dict[motif_type] = layer_count
+        return threads_motifs
 
     def retrieve_motif_texts(self, corpus: Corpus):
         threads_motifs = self.retrieve_motifs(corpus)
