@@ -6,6 +6,7 @@ from .politenessStrategies import *
 from .transformer import *
 from .parser import *
 from .hyperconvo import *
+from .hyperconvo_orig import *
 from .userConvoDiversity import *
 from .basic import *
 from .framework import *
