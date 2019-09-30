@@ -265,9 +265,7 @@ class HyperConvo(Transformer):
     def _motif_feats(uts: Optional[Dict[Hashable, Utterance]] = None,
                      G: Hypergraph = None,
                      name_ext: str="",
-                     exclude_id: str = None,
-                     latent=False,
-                     trans=False) -> Dict:
+                     exclude_id: str = None) -> Dict:
         """
         Helper method for retrieve_feats().
         Generate statistics on motif-related features in a Hypergraph (G), or a Hypergraph
@@ -285,6 +283,7 @@ class HyperConvo(Transformer):
         motifs = G.extract_motifs()
 
         stat_funcs = {
+            "is-present": lambda l: len(l) > 0,
             "count": len
         }
 
@@ -295,17 +294,17 @@ class HyperConvo(Transformer):
                 stats["{}[{}{}]".format(stat, str(motif_type), name_ext)] = \
                     stat_func(motifs[motif_type])
 
-        if latent:
-            latent_motif_count, transitions = HyperConvo._latent_motif_count(motifs, trans=trans)
-            for motif_type in latent_motif_count:
-                # stats["is-present[LATENT_{}{}]".format(motif_type, name_ext)] = \
-                #     (latent_motif_count[motif_type] > 0)
-                stats["count[LATENT_{}{}]".format(motif_type, name_ext)] = latent_motif_count[motif_type]
-
-            if trans:
-                assert transitions is not None
-                for p, v in transitions.items():
-                    stats["trans[{}]".format(p)] = v
+        # if latent:
+        #     latent_motif_count, transitions = HyperConvo._latent_motif_count(motifs, trans=trans)
+        #     for motif_type in latent_motif_count:
+        #         # stats["is-present[LATENT_{}{}]".format(motif_type, name_ext)] = \
+        #         #     (latent_motif_count[motif_type] > 0)
+        #         stats["count[LATENT_{}{}]".format(motif_type, name_ext)] = latent_motif_count[motif_type]
+        #
+        #     if trans:
+        #         assert transitions is not None
+        #         for p, v in transitions.items():
+        #             stats["trans[{}]".format(p)] = v
 
         return stats
 
@@ -387,12 +386,12 @@ class HyperConvo(Transformer):
             stats = {}
             G = HyperConvo._make_hypergraph(uts=thread)
             G_mid = HyperConvo._make_hypergraph(uts=thread, exclude_id=root)
-            for k, v in HyperConvo._degree_feats(G=G).items(): stats[k] = v
-            # for k, v in HyperConvo._motif_feats(G=G).items(): stats[k] = v
-            for k, v in HyperConvo._degree_feats(G=G_mid,
-                                           name_ext="mid-thread ").items(): stats[k] = v
-            # for k, v in HyperConvo._motif_feats(G=G_mid,
-            #                               name_ext=" over mid-thread").items(): stats[k] = v
+            # for k, v in HyperConvo._degree_feats(G=G).items(): stats[k] = v
+            for k, v in HyperConvo._motif_feats(G=G).items(): stats[k] = v
+            # for k, v in HyperConvo._degree_feats(G=G_mid,
+            #                                name_ext="mid-thread ").items(): stats[k] = v
+            for k, v in HyperConvo._motif_feats(G=G_mid,
+                                          name_ext=" over mid-thread").items(): stats[k] = v
             threads_stats[root] = stats
 
         return threads_stats
