@@ -320,6 +320,16 @@ class HyperConvo(Transformer):
 
         return threads_motifs
 
+    def retrieve_dyadic_motif_counts(self, corpus: Corpus):
+        threads_motifs = {}
+        for i, (root, thread) in enumerate(
+                corpus.utterance_threads(prefix_len=self.prefix_len, include_root=self.include_root).items()):
+            if len(thread) < self.min_thread_len: continue
+            G = HyperConvo._make_hypergraph(uts=thread)
+            motifs = G.extract_dyadic_motif_counts()
+            threads_motifs[root] = motifs
+        return threads_motifs
+
     def retrieve_motif_paths(self, corpus: Corpus):
         threads_motifs = self.retrieve_motifs(corpus)
         threads_paths = dict()
@@ -397,13 +407,13 @@ class HyperConvo(Transformer):
             if len(thread) < self.min_thread_len: continue
             stats = {}
             G = HyperConvo._make_hypergraph(uts=thread)
-            G_mid = HyperConvo._make_hypergraph(uts=thread, exclude_id=root)
+            # G_mid = HyperConvo._make_hypergraph(uts=thread, exclude_id=root)
             # for k, v in HyperConvo._degree_feats(G=G).items(): stats[k] = v
             for k, v in HyperConvo._motif_feats(G=G).items(): stats[k] = v
             # for k, v in HyperConvo._degree_feats(G=G_mid,
             #                                name_ext="mid-thread ").items(): stats[k] = v
-            for k, v in HyperConvo._motif_feats(G=G_mid,
-                                          name_ext=" over mid-thread").items(): stats[k] = v
+            # for k, v in HyperConvo._motif_feats(G=G_mid,
+            #                               name_ext=" over mid-thread").items(): stats[k] = v
             threads_stats[root] = stats
 
         return threads_stats

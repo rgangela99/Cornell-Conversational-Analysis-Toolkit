@@ -34,7 +34,7 @@ def random_other_utt(prev_utts: List[Utterance], responses: Dict[str, Set[User]]
 
     other_utts = list(filter(lambda x: responder not in responses[x.id], other_utts)) # avoid responding to same Utterance more than once
     # print("Filter responding twice: {}".format(other_utts))
-    if len(other_utts) == 0: return prev_utts[0] # reply to root/self if no other
+    if len(other_utts) == 0: return random.choice(prev_utts) #return prev_utts[0] # reply to root/self if no other
 
     return random.choice(other_utts)
 
@@ -42,7 +42,7 @@ def randomize_thread(root: str, thread: Dict[str, Utterance]) -> Dict[str, Utter
     order = get_arrival_order(thread)
 
     # First utterance in thread is always the root
-    utt0 = Utterance(id=root, user=order[0], root=root, reply_to=None, timestamp=0)
+    utt0 = Utterance(id=root, user=order[0], root=root, reply_to=None, timestamp=0, meta={"top_level_comment": root})
 
     prev_utts = [utt0]
     responses = dict()
@@ -52,7 +52,9 @@ def randomize_thread(root: str, thread: Dict[str, Utterance]) -> Dict[str, Utter
         utt_to_respond_to = random_other_utt(prev_utts, responses, user)
         responses[utt_to_respond_to.id].add(user)
 
-        new_utt = Utterance(id="{}_{}".format(root, idx), user=user, root=root, reply_to=utt_to_respond_to.get("id"), timestamp=idx)
+        new_utt = Utterance(id="{}_{}".format(root, idx), user=user, root=root,
+                            reply_to=utt_to_respond_to.get("id"), timestamp=idx,
+                            meta={"top_level_comment": root})
         prev_utts.append(new_utt)
         responses[new_utt.id] = set()
 
