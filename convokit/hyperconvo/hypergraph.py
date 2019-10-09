@@ -1,7 +1,7 @@
 import itertools
 from typing import Tuple, List, Dict, Optional, Hashable, Collection
 from .triadMotif import TriadMotif, MotifType
-
+from collections import defaultdict
 
 class Hypergraph:
     """
@@ -89,6 +89,17 @@ class Hypergraph:
         """
         return sorted(timestamps, key=lambda x: x['timestamp'])
 
+    def extract_dyadic_motif_counts(self) -> Dict[str, int]:
+        motifs = defaultdict(int)
+        for C1, C2 in itertools.combinations(self.hypernodes, 2):
+            if C1 not in self.adj_in[C2] and C2 not in self.adj_in[C1]:
+                motifs['DYADIC[NO_EDGE]'] += 1
+            elif C1 in self.adj_in[C2] and C2 in self.adj_in[C1]:
+                motifs['DYADIC[TWO_EDGES]'] += 1
+            else:
+                motifs['DYADIC[ONE_EDGE'] += 1
+        return motifs
+
     def extract_motifs(self) -> Dict[str, List]:
 
         motifs = dict()
@@ -114,6 +125,7 @@ class Hypergraph:
             motifs[motif_type] = motif_func()
 
         return motifs
+
 
     # returns list of tuples of form (C1, C2, C3), no edges
     def no_edge_triad_motifs(self):

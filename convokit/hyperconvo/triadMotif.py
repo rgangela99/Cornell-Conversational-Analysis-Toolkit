@@ -324,7 +324,7 @@ class TriadMotif:
             raise Exception("No such motif type: {}".format(self.triad_type))
 
     # returns a motif with the last edge removed
-    def regress(self,verbose=False):
+    def regress(self, verbose=False):
         if self.triad_type == MotifType.NO_EDGE_TRIADS.name: return None
         last_edge_idx = self._last_added_edge_idx()
         if verbose: print("Last edge index is: {}".format(last_edge_idx))

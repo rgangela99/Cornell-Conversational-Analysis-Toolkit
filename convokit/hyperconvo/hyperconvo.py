@@ -320,6 +320,16 @@ class HyperConvo(Transformer):
 
         return threads_motifs
 
+    def retrieve_dyadic_motif_counts(self, corpus: Corpus):
+        threads_motifs = {}
+        for i, (root, thread) in enumerate(
+                corpus.utterance_threads(prefix_len=self.prefix_len, include_root=self.include_root).items()):
+            if len(thread) < self.min_thread_len: continue
+            G = HyperConvo._make_hypergraph(uts=thread)
+            motifs = G.extract_dyadic_motif_counts()
+            threads_motifs[root] = motifs
+        return threads_motifs
+
     def retrieve_motif_paths(self, corpus: Corpus):
         threads_motifs = self.retrieve_motifs(corpus)
         threads_paths = dict()
