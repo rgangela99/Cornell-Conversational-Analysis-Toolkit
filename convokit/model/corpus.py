@@ -4,6 +4,7 @@ import pickle
 from collections import defaultdict
 import json
 import os
+import numpy as np
 from .user import User
 from .utterance import Utterance
 from .conversation import Conversation
@@ -61,6 +62,12 @@ class Corpus:
         if exclude_conversation_meta is None: exclude_conversation_meta = []
         if exclude_user_meta is None: exclude_user_meta = []
         if exclude_overall_meta is None: exclude_overall_meta = []
+
+        # keeps track of features and text/matrix representations.
+        self.feature_index = {}
+        self.utterance_keys = {}
+        self.features = {}
+        self.key_to_idx = {}
 
         self.version = version if version is not None else 0
 
@@ -165,6 +172,19 @@ class Corpus:
                 for field in exclude_overall_meta:
                     del self.meta_index["overall-index"][field]
 
+                # loads in feature index
+                if os.path.exists(os.path.join(filename, 'feature_index.json')):
+                    with open(os.path.join(filename, 'feature_index.json'), 'r') as f:
+                        self.feature_index = json.load(f)
+
+
+                # loads in utterance keys
+                try:
+                    self.load_utterance_keys('default')
+                except:
+                    pass
+
+
             else:
                 users_meta = defaultdict(dict)
                 convos_meta = defaultdict(dict)
@@ -239,7 +259,13 @@ class Corpus:
                                  meta=convo_meta)
             self.conversations[convo_id] = convo
 
+        
         self.update_users_data()
+
+        if 'default' not in self.utterance_keys:
+            self.utterance_keys['default'] = list(self.utterances.keys())
+            self.key_to_idx['default'] = self._get_key_to_idx(self.utterance_keys['default'])
+        
 
     @staticmethod
     def dump_helper_bin(d: Dict, d_bin: Dict, utterances_idx: Dict) -> Dict:
@@ -355,15 +381,53 @@ class Corpus:
         with open(os.path.join(dir_name, "index.json"), "w") as f:
             json.dump(self.meta_index, f)
 
+        with open(os.path.join(filename, 'feature_index.json'), 'w') as f:
+            json.dump(self.feature_index)
+
+        self.dump_utterance_keys('default')
+
+    # helper functions for utterance keys
+    def get_utterance_keys(self, index_name='default'):
+        return self.utterance_keys[index_name]
+
+    def load_utterance_keys(self, index_name, dir_name=None):
+        if (self.original_corpus_path is None) and (dir_name is None):
+            raise ValueError('must specify a directory to read from')
+        if dir_name is None:
+            dir_name = self.original_corpus_path
+
+        filename = os.path.join(dir_name, index_name + '.keys.txt')
+        with open(filename, 'r') as f:
+            self.utterance_keys[index_name] = [x.strip() for x in f.readlines()]
+        self.key_to_idx[index_name] = self._get_key_to_idx(self.utterance_keys[index_name])
+
+    def dump_utterance_keys(self, index_name, dir_name=None):
+        if (self.original_corpus_path is None) and (dir_name is None):
+            raise ValueError('must specify a directory to write to')
+        
+        if dir_name is None:
+            dir_name = self.original_corpus_path
+        filename = os.path.join(dir_name, index_name + '.keys.txt')
+        with open(filename, 'w') as f:
+            f.write('\n'.join(str(x) for x in self.utterance_keys[index_name]))
+
+    def _get_key_to_idx(self, key_list):
+        return {key: idx for idx, key in enumerate(key_list)}
+
+
+    # helper functions for utterances
     def get_utterance_ids(self) -> List:
-        return list(self.utterances.keys())
+        return self.get_utterance_keys()
+        # return list(self.utterances.keys())
 
     def get_utterance(self, ut_id: Hashable) -> Utterance:
         return self.utterances[ut_id]
 
     def iter_utterances(self) -> Generator[Utterance, None, None]:
-        for v in self.utterances.values():
-            yield v
+        for k in self.get_utterance_keys():
+            yield self.utterances[k]
+        # for v in self.utterances.values():
+        #     yield v
 
     def get_conversation_ids(self) -> List[str]:
         return list(self.conversations.keys())
