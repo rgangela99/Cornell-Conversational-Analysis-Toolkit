@@ -11,8 +11,9 @@ class Hypergraph:
     from hypergraphs (Fig 2 of
     http://www.cs.cornell.edu/~cristian/Patterns_of_participant_interactions.html)
     """
-    def __init__(self):
+    def __init__(self, utterances):
         # public
+        self.utterances = utterances
         self.nodes = dict()
         self.hypernodes = dict()
 

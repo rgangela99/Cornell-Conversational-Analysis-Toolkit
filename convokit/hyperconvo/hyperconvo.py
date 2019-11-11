@@ -105,7 +105,7 @@ class HyperConvo(Transformer):
                                    "has no valid corpus / utterances input")
             uts = {utt.id: utt for utt in corpus.iter_utterances()}
 
-        G = Hypergraph()
+        G = Hypergraph(utterances=uts)
         username_to_utt_ids = dict()
         reply_edges = []
         speaker_to_reply_tos = defaultdict(list)
