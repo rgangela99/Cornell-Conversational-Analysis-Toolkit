@@ -24,6 +24,7 @@ class User:
         self._meta = meta if meta is not None else {}
         self._split_attribs = set()
         self._update_uid()
+        self.id = name
 
     def identify_by_attribs(self, attribs: Collection) -> None:
         """Identify a user by a list of attributes. Sets which user info
