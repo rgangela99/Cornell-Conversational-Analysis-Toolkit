@@ -34,7 +34,7 @@ class Hypergraph:
         self.adj_in[name] = dict()
 
     # edge or hyperedge
-    def add_edge(self, u: str, v: str, info: Optional[dict]=None) -> None:
+    def add_edge(self, u: str, v: str, info=None) -> None:
         assert u in self.nodes or u in self.hypernodes
         assert v in self.nodes or v in self.hypernodes
         if u in self.hypernodes and v in self.hypernodes:

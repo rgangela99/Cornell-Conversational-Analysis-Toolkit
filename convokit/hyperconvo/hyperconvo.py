@@ -120,7 +120,7 @@ class HyperConvo(Transformer):
                         and ut.reply_to != exclude_id:
                     reply_edges.append((ut.id, ut.reply_to))
                     speaker_to_reply_tos[ut.user].append(ut.reply_to)
-                    speaker_target_pairs.add((ut.user, uts[ut.reply_to].user, ut.timestamp))
+                    speaker_target_pairs.add(ut)
                 G.add_node(ut.id, info=ut.__dict__)
         # hypernodes
         for u, ids in username_to_utt_ids.items():
@@ -134,16 +134,8 @@ class HyperConvo(Transformer):
             for reply_to in reply_tos:
                 G.add_edge(u, reply_to)
         # user to user response edges
-        for u, v, timestamp, text, reply_to, utt_id, top_level_comment in speaker_target_pairs:
-            G.add_edge(u, v, {'timestamp': timestamp,
-                              'text': text,
-                              'speaker': u,
-                              'target': v,
-                              'reply_to': reply_to,
-                              'top_level_comment': top_level_comment,
-                              'utt_id': utt_id,
-                              'root': (reply_to == top_level_comment)
-                              })
+        for u, v, utt in speaker_target_pairs:
+            G.add_edge(u, v, utt)
         return G
 
     @staticmethod
@@ -361,8 +353,8 @@ class HyperConvo(Transformer):
             # G_mid = HyperConvo._make_hypergraph(uts=thread, exclude_id=root)
             # for k, v in HyperConvo._degree_feats(G=G).items(): stats[k] = v
             for k, v in HyperConvo._motif_feats(G=G).items(): stats[k] = v
-            for k, v in HyperConvo._degree_feats(G=G_mid, name_ext="mid-thread ").items(): stats[k] = v
-            for k, v in HyperConvo._motif_feats(G=G_mid, name_ext=" over mid-thread").items(): stats[k] = v
+            # for k, v in HyperConvo._degree_feats(G=G_mid, name_ext="mid-thread ").items(): stats[k] = v
+            # for k, v in HyperConvo._motif_feats(G=G_mid, name_ext=" over mid-thread").items(): stats[k] = v
             threads_stats[root] = stats
 
         return threads_stats
