@@ -33,7 +33,7 @@ class ThreadEmbedder(Transformer):
         """
         return self.fit_transform(corpus)
 
-    def fit_transform(self, corpus: Corpus) -> Corpus:
+    def fit_transform(self, corpus: Corpus, y = None) -> Corpus:
         """
         :param corpus: the Corpus to use
 

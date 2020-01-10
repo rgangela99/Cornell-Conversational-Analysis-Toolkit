@@ -1,12 +1,11 @@
 from collections import defaultdict
 import numpy as np
 import scipy.stats
-
 from convokit.transformer import Transformer
 from typing import Dict, Optional
 from convokit.model import Corpus, Utterance
 from .hypergraph import Hypergraph
-from .triadMotif import TriadMotif, MotifType
+from .triadMotif import TriadMotif
 
 
 class HyperConvo(Transformer):

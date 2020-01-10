@@ -16,7 +16,7 @@ def get_arrival_order(thread: Dict[str, Utterance]) -> List[User]:
     """
     retval = []
     for utt_id, utt in thread.items():
-        retval.append((utt.get('user'), utt.get('timestamp')))
+        retval.append((utt.user, utt.timestamp))
     return [user for user, ts in sorted(retval, key=lambda x: x[1])]
 
 
@@ -58,4 +58,4 @@ def randomize_thread(root: str, thread: Dict[str, Utterance]) -> Dict[str, Utter
         prev_utts.append(new_utt)
         responses[new_utt.id] = set()
 
-    return {utt.get("id"): utt for utt in prev_utts}
+    return {utt.id: utt for utt in prev_utts}
