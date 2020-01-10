@@ -10,3 +10,4 @@ These are the classes that comprise a ConvoKit corpus:
    Utterance <utterance.rst>
    Conversation <conversation.rst>
    Corpus <corpus.rst>
+   UtteranceNode <utterance

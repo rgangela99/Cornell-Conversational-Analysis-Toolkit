@@ -16,8 +16,8 @@ te.fit_transform(corpus)
 ce = convokit.CommunityEmbedder(community_key="subreddit", method="tsne")
 ce.fit_transform(corpus)
 
-pts = corpus.get_meta()["communityEmbedder"]["pts"]
-labels = corpus.get_meta()["communityEmbedder"]["labels"]
+pts = corpus.meta["communityEmbedder"]["pts"]
+labels = corpus.meta["communityEmbedder"]["labels"]
 
 xs, ys = zip(*pts)
 plt.scatter(xs, ys)

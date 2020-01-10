@@ -1,5 +1,5 @@
 # Cornell Conversational Analysis Toolkit ([ConvoKit](http://convokit.cornell.edu/))
-This toolkit contains tools to extract conversational features and analyze social phenomena in conversations, using a [single unified interface](https://zissou.infosci.cornell.edu/convokit/documentation/architecture.html) inspired by (and compatible with) scikit-learn.  Several large [conversational datasets](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets) are included together with scripts exemplifying the use of the toolkit on these datasets. The latest version is [2.1.11](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/releases/tag/v2.0) (released 18 Sep 2019).
+This toolkit contains tools to extract conversational features and analyze social phenomena in conversations, using a [single unified interface](https://zissou.infosci.cornell.edu/convokit/documentation/architecture.html) inspired by (and compatible with) scikit-learn.  Several large [conversational datasets](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets) are included together with scripts exemplifying the use of the toolkit on these datasets. The latest version is [2.2.0](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/releases/tag/v2.0) (released 06 Nov 2019); follow the [project on GitHub](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to keep track of updates.
 
 The toolkit currently implements features for:
 
@@ -13,10 +13,12 @@ Example: [exploring the balance of power in the U.S. Supreme Court](https://gith
 A set of lexical and parse-based features correlating with politeness and impoliteness.  
 Example: [understanding the (mis)use of politeness strategies in conversations gone awry on Wikipedia](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/conversations-gone-awry/Conversations_Gone_Awry_Prediction.ipynb).
 
-### [Conversational prompts](http://www.cs.cornell.edu/~cristian/Asking_too_much.html) <sub><sup>[(API)](https://zissou.infosci.cornell.edu/convokit/documentation/questionTypology.html)</sup></sub>
+### [Prompt types](http://www.cs.cornell.edu/~cristian/Asking_too_much.html) <sub><sup>[(API)](https://zissou.infosci.cornell.edu/convokit/documentation/promptTypes.html)</sup></sub>
 
-An unsupervised method for extracting surface motifs that occur in conversations and grouping them by rhetorical role.  
-Examples: [extracting common question types in U.K. parliament](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/question-typology/parliament_questions_example.ipynb), [understanding the use of conversational prompts in conversations gone awry on Wikipedia](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/conversations-gone-awry/Conversations_Gone_Awry_Prediction.ipynb).
+An unsupervised method for grouping utterances and utterance features by their rhetorical role.
+Examples: [extracting question types in the U.K. parliament](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/prompt-types/prompt-type-wrapper-demo.ipynb), [extended version demonstrating additional functionality](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/prompt-types/prompt-type-demo.ipynb), [understanding the use of conversational prompts in conversations gone awry on Wikipedia](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/conversations-gone-awry/Conversations_Gone_Awry_Prediction.ipynb).
+
+Also includes functionality to extract surface motifs to represent utterances, used in the above paper [(API)](https://zissou.infosci.cornell.edu/convokit/documentation/phrasingMotifs.html).
 
 ### [Hypergraph conversation representation](http://www.cs.cornell.edu/~cristian/Patterns_of_participant_interactions.html) <sub><sup>[(API)](https://zissou.infosci.cornell.edu/convokit/documentation/hyperconvo.html)</sup></sub>
 A method for extracting structural features of conversations through a hypergraph representation.  
@@ -26,8 +28,9 @@ Example: [hypergraph creation and feature extraction, visualization and interpre
 A method to compute the linguistic diversity of individuals within their own conversations, and between other individuals in a population.  
 Example: [user conversation attributes and diversity example on ChangeMyView](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/user-convo-attributes/user-convo-diversity-demo.ipynb)
 
-### [CRAFT: Online forecasting of conversational outcomes (Coming Soon!)](https://arxiv.org/abs/1909.01362)
-A neural model for forecasting future outcomes of conversations (e.g., derailment into personal attacks) as they develop.
+### [CRAFT: Online forecasting of conversational outcomes](https://arxiv.org/abs/1909.01362)
+A neural model for forecasting future outcomes of conversations (e.g., derailment into personal attacks) as they develop.  
+Available as an interactive notebook: [full version (fine-tuning + inference)](https://colab.research.google.com/drive/1SH4iMEHdoH4IovN-b9QOSK4kG4DhAwmb) or [inference-only](https://colab.research.google.com/drive/1GvICZN0VwZQSWw3pJaEVY-EQGoO-L5lH).
 
 ## Datasets
 ConvoKit ships with several datasets ready for use "out-of-the-box".
@@ -63,19 +66,17 @@ Name for download: `wiki-corpus`
 Transcripts for tennis singles post-match press conferences for major tournaments between 2007 to 2015 (6,467 post-match press conferences).  
 Name for download: `tennis-corpus`
 
-
 ### [Reddit Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/subreddit.html)
 
 Reddit conversations from over 900k subreddits, arranged by subreddit. A [small subset](https://zissou.infosci.cornell.edu/convokit/documentation/reddit-small.html) sampled from 100 highly active subreddits is also available. 
  
 Name for download: `subreddit-<name_of_subreddit>` for the by-subreddit data, `reddit-corpus-small` for the small subset. 
 
-### Wikiconv Corpus (WIP)
+### [WikiConv Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/wikiconv.html)
 
 The full corpus of Wikipedia talk page conversations, based on the reconstruction described in [this paper](http://www.cs.cornell.edu/~cristian/index_files/wikiconv-conversation-corpus.pdf).
 Note that due to the large size of the data, it is split up by year.
-We are currently working on implementing, as part of the corpus metadata, block data retrieved directly from the Wikipedia block log, for reproducing the [Trajectories of Blocked Community Members](http://www.cs.cornell.edu/~cristian/Recidivism_online_files/recidivism_online.pdf) paper.
-In the meantime, raw block data can be downloaded [here](https://zissou.infosci.cornell.edu/convokit/datasets/wikiconv-corpus/blocks.json).
+We separately provide [block data retrieved directly from the Wikipedia block log](https://zissou.infosci.cornell.edu/convokit/datasets/wikiconv-corpus/blocks.json), for reproducing the [Trajectories of Blocked Community Members](http://www.cs.cornell.edu/~cristian/Recidivism_online_files/recidivism_online.pdf) paper.
 
 Name for download: `wikiconv-<year>` to download wikiconv data for the specified year.
 
@@ -84,6 +85,42 @@ Name for download: `wikiconv-<year>` to download wikiconv data for the specified
 A collection of almost 1.5 million conversations and 2.8 million comments posted by developers reviewing proposed code changes in the Chromium project.
 
 Name for download: `chromium-corpus`
+
+### [Winning Arguments Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/winning.html)
+
+A metadata-rich subset of conversations made in the r/ChangeMyView subreddit between 1 Jan 2013 - 7 May 2015, with information on the delta (success) of a user's utterance in convincing the poster.
+
+Name for download: `winning-args-corpus`
+
+### [Coarse Discourse Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/coarseDiscourse.html)
+
+A subset of Reddit conversations that have been manually annotated with discourse act labels.
+
+Name for download: `reddit-coarse-discourse-corpus`
+
+### [Persuasion For Good Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/persuasionforgood.html)
+
+A collection of online conversations generated by Amazon Mechanical Turk workers, where one participant (the *persuader*) tries to convince the other (the *persuadee*) to donate to a charity.
+
+Name for download: `persuasionforgood-corpus`
+
+### [Intelligence Squared Debates Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/iq2.html)
+
+Transcripts of debates held as part of Intelligence Squared Debates.
+
+Name for download: `iq2-corpus`
+
+### [Friends Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/friends.html)
+
+A collection of all the conversations that occurred over 10 seasons of Friends, a popular American TV sitcom that ran in the 1990s.
+
+Name for download: `friends-corpus`
+
+### [Switchboard Dialog Act Corpus](https://zissou.infosci.cornell.edu/convokit/documentation/switchboard.html)
+
+A collection of 1,155 five-minute telephone conversations between two participants, annotated with speech act tags.
+
+Name for download: `switchboard-corpus`
 
 ### ...And your own corpus!
 
@@ -96,7 +133,7 @@ This toolkit requires Python >= 3.6.
 2. Download Spacy's English model: `python3 -m spacy download en`
 3. Download NLTK's 'punkt' model: `import nltk; nltk.download('punkt')` (in Python interpreter)
 
-Alternatively, visit our [Github Page](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to install from source.
+Alternatively, visit our [Github Page](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to install from source. If you encounter difficulties with installation, check out our [Troubleshooting Guide](https://zissou.infosci.cornell.edu/convokit/documentation/troubleshooting.html) for a list of solutions to common issues.
 
 ## Documentation
 Documentation is hosted [here](http://zissou.infosci.cornell.edu/convokit/documentation/). If you are new to ConvoKit, great places to get started are the [Core Concepts tutorial](https://zissou.infosci.cornell.edu/convokit/documentation/architecture.html) for an overview of the ConvoKit "philosophy" and object model, and the [High-level tutorial](https://zissou.infosci.cornell.edu/convokit/documentation/tutorial.html) for an walkthrough of how to import ConvoKit into your project, load a Corpus, and use ConvoKit functions.

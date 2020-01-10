@@ -1,5 +1,5 @@
 import itertools
-from typing import Tuple, List, Dict, Optional, Hashable, Collection
+from typing import Tuple, List, Dict, Optional, Collection
 from .triadMotif import TriadMotif, MotifType
 from collections import defaultdict
 
@@ -21,20 +21,20 @@ class Hypergraph:
         self.adj_out = dict()  # out edges for each (hyper)node
         self.adj_in = dict()   # in edges for each (hyper)node
 
-    def add_node(self, u: Hashable, info: Optional[Dict]=None) -> None:
+    def add_node(self, u: str, info: Optional[Dict]=None) -> None:
         self.nodes[u] = info if info is not None else dict()
         self.adj_out[u] = dict()
         self.adj_in[u] = dict()
 
-    def add_hypernode(self, name: Hashable,
-                      nodes: Collection[Hashable],
+    def add_hypernode(self, name: str,
+                      nodes: Collection[str],
                       info: Optional[dict]=None) -> None:
         self.hypernodes[name] = set(nodes)
         self.adj_out[name] = dict()
         self.adj_in[name] = dict()
 
     # edge or hyperedge
-    def add_edge(self, u: Hashable, v: Hashable, info: Optional[dict]=None) -> None:
+    def add_edge(self, u: str, v: str, info: Optional[dict]=None) -> None:
         assert u in self.nodes or u in self.hypernodes
         assert v in self.nodes or v in self.hypernodes
         if u in self.hypernodes and v in self.hypernodes:
@@ -47,26 +47,26 @@ class Hypergraph:
         self.adj_out[u][v].append(info)
         self.adj_in[v][u].append(info)
 
-    def edges(self) -> Dict[Tuple[Hashable, Hashable], List]:
+    def edges(self) -> Dict[Tuple[str, str], List]:
         return dict(((u, v), lst) for u, d in self.adj_out.items()
                     for v, lst in d.items())
 
-    def outgoing_nodes(self, u: Hashable) -> Dict[Hashable, List]:
+    def outgoing_nodes(self, u: str) -> Dict[str, List]:
         assert u in self.adj_out
         return dict((v, lst) for v, lst in self.adj_out[u].items()
                     if v in self.nodes)
 
-    def outgoing_hypernodes(self, u) -> Dict[Hashable, List]:
+    def outgoing_hypernodes(self, u) -> Dict[str, List]:
         assert u in self.adj_out
         return dict((v, lst) for v, lst in self.adj_out[u].items()
                     if v in self.hypernodes)
 
-    def incoming_nodes(self, v: Hashable) -> Dict[Hashable, List]:
+    def incoming_nodes(self, v: str) -> Dict[str, List]:
         assert v in self.adj_in
         return dict((u, lst) for u, lst in self.adj_in[v].items() if u in
                     self.nodes)
 
-    def incoming_hypernodes(self, v: Hashable) -> Dict[Hashable, List]:
+    def incoming_hypernodes(self, v: str) -> Dict[str, List]:
         assert v in self.adj_in
         return dict((u, lst) for u, lst in self.adj_in[v].items() if u in
                     self.hypernodes)

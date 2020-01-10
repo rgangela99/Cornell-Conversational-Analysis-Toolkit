@@ -11,6 +11,8 @@ from convokit.politeness_api.features.vectorizer import get_unigrams_and_bigrams
 from convokit.transformer import Transformer
 from convokit.model import Corpus
 
+from itertools import chain
+
 class PolitenessStrategies(Transformer):
     """
     Encapsulates extraction of politeness strategies from utterances in a
@@ -41,13 +43,33 @@ class PolitenessStrategies(Transformer):
         # use the bundled politeness API to extract politeness features for each
         # preprocessed comment
         if self.verbose: print("Extracting politeness strategies...")
-        feature_dicts = [get_politeness_strategy_features(doc) for doc in processed_comments]
+        feature_dicts = []
+        for i, doc in enumerate(processed_comments):
+            if self.verbose and i > 0 and (i % self.verbose) == 0:
+                print("\t%03d" % i)
+            feature_dicts.append(get_politeness_strategy_features(doc))
+
 
         # add the extracted strategies to the utterance metadata
         for utt_id, strats in zip(comment_ids, feature_dicts):
             corpus.get_utterance(utt_id).meta[self.ATTR_NAME] = strats
 
         return corpus
+
+    def _convert_sents(self, parsed):
+        doc = {'sentences': [], 'parses': []}
+        for sent in parsed:
+            doc['sentences'].append(' '.join(x['tok'] for x in sent['toks']))
+            sent_parses = []
+            for i,tok in enumerate(sent['toks']):
+                if tok['dep'] != 'punct':
+                    ele = '%s(%s-%d, %s-%d)' %\
+                        (tok['dep'], sent['toks'][tok.get('up',i)]['tok'], tok.get('up',i)+1,
+                        tok['tok'], i+1)
+                    sent_parses.append(ele)
+            doc['parses'].append(sent_parses)
+        doc['unigrams'] = list(chain(*[[y['tok'] for y in sent['toks']] for sent in parsed]))
+        return doc
 
     def _preprocess_utterances(self, corpus: Corpus) -> Tuple[List[Hashable], List[Dict]]:
         """Convert each Utterance in the given Corpus into the representation expected
@@ -64,18 +86,19 @@ class PolitenessStrategies(Transformer):
             if self.verbose and i > 0 and (i % self.verbose) == 0:
                 print("\t%03d" % i)
             utt_ids.append(utterance.id)
-            doc = {"text": utterance.text, "sentences": [], "parses": []}
-            # the politeness API goes sentence-by-sentence
-            for sent in utterance.meta["parsed"].sents:
-                doc["sentences"].append(sent.text)
-                sent_parses = []
-                pos = sent.start
-                for tok in sent:
-                    if tok.dep_ != "punct": # the politeness API does not know how to handle punctuation in parses
-                        ele = "%s(%s-%d, %s-%d)"%(tok.dep_, tok.head.text, tok.head.i + 1 - pos, tok.text, tok.i + 1 - pos)
-                        sent_parses.append(ele)
-                doc["parses"].append(sent_parses)
-            doc["unigrams"], doc["bigrams"] = get_unigrams_and_bigrams(doc)
+            doc = self._convert_sents(utterance.get_info('parsed'))
+            # doc = {"text": utterance.text, "sentences": [], "parses": []}
+            # # the politeness API goes sentence-by-sentence
+            # for sent in utterance.meta["parsed"].sents:
+            #     doc["sentences"].append(sent.text)
+            #     sent_parses = []
+            #     pos = sent.start
+            #     for tok in sent:
+            #         if tok.dep_ != "punct": # the politeness API does not know how to handle punctuation in parses
+            #             ele = "%s(%s-%d, %s-%d)"%(tok.dep_, tok.head.text, tok.head.i + 1 - pos, tok.text, tok.i + 1 - pos)
+            #             sent_parses.append(ele)
+            #     doc["parses"].append(sent_parses)
+            # doc["unigrams"], doc["bigrams"] = get_unigrams_and_bigrams(doc)
             documents.append(doc)
         if self.verbose:
             print("Done!")

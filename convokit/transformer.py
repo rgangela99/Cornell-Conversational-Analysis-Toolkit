@@ -20,7 +20,7 @@ class Transformer(ABC):
     implemented more efficiently than doing the steps separately.
     """
 
-    def fit(self, corpus: Corpus):
+    def fit(self, corpus: Corpus, y=None):
         """Use the provided Corpus to perform any precomputations necessary to
         later perform the actual transformation step.
 
@@ -44,7 +44,7 @@ class Transformer(ABC):
         """
         pass
 
-    def fit_transform(self, corpus: Corpus) -> Corpus:
+    def fit_transform(self, corpus: Corpus, y=None) -> Corpus:
         """Fit and run the Transformer on a single Corpus.
 
         :param corpus: the Corpus to use
@@ -53,3 +53,12 @@ class Transformer(ABC):
         """
         self.fit(corpus)
         return self.transform(corpus)
+
+    def summarize(self, corpus: Corpus):
+        pass
+
+    def get_model(self):
+        pass
+
+    def set_model(self, model):
+        pass

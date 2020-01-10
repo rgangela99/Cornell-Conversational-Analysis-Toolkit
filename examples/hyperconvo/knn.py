@@ -15,8 +15,8 @@ te.fit_transform(corpus)
 ce = convokit.CommunityEmbedder(community_key="subreddit")
 ce.fit_transform(corpus)
 
-X_communities = corpus.get_meta()["communityEmbedder"]["pts"]
-subreddits = corpus.get_meta()["communityEmbedder"]["labels"]
+X_communities = corpus.meta["communityEmbedder"]["pts"]
+subreddits = corpus.meta["communityEmbedder"]["labels"]
 
 knn = NearestNeighbors(n_neighbors=10)
 knn.fit(X_communities)

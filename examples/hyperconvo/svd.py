@@ -20,14 +20,14 @@ feat_names = list(sorted(threads_feats[list(threads_feats.keys())[0]].keys()))
 print("Computing low-dimensional embeddings")
 te = convokit.ThreadEmbedder(return_components=True)
 te.fit_transform(corpus)
-X_threads = corpus.get_meta()["threadEmbedder"]["X"]
-roots = corpus.get_meta()["threadEmbedder"]["roots"]
-components = corpus.get_meta()["threadEmbedder"]["components"]
+X_threads = corpus.meta["threadEmbedder"]["X"]
+roots = corpus.meta["threadEmbedder"]["roots"]
+components = corpus.meta["threadEmbedder"]["components"]
 
 ce = convokit.CommunityEmbedder(community_key="subreddit")
 ce.fit_transform(corpus)
-X_communities = corpus.get_meta()["communityEmbedder"]["pts"]
-subreddits = corpus.get_meta()["communityEmbedder"]["labels"]
+X_communities = corpus.meta["communityEmbedder"]["pts"]
+subreddits = corpus.meta["communityEmbedder"]["labels"]
 
 print("TOP THREADS")
 for d in range(7):

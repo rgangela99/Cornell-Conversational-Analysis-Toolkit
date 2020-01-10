@@ -1,1 +1,2 @@
-from .coordination import *
+from .coordination import Coordination
+from .coordinationScore import *

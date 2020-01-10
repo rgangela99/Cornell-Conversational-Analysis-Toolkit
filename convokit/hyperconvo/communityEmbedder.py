@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from convokit.transformer import Transformer
 from convokit.model import Corpus
-from typing import Optional, Hashable
+from typing import Optional
 
 
 class CommunityEmbedder(Transformer):
@@ -22,7 +22,7 @@ class CommunityEmbedder(Transformer):
     :param method: Embedding method; "svd", "tsne" or "none"
     """
 
-    def __init__(self, community_key: Optional[Hashable]=None, n_components: int=2, method: str="none"):
+    def __init__(self, community_key: Optional[str]=None, n_components: int=2, method: str="none"):
         self.community_key = community_key
         self.n_components = n_components
         self.method = method

@@ -8,8 +8,7 @@ Example usage: `user conversation attributes <https://github.com/CornellNLP/Corn
 .. automodule:: convokit.user_convo_helpers.user_convo_attrs
     :members:
 
-.. automodule:: convokit.user_convo_helpers.user_convo_history
-    :members:
+.. automodule:: convokit.user_convo_helpers.user_convo_lifestage
+	:members:
 
-.. automodule:: convokit.user_convo_helpers.user_convo_utils
-    :members:
+

@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats
 
 from convokit.transformer import Transformer
-from typing import Dict, Optional, Hashable
+from typing import Dict, Optional
 from convokit.model import Corpus, Utterance
 from .hypergraph import Hypergraph
 from .triadMotif import TriadMotif, MotifType
@@ -54,7 +54,7 @@ class HyperConvo(Transformer):
         """
         return self.fit_transform(corpus)
 
-    def fit_transform(self, corpus: Corpus) -> Corpus:
+    def fit_transform(self, corpus: Corpus, y=None) -> Corpus:
         """
         fit_transform() retrieves features from the corpus conversational
         threads using retrieve_feats()
@@ -87,9 +87,9 @@ class HyperConvo(Transformer):
         return corpus
 
     @staticmethod
-    def _make_hypergraph(corpus: Optional[Corpus] = None,
-                         uts: Optional[Dict[Hashable, Utterance]] = None,
-                         exclude_id: Hashable = None) -> Hypergraph:
+    def _make_hypergraph(corpus: Optional[Corpus]=None,
+                         uts: Optional[Dict[str, Utterance]]=None,
+                         exclude_id: str=None) -> Hypergraph:
         """
         Construct a Hypergraph from all the utterances of a Corpus, or a specified subset of utterances
 
@@ -111,7 +111,7 @@ class HyperConvo(Transformer):
         speaker_to_reply_tos = defaultdict(list)
         speaker_target_pairs = set()
         # nodes
-        for ut in sorted(uts.values(), key=lambda h: h.get("timestamp")):
+        for ut in sorted(uts.values(), key=lambda h: h.timestamp):
             if ut.id != exclude_id:
                 if ut.user not in username_to_utt_ids:
                     username_to_utt_ids[ut.user] = set()
@@ -120,7 +120,7 @@ class HyperConvo(Transformer):
                         and ut.reply_to != exclude_id:
                     reply_edges.append((ut.id, ut.reply_to))
                     speaker_to_reply_tos[ut.user].append(ut.reply_to)
-                    speaker_target_pairs.add((ut.user, uts[ut.reply_to].user, ut.timestamp, ut.text, ut.reply_to, ut.id, ut.root))
+                    speaker_target_pairs.add((ut.user, uts[ut.reply_to].user, ut.timestamp))
                 G.add_node(ut.id, info=ut.__dict__)
         # hypernodes
         for u, ids in username_to_utt_ids.items():
@@ -157,10 +157,10 @@ class HyperConvo(Transformer):
         return "C" if b else "c"
 
     @staticmethod
-    def _degree_feats(uts: Optional[Dict[Hashable, Utterance]]=None,
+    def _degree_feats(uts: Optional[Dict[str, Utterance]]=None,
                       G: Optional[Hypergraph]=None,
                       name_ext: str="",
-                      exclude_id: Optional[Hashable]=None) -> Dict:
+                      exclude_id: Optional[str]=None) -> Dict:
         """
         Helper method for retrieve_feats().
         Generate statistics on degree-related features in a Hypergraph (G), or a Hypergraph
@@ -213,57 +213,8 @@ class HyperConvo(Transformer):
         return stats
 
     @staticmethod
-    def probabilities(transitions: Dict):
-        """
-        Takes a transitions count dictionary Dict[(MotifType.name->MotifType.name)->Int]
-        :return: transitions probability dictionary Dict[(MotifType.name->MotifType.name)->Float]
-        """
-        probs = dict()
-
-        for parent, children in TriadMotif.relations().items():
-            total = sum(transitions[(parent, c)] for c in children) + transitions[(parent, parent)]
-            probs[(parent, parent)] = (transitions[(parent, parent)] / total) if total > 0 else 0
-            for c in children:
-                probs[(parent, c)] = (transitions[(parent, c)] / total) if total > 0 else 0
-
-        return probs
-
-    @staticmethod
-    def _latent_motif_count(motifs, trans: bool):
-        """
-        Takes a dictionary of (MotifType.name, List[Motif]) and a bool prob, indicating whether
-        transition probabilities need to be returned
-        :return: Returns a tuple of a dictionary of latent motif counts
-        and a dictionary of motif->motif transition probabilities
-         (Dict[MotifType.name->Int], Dict[(MotifType.name->MotifType.name)->Float])
-         The second element is None if prob=False
-        """
-        latent_motif_count = {motif_type.name: 0 for motif_type in MotifType}
-
-        transitions = TriadMotif.transitions()
-        for motif_type, motif_instances in motifs.items():
-            for motif_instance in motif_instances:
-                curr_motif = motif_instance
-                child_motif_type = curr_motif.get_type()
-                # Reflexive edge
-                if trans:
-                    transitions[(child_motif_type, child_motif_type)] += 1
-
-                # print(transitions)
-                while True:
-                    latent_motif_count[curr_motif.get_type()] +=  1
-                    curr_motif = curr_motif.regress()
-                    if curr_motif is None: break
-                    parent_motif_type = curr_motif.get_type()
-                    if trans:
-                        transitions[(parent_motif_type, child_motif_type)] += 1
-                    child_motif_type = parent_motif_type
-
-        return latent_motif_count, transitions
-
-    @staticmethod
-    def _motif_feats(uts: Optional[Dict[Hashable, Utterance]] = None,
-                     G: Hypergraph = None,
+    def _motif_feats(uts: Optional[Dict[str, Utterance]]=None,
+                     G: Hypergraph=None,
                      name_ext: str="",
                      exclude_id: str = None) -> Dict:
         """
@@ -410,10 +361,8 @@ class HyperConvo(Transformer):
             # G_mid = HyperConvo._make_hypergraph(uts=thread, exclude_id=root)
             # for k, v in HyperConvo._degree_feats(G=G).items(): stats[k] = v
             for k, v in HyperConvo._motif_feats(G=G).items(): stats[k] = v
-            # for k, v in HyperConvo._degree_feats(G=G_mid,
-            #                                name_ext="mid-thread ").items(): stats[k] = v
-            # for k, v in HyperConvo._motif_feats(G=G_mid,
-            #                               name_ext=" over mid-thread").items(): stats[k] = v
+            for k, v in HyperConvo._degree_feats(G=G_mid, name_ext="mid-thread ").items(): stats[k] = v
+            for k, v in HyperConvo._motif_feats(G=G_mid, name_ext=" over mid-thread").items(): stats[k] = v
             threads_stats[root] = stats
 
         return threads_stats
