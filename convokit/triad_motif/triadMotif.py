@@ -1,6 +1,7 @@
 from enum import Enum, auto
 from typing import Tuple, Dict, List, Optional
 from graphviz import Digraph
+from convokit.model import Utterance
 
 
 class MotifType(Enum):
@@ -27,7 +28,7 @@ class TriadMotif:
     Represents a triadic motif, consisting of three hypernodes and directed edges between the hypernodes
     Contains functionality to temporally regress a motif to its antecedent stages
     """
-    def __init__(self, hypernodes: Tuple, edges: Tuple[List[Dict[str, int]], ...], triad_type: str):
+    def __init__(self, hypernodes: Tuple, edges: Tuple[List[Utterance], ...], triad_type: str):
         self.hypernodes = hypernodes
         self.edges = edges
         self.triad_type = triad_type
@@ -49,7 +50,7 @@ class TriadMotif:
         # print("The current motif type is: {}".format(self.type))
         # print("This is what the edge set looks like: {}".format(edges))
         for i, edge_list in enumerate(edges):
-            timestamp = edge_list[0]['timestamp'] # only need to get first edge of type to determine how to regress
+            timestamp = edge_list[0].timestamp # only need to get first edge of type to determine how to regress
             if timestamp >= max_timestamp:
                 max_idx = i
                 max_timestamp = timestamp
@@ -58,7 +59,7 @@ class TriadMotif:
     def get_text(self):
         texts = []
         for e in self.edges:
-            texts.append(e[0]["text"])
+            texts.append(e[0].text)
         return texts
 
 
@@ -329,7 +330,6 @@ class TriadMotif:
         last_edge_idx = self._last_added_edge_idx()
         if verbose: print("Last edge index is: {}".format(last_edge_idx))
         hypernodes, edges = self.delete_and_reorder(last_edge_idx)
-
         new_type = TriadMotif.regression()[self.triad_type][last_edge_idx]
 
         return TriadMotif(hypernodes, edges, new_type)
@@ -569,23 +569,24 @@ class TriadMotif:
 
         return retval
 
-    def visualize(self, text_limit: Optional[int] = 20, verbose: bool = False) -> None:
-        """
-        Uses Graphviz to construct a visualisation of the motif, with edges labelled with the utterance text
-        :param text_limit:
-        :param verbose:
-        :return:
-        """
-        g = Digraph('G')
-        g.attr(rankdir='LR')
-        edges = sorted([e[0] for e in self.edges], key=lambda x: x['timestamp'])
-        for idx, edge in enumerate(edges):
-            if verbose:
-                label = "{}. {}".format(idx + 1, edge['text']) if text_limit is None else "{}. {}".format(idx + 1, edge['text'][:text_limit])
-            else:
-                label = str(idx+1)
-            g.edge(str(edge['speaker']), str(edge['target']), label=label)
-        g.view()
+    # def visualize(self, text_limit: Optional[int] = 20, verbose: bool = False) -> None:
+    #     """
+    #     Uses Graphviz to construct a visualisation of the motif, with edges labelled with the utterance text
+    #     :param text_limit:
+    #     :param verbose:
+    #     :return:
+    #     """
+    #     g = Digraph('G')
+    #     g.attr(rankdir='LR')
+    #     edges = sorted([e[0] for e in self.edges], key=lambda x: x.timestamp)
+    #     for idx, edge in enumerate(edges):
+    #         if verbose:
+    #             label = "{}. {}".format(idx + 1, edge.text) if text_limit is None \
+    #                 else "{}. {}".format(idx + 1, edge.text[:text_limit])
+    #         else:
+    #             label = str(idx+1)
+    #         g.edge(str(edge.user.id), str(self.edges[edge.reply_to]), label=label)
+    #     g.view()
 
     def get_development_path(self) -> Tuple[str]:
         """
@@ -599,23 +600,23 @@ class TriadMotif:
         return tuple(path[::-1])
 
 
-    def replay_motif(self) -> None:
-        """
-        Prints each utterance in order and the corresponding motif development
-        :return: None
-        """
-        pathway = self.get_development_path()
-        sorted_edges = sorted(self.edges, key=lambda e: e[0]['timestamp'])
-        for i in range(len(pathway)):
-            if i == 0: continue
-            print("########################")
-            print("{} -> {}".format(pathway[i-1], pathway[i]))
-            print()
-            edge = sorted_edges[i-1][0]
-            print("{} -> {}".format(edge['speaker'], edge['target']))
-            print()
-            print("TEXT: {}".format(edge['text']))
-            print()
-            if edge['root']:
-                print("(This utterance responds to a top-level-comment!)")
-                print()
+    # def replay_motif(self) -> None:
+    #     """
+    #     Prints each utterance in order and the corresponding motif development
+    #     :return: None
+    #     """
+    #     pathway = self.get_development_path()
+    #     sorted_edges = sorted(self.edges, key=lambda e: e[0]['timestamp'])
+    #     for i in range(len(pathway)):
+    #         if i == 0: continue
+    #         print("########################")
+    #         print("{} -> {}".format(pathway[i-1], pathway[i]))
+    #         print()
+    #         edge = sorted_edges[i-1][0]
+    #         print("{} -> {}".format(edge['speaker'], edge['target']))
+    #         print()
+    #         print("TEXT: {}".format(edge['text']))
+    #         print()
+    #         if edge['root']:
+    #             print("(This utterance responds to a top-level-comment!)")
+    #             print()
