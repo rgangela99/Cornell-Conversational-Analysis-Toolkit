@@ -34,6 +34,9 @@ class Utterance(CorpusObject):
         self.timestamp = timestamp # int(timestamp) if timestamp is not None else timestamp
         self.text = text
 
+    def __hash__(self):
+        return super().__hash__()
+
     def __eq__(self, other):
         if not isinstance(other, Utterance):
             return False

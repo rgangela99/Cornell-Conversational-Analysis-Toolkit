@@ -91,6 +91,9 @@ class CorpusObject:
                                                  self.id,
                                                  self.meta)
 
+    def __hash__(self):
+        return hash(self.obj_type + self.id)
+
     def __repr__(self):
         copy = self.__dict__.copy()
         if 'utterances' in copy:

@@ -2,6 +2,7 @@ import itertools
 from typing import Tuple, List, Dict, Optional, Collection
 from .triadMotif import TriadMotif, MotifType
 from collections import defaultdict
+from convokit import Utterance, User
 
 class Hypergraph:
     """
@@ -13,32 +14,71 @@ class Hypergraph:
     """
     def __init__(self, utterances):
         # public
-        self.utterances = utterances
-        self.nodes = dict()
+        self.nodes: Dict[str, Utterance] = dict()
         self.hypernodes = dict()
+        self.users = dict()
 
         # private
         self.adj_out = dict()  # out edges for each (hyper)node
         self.adj_in = dict()   # in edges for each (hyper)node
 
-    def add_node(self, u: str, info: Optional[Dict]=None) -> None:
-        self.nodes[u] = info if info is not None else dict()
-        self.adj_out[u] = dict()
-        self.adj_in[u] = dict()
+    @staticmethod
+    def init_from_utterances(utterances: List[Utterance]):
+        utt_dict = {utt.id: utt for utt in utterances}
+        hypergraph = Hypergraph()
+        user_to_utt_ids = dict()
+        reply_edges = []
+        speaker_to_reply_tos = defaultdict(list)
+        speaker_target_pairs = set()
 
-    def add_hypernode(self, name: str,
-                      nodes: Collection[str],
-                      info: Optional[dict]=None) -> None:
-        self.hypernodes[name] = set(nodes)
-        self.adj_out[name] = dict()
-        self.adj_in[name] = dict()
+        # nodes (utts)
+        for utt in sorted(utterances, key=lambda h: h.timestamp):
+            if utt.user not in user_to_utt_ids:
+                user_to_utt_ids[utt.user] = set()
+            user_to_utt_ids[utt.user].add(utt.id)
+
+            if utt.reply_to is not None and utt.reply_to in utt_dict:
+                reply_edges.append((utt.id, utt.reply_to))
+                speaker_to_reply_tos[utt.user.id].append(utt.reply_to)
+                speaker_target_pairs.add((utt.user.id, utt_dict[utt.reply_to].user.id, utt))
+            hypergraph.add_node(utt)
+
+        # hypernodes (users)
+        for user, utt_ids in user_to_utt_ids.items():
+            hypergraph.add_hypernode(user, utt_ids)
+
+        # reply edges (utt to utt)
+        for speaker_utt_id, target_utt_id in reply_edges:
+            hypergraph.add_edge(speaker_utt_id, target_utt_id)
+
+        # user to utterance response edges
+        for user, reply_tos in speaker_to_reply_tos.items():
+            for reply_to in reply_tos:
+                hypergraph.add_edge(user, reply_to)
+
+        # user to user response edges
+        for user, target, utt in speaker_target_pairs:
+            hypergraph.add_edge(user, target, utt)
+
+        return hypergraph
+
+    def add_node(self, utt: Utterance) -> None:
+        self.nodes[utt.id] = utt
+        self.adj_out[utt.id] = dict()
+        self.adj_in[utt.id] = dict()
+
+    def add_hypernode(self, user: User, nodes: Collection[str]) -> None:
+        self.hypernodes[user.id] = set(nodes)
+        self.users[user.id] = user
+        self.adj_out[user.id] = dict()
+        self.adj_in[user.id] = dict()
 
     # edge or hyperedge
     def add_edge(self, u: str, v: str, info=None) -> None:
         assert u in self.nodes or u in self.hypernodes
         assert v in self.nodes or v in self.hypernodes
-        if u in self.hypernodes and v in self.hypernodes:
-            assert len(info.keys()) > 0
+        # if u in self.hypernodes and v in self.hypernodes:
+        #     assert info is not N
         if v not in self.adj_out[u]:
             self.adj_out[u][v] = []
         if u not in self.adj_in[v]:

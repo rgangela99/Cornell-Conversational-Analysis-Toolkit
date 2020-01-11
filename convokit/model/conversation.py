@@ -255,6 +255,9 @@ class Conversation(CorpusObject):
                  for leaf_utt_id in leaf_utt_ids]
         return paths
 
+    def __hash__(self):
+        return super().__hash__()
+
     def __eq__(self, other):
         if not isinstance(other, Conversation):
             return False

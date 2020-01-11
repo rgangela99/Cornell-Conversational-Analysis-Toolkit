@@ -1,4 +1,4 @@
-from .hyperconvo import *
+from .hyperconvo import HyperConvo
 from .communityEmbedder import *
 from .threadEmbedder import *
 from .triadMotif import *
