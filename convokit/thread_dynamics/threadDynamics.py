@@ -74,14 +74,14 @@ class ThreadDynamics(Transformer):
                     for idx, utt in enumerate(utts_prefix[1:C_idx]):
                         if {utt.user.id, utts_prefix[idx].user.id} == {A, B}:
                             if utt.user.id == A:
-                                retval['B2A_beforeC'] += 1
-                            else:
                                 retval['A2B_beforeC'] += 1
+                            else:
+                                retval['B2A_beforeC'] += 1
 
-                    for idx, utt in enumerate(utts_prefix[C_idx:1]):
+                    for idx, utt in enumerate(utts_prefix[C_idx:]):
                         if {utt.user.id, utts_prefix[idx].user.id} == {A, B}:
                             if utt.user.id == A:
-                                retval['B2A_afterC'] += 1
+                                retval['A2B_afterC'] += 1
                             else:
                                 retval['B2A_afterC'] += 1
 
