@@ -28,7 +28,7 @@ class TriadMotif:
     Represents a triadic motif, consisting of three hypernodes and directed edges between the hypernodes
     Contains functionality to temporally regress a motif to its antecedent stages
     """
-    def __init__(self, hypernodes: Tuple, edges: Tuple[List[Utterance], ...], triad_type: str):
+    def __init__(self, hypernodes: Tuple, edges: Tuple[List[Dict], ...], triad_type: str):
         self.hypernodes = hypernodes
         self.edges = edges
         self.triad_type = triad_type
@@ -50,7 +50,7 @@ class TriadMotif:
         # print("The current motif type is: {}".format(self.type))
         # print("This is what the edge set looks like: {}".format(edges))
         for i, edge_list in enumerate(edges):
-            timestamp = edge_list[0].timestamp # only need to get first edge of type to determine how to regress
+            timestamp = edge_list[0]['utt'].timestamp # only need to get first edge of type to determine how to regress
             if timestamp >= max_timestamp:
                 max_idx = i
                 max_timestamp = timestamp
@@ -569,24 +569,30 @@ class TriadMotif:
 
         return retval
 
-    # def visualize(self, text_limit: Optional[int] = 20, verbose: bool = False) -> None:
-    #     """
-    #     Uses Graphviz to construct a visualisation of the motif, with edges labelled with the utterance text
-    #     :param text_limit:
-    #     :param verbose:
-    #     :return:
-    #     """
-    #     g = Digraph('G')
-    #     g.attr(rankdir='LR')
-    #     edges = sorted([e[0] for e in self.edges], key=lambda x: x.timestamp)
-    #     for idx, edge in enumerate(edges):
-    #         if verbose:
-    #             label = "{}. {}".format(idx + 1, edge.text) if text_limit is None \
-    #                 else "{}. {}".format(idx + 1, edge.text[:text_limit])
-    #         else:
-    #             label = str(idx+1)
-    #         g.edge(str(edge.user.id), str(self.edges[edge.reply_to]), label=label)
-    #     g.view()
+    @staticmethod
+    def _wrap_text(text, wrap_amt):
+        return ''.join([text[i*wrap_amt: (i+1)*wrap_amt] + "\n" for i in range((len(text) // wrap_amt)+1)])
+
+    def visualize(self, text_limit: Optional[int] = 20, verbose: bool = False, wrap_amt: int = 50) -> None:
+        """
+        Uses Graphviz to construct a visualisation of the motif, with edges labelled with the utterance text
+        :param text_limit:
+        :param verbose:
+        :return:
+        """
+        g = Digraph('G')
+        g.attr(rankdir='LR')
+        edges = sorted([e[0] for e in self.edges], key=lambda x: x['utt'].timestamp)
+        # print(utt_id_to_user_id)
+        # print(edges)
+        for idx, edge in enumerate(edges):
+            if verbose:
+                label = "{}. {}".format(idx + 1, edge['utt'].text) if text_limit is None \
+                    else "{}. {}".format(idx + 1, edge['utt'].text[:text_limit])
+            else:
+                label = str(idx+1)
+            g.edge(str(edge['utt'].user.id), str(edge['target_user']), label=self._wrap_text(label, wrap_amt))
+        g.view()
 
     def get_development_path(self) -> Tuple[str]:
         """

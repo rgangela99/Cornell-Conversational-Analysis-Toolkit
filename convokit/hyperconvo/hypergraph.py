@@ -23,11 +23,12 @@ class Hypergraph:
     @staticmethod
     def init_from_utterances(utterances: List[Utterance]):
         utt_dict = {utt.id: utt for utt in utterances}
+        utt_to_user_id = {utt.id: utt.user.id for utt in utterances}
         hypergraph = Hypergraph()
         user_to_utt_ids = dict()
         reply_edges = []
         speaker_to_reply_tos = defaultdict(list)
-        speaker_target_pairs = set()
+        speaker_target_pairs = list()
 
         # nodes (utts)
         for utt in sorted(utterances, key=lambda h: h.timestamp):
@@ -38,7 +39,8 @@ class Hypergraph:
             if utt.reply_to is not None and utt.reply_to in utt_dict:
                 reply_edges.append((utt.id, utt.reply_to))
                 speaker_to_reply_tos[utt.user.id].append(utt.reply_to)
-                speaker_target_pairs.add((utt.user.id, utt_dict[utt.reply_to].user.id, utt))
+                speaker_target_pairs.append([utt.user.id, utt_dict[utt.reply_to].user.id,
+                                          {'utt': utt, 'target_user': utt_to_user_id[utt.reply_to]}])
             hypergraph.add_node(utt)
 
         # hypernodes (users)
@@ -55,8 +57,8 @@ class Hypergraph:
                 hypergraph.add_edge(user, reply_to)
 
         # user to user response edges
-        for user, target, utt in speaker_target_pairs:
-            hypergraph.add_edge(user, target, utt)
+        for user, target, utt_info in speaker_target_pairs:
+            hypergraph.add_edge(user, target, utt_info)
 
         return hypergraph
 

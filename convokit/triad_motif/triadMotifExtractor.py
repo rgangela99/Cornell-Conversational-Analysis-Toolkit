@@ -10,13 +10,13 @@ class TriadMotifExtractor:
         self.hg = hypergraph
 
     @staticmethod
-    def _sorted_ts(timestamps: List[Utterance]) -> List[Utterance]:
+    def _sorted_ts(edge_infos: List[Dict]) -> List[Dict]:
         """
         helper method for getting sorted timestamps of edges between hypernodes, e.g. from Hypergraph.adj_out[C1][C2]
-        :param timestamps: e.g. [{'timestamp': 1322706222, 'text': "Lolapalooza"}, {'timestamp': 1322665765, 'text': "Wanda"}]
+        :param edge_infos: e.g. [{'timestamp': 1322706222, 'text': "Lolapalooza"}, {'timestamp': 1322665765, 'text': "Wanda"}]
         :return: edge dictionaries sorted by timestamp
         """
-        return sorted(timestamps, key=lambda x: x.timestamp)
+        return sorted(edge_infos, key=lambda x: x['utt'].timestamp)
         
     def extract_dyadic_motif_counts(self) -> Dict[str, int]:
         motifs = defaultdict(int)
