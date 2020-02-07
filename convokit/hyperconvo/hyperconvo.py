@@ -59,9 +59,10 @@ class HyperConvo(Transformer):
                          will have metadata for multiple threads - equal to the number of top-level comments.)
     """
 
-    def __init__(self, prefix_len: int = 10, min_thread_len: int = 10):
+    def __init__(self, prefix_len: int = 10, min_thread_len: int = 10, feat_name: str = "hyperconvo"):
         self.prefix_len = prefix_len
         self.min_thread_len = min_thread_len
+        self.feat_name = feat_name
 
     def transform(self, corpus: Corpus) -> Corpus:
         """
@@ -81,7 +82,7 @@ class HyperConvo(Transformer):
         convo_id_to_feats = self.retrieve_feats(corpus)
         for convo_id, feats in convo_id_to_feats.items():
             convo = corpus.get_conversation(convo_id)
-            convo.add_meta("hyperconvo", feats)
+            convo.add_meta(self.feat_name, feats)
 
         return corpus
 

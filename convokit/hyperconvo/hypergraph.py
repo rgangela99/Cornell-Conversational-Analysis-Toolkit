@@ -1,6 +1,7 @@
 from typing import Tuple, List, Dict, Collection
 from collections import defaultdict
 from convokit import Utterance, User
+import itertools
 
 class Hypergraph:
     """
@@ -121,3 +122,69 @@ class Hypergraph:
                      (self.hypernodes if from_hyper else self.nodes)]) for v in
                 (self.hypernodes if to_hyper else self.nodes)]
 
+    def reciprocity_motifs(self) -> List[Tuple]:
+        """
+        :return: List of tuples of form (C1, c1, c2, C1->c2, c2->c1) as in paper
+        """
+        motifs = []
+        for C1, c1_nodes in self.hypernodes.items():
+            for c1 in c1_nodes:
+                motifs += [(C1, c1, c2, e1, e2) for c2 in self.adj_in[c1] if
+                           c2 in self.nodes and c2 in self.adj_out[C1]
+                           for e1 in self.adj_out[C1][c2]
+                           for e2 in self.adj_out[c2][c1]]
+        return motifs
+
+    def external_reciprocity_motifs(self) -> List[Tuple]:
+        """
+        :return: List of tuples of form (C3, c2, c1, C3->c2, c2->c1) as in paper
+        """
+        motifs = []
+        for C3 in self.hypernodes:
+            for c2 in self.adj_out[C3]:
+                if c2 in self.nodes:
+                    motifs += [(C3, c2, c1, e1, e2) for c1 in
+                               set(self.adj_out[c2].keys()) - self.hypernodes[C3]
+                               if c1 in self.nodes
+                               for e1 in self.adj_out[C3][c2]
+                               for e2 in self.adj_out[c2][c1]]
+        return motifs
+
+    def dyadic_interaction_motifs(self) -> List[Tuple]:
+        """
+        :return: List of tuples of form (C1, C2, C1->C2, C2->C1) as in paper
+        """
+
+        motifs = []
+        for C1 in self.hypernodes:
+            motifs += [(C1, C2, e1, e2) for C2 in self.adj_out[C1] if C2 in
+                       self.hypernodes and C1 in self.adj_out[C2]
+                       for e1 in self.adj_out[C1][C2]
+                       for e2 in self.adj_out[C2][C1]]
+        return motifs
+
+    def incoming_triad_motifs(self) -> List[Tuple]:
+        """
+        :return: List of tuples of form (C1, C2, C3, C2->C1, C3->C1) as in paper
+        """
+        motifs = []
+        for C1 in self.hypernodes:
+            incoming = list(self.adj_in[C1].keys())
+            motifs += [(C1, C2, C3, e1, e2) for C2, C3 in
+                       itertools.combinations(incoming, 2)
+                       for e1 in self.adj_out[C2][C1]
+                       for e2 in self.adj_out[C3][C1]]
+        return motifs
+
+    def outgoing_triad_motifs(self) -> List[Tuple]:
+        """
+        :return: List of tuples of form (C1, C2, C3, C1->C2, C1->C3) as in paper
+        """
+        motifs = []
+        for C1 in self.hypernodes:
+            outgoing = list(self.adj_out[C1].keys())
+            motifs += [(C1, C2, C3, e1, e2) for C2, C3 in
+                       itertools.combinations(outgoing, 2)
+                       for e1 in self.adj_out[C1][C2]
+                       for e2 in self.adj_out[C1][C3]]
+        return motifs
