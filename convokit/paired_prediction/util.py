@@ -1,5 +1,3 @@
-from convokit import Corpus
-from collections import defaultdict
 from random import choice, shuffle
 from pandas import DataFrame
 import numpy as np

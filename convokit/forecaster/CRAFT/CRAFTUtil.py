@@ -3,25 +3,22 @@ import unicodedata
 import nltk
 import random
 import itertools
-import torch
+try:
+    import torch
+except (ModuleNotFoundError, ImportError) as e:
+    raise ModuleNotFoundError("torch is not currently installed. Run 'pip install convokit[craft]' if you would like to use the CRAFT model.")
 
-CONSTANTS = {'MAX_LENGTH': 80,
-             'PAD_token': 0,
+from typing import List, Tuple
+
+CONSTANTS = {'PAD_token': 0,
              'SOS_token': 1,
              'EOS_token': 2,
              'UNK_token': 3,
              'WORD2INDEX_URL': "http://zissou.infosci.cornell.edu/convokit/models/craft_wikiconv/word2index.json",
              'INDEX2WORD_URL': "http://zissou.infosci.cornell.edu/convokit/models/craft_wikiconv/index2word.json",
              'MODEL_URL': "http://zissou.infosci.cornell.edu/convokit/models/craft_wikiconv/craft_full.tar",
-             'hidden_size': 500,
-             'encoder_n_layers': 2,
-             'context_encoder_n_layers': 2,
-             'decoder_n_layers': 2,
-             'dropout': 0.1,
-             'batch_size': 64
              }
 
-MAX_LENGTH = 80  # Maximum sentence length (number of tokens) to consider
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
@@ -126,7 +123,7 @@ def indexesFromSentence(voc, sentence):
 def zeroPadding(l, fillvalue=PAD_token):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
-def binaryMatrix(l, value=PAD_token):
+def binaryMatrix(l):
     m = []
     for i, seq in enumerate(l):
         m.append([])
@@ -174,22 +171,25 @@ def outputVar(l, voc):
     return padVar, mask, max_target_len
 
 # Returns all items for a given batch of pairs
-def batch2TrainData(voc, pair_batch, already_sorted=False):
+def batch2TrainData(voc, pair_batch: List[Tuple], already_sorted=False):
     if not already_sorted:
         pair_batch.sort(key=lambda x: len(x[0]), reverse=True)
-    # input_batch, output_batch, label_batch, id_batch = [], [], [], []
-    input_batch, output_batch, id_batch = [], [], []
+    input_batch, output_batch, label_batch, id_batch = [], [], [], []
     for pair in pair_batch:
         input_batch.append(pair[0])
         output_batch.append(pair[1])
-        # label_batch.append(pair[2])
-        id_batch.append(pair[2])
+        label_batch.append(pair[2])
+        if len(pair) > 3:
+            id_batch.append(pair[3])
+        else:
+            id_batch.append(None)
     dialog_lengths = torch.tensor([len(x) for x in input_batch])
     input_utterances, batch_indices, dialog_indices = dialogBatch2UtteranceBatch(input_batch)
     inp, utt_lengths = inputVar(input_utterances, voc)
     output, mask, max_target_len = outputVar(output_batch, voc)
-    # label_batch = torch.FloatTensor(label_batch) if label_batch[0] is not None else None
-    return inp, dialog_lengths, utt_lengths, batch_indices, dialog_indices, id_batch, output, mask, max_target_len
+    label_batch = torch.FloatTensor(label_batch) if label_batch[0] is not None else None
+    return inp, dialog_lengths, utt_lengths, batch_indices, dialog_indices, \
+           label_batch, id_batch, output, mask, max_target_len
 
 def batchIterator(voc, source_data, batch_size, shuffle=True):
     cur_idx = 0
@@ -207,9 +207,8 @@ def batchIterator(voc, source_data, batch_size, shuffle=True):
         batch.sort(key=lambda x: len(x[0]), reverse=True)
         # for analysis purposes, get the source dialogs and labels associated with this batch
         batch_dialogs = [x[0] for x in batch]
-        # batch_labels = [x[2] for x in batch]
         # convert batch to tensors
         batch_tensors = batch2TrainData(voc, batch, already_sorted=True)
-        # yield (batch_tensors, batch_dialogs, batch_labels, true_batch_size)
-        yield (batch_tensors, batch_dialogs,true_batch_size)
+        yield (batch_tensors, batch_dialogs, true_batch_size)
         cur_idx += batch_size
+

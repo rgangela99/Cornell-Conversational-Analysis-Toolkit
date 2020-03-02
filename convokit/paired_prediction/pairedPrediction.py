@@ -9,41 +9,47 @@ from convokit.classifier.util import get_coefs_helper
 
 
 class PairedPrediction(Transformer):
+    """
+    At a high level, Paired Prediction is a quasi-experimental method that controls for certain priors,
+    see Cheng et al. 2014 for an illustrated example of PairedPrediction in research.
+    (https://cs.stanford.edu/people/jure/pubs/disqus-icwsm14.pdf)
+
+    See Pairer's documentation for more information about pairing.
+
+    :param pred_feats: List of metadata features to be used in prediction. Features can either be values or a dictionary of key-value pairs, but not a nested dictionary
+    :param clf: optional classifier to be used in the paired prediction
+    :param pair_id_feat_name: metadata feature name to use in annotating object with pair id, default: "pair_id"
+    :param label_feat_name: metadata feature name to use in annotating object with predicted label, default: "label"
+    :param pair_orientation_feat_name: metadata feature name to use in annotating object with pair orientation, default: "pair_orientation"
+
+    """
     def __init__(self, obj_type: str,
                  pred_feats: List[str],
-                 selector: Callable[[CorpusObject], bool] = lambda x: True,
-                 clf=None, # annotate_pairs: bool = True,
+                 clf=None,
                  pair_id_feat_name: str = "pair_id",
-                 label_feat_name: str = "label",
+                 label_feat_name: str = "pair_obj_label",
                  pair_orientation_feat_name: str = "pair_orientation"):
-
-        """
-        :param pred_feats: List of metadata features to be used in prediction. Features can either be values or a
-                        dictionary of key-value pairs, but not a nested dictionary
-        :param selector: optional function to filter object for
-        :param clf: optional classifier to be used in the paired prediction
-        :param pair_id_feat_name: metadata feature name to use in annotating object with pair id, default: "pair_id"
-        :param label_feat_name: metadata feature name to use in annotating object with predicted label, default: "label"
-        :param pair_orientation_feat_name: metadata feature name to use in annotating object with pair orientation,
-        default: "pair_orientation"
-
-        """
-        # :param annotate_pairs: set to False if objects already have the pair information annotated
 
         assert obj_type in ["user", "utterance", "conversation"]
         self.obj_type = obj_type
         self.clf = Pipeline([("standardScaler", StandardScaler(with_mean=False)),
                              ("logreg", LogisticRegression(solver='liblinear'))]) if clf is None else clf
         self.pred_feats = pred_feats
-        self.selector = selector
         self.pair_id_feat_name = pair_id_feat_name
         self.label_feat_name = label_feat_name
         self.pair_orientation_feat_name = pair_orientation_feat_name
 
-    def fit(self, corpus: Corpus, y=None):
+    def fit(self, corpus: Corpus, y=None, selector: Callable[[CorpusObject], bool] = lambda x: True):
+        """
+        Fit the internal classifier on the paired object features, with an optional selector selecting for which corpus objects to include in the analysis
+
+        :param corpus: target Corpus
+        :param selector: a (lambda) function that takes a Corpus object and returns a bool: True if the object is to be included in the paired prediction. By default, includes all objects.
+        :return: fitted PairedPrediction Transformer
+        """
         # Check if Pairer.transform() needs to be run first
         self._check_for_pair_information(corpus)
-        pair_id_to_objs = generate_pair_id_to_objs(corpus, self.obj_type, self.selector, self.pair_orientation_feat_name,
+        pair_id_to_objs = generate_pair_id_to_objs(corpus, self.obj_type, selector, self.pair_orientation_feat_name,
                                                    self.label_feat_name, self.pair_id_feat_name)
 
         X, y = generate_paired_X_y(self.pred_feats, self.pair_orientation_feat_name, pair_id_to_objs)
@@ -51,6 +57,9 @@ class PairedPrediction(Transformer):
         return self
 
     def transform(self, corpus: Corpus) -> Corpus:
+        """
+        PairedPrediction does not add any annotations to the Corpus.
+        """
         return corpus
 
     def _check_for_pair_information(self, corpus):
@@ -63,14 +72,16 @@ class PairedPrediction(Transformer):
             raise ValueError("Some metadata features required for paired prediction are missing: {}. "
                              "You may need to run Pairer.transform() first.".format(required_keys))
 
-    def summarize(self, corpus: Corpus, cv=LeaveOneOut()):
+    def summarize(self, corpus: Corpus, selector: Callable[[CorpusObject], bool] = lambda x: True, cv=LeaveOneOut()):
         """
-        Run PairedPrediction on the corpus with cross-validation
+        Run PairedPrediction on the corpus with cross-validation and returns the mean cross-validation score.
+
         :param corpus: target Corpus (must be annotated with pair information using PairedPrediction.transform())
+        :param selector: a (lambda) function that takes a Corpus object and returns a bool: True if the object is to be included in summary. By default, includes all objects.
         :param cv: optional CV model: default is LOOCV
         :return: cross-validation accuracy score
         """
-        pair_id_to_objs = generate_pair_id_to_objs(corpus, self.obj_type, self.selector, self.pair_orientation_feat_name,
+        pair_id_to_objs = generate_pair_id_to_objs(corpus, self.obj_type, selector, self.pair_orientation_feat_name,
                                                    self.label_feat_name, self.pair_id_feat_name)
 
         X, y = generate_paired_X_y(self.pred_feats, self.pair_orientation_feat_name, pair_id_to_objs)
@@ -78,41 +89,10 @@ class PairedPrediction(Transformer):
 
     def get_coefs(self, feature_names: List[str], coef_func=None):
         """
-        Get dataframe of classifier coefficients
+        Get dataframe of classifier coefficients.
+
         :param feature_names: list of feature names to get coefficients for
-        :param coef_func: function for accessing the list of coefficients from the classifier model; by default,
-                            assumes it is a pipeline with a logistic regression component
+        :param coef_func: function for accessing the list of coefficients from the classifier model; by default, assumes it is a pipeline with a logistic regression component
         :return: DataFrame of features and coefficients, indexed by feature names
         """
         return get_coefs_helper(self.clf, feature_names, coef_func)
-
-    #
-    # def print_extreme_coefs(self, feature_names: List[str], num_features: Optional[int] = None):
-    #     """
-    #     Must be run after summarize()
-    #     Prints the extreme coefficients of the trained classifier model for visual inspection, assuming
-    #     it is a pipeline with a logistic regression component
-    #     :param feature_names: list of feature names to inspect
-    #     :param num_features: optional number of extreme coefficients to print
-    #     :return: None (prints features)
-    #     """
-    #     coefs = self.clf.named_steps['logreg'].coef_[0].tolist()
-    #
-    #     assert len(feature_names) == len(coefs)
-    #
-    #     feats_coefs = sorted(list(zip(feature_names, coefs)), key=lambda x: x[1], reverse=True)
-    #
-    #     if num_features is None:
-    #         num_features = len(feature_names) // 4
-    #
-    #     print()
-    #     print("TOP {} FEATURES".format(num_features))
-    #     for ft, coef in feats_coefs[:num_features]:
-    #         print("{}: {:.3f}".format(ft, coef))
-    #     print()
-    #     print("BOTTOM {} FEATURES".format(num_features))
-    #     for ft, coef in feats_coefs[-num_features:]:
-    #         print("{}: {:.3f}".format(ft, coef))
-    #     print()
-    #
-    #

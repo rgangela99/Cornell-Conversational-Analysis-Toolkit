@@ -46,7 +46,7 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
             A collection of almost 1.5 million conversations and 2.8 million comments posted by developers reviewing proposed code changes in the Chromium project.
     :param verbose: Print checkpoint statements for download
     :param data_dir: Output path of downloaded file (default: ~/.convokit)
-    :param use_newest_version: Redownload if new version is found
+    :param use_newest_version: Re-download if new version is found
     :param use_local: if True, use the local version of corpus if it exists (regardless of whether a newer version exists)
 
     :return: The path to the downloaded item.
@@ -68,7 +68,7 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
     elif name.startswith("wikiconv"):
         wikiconv_year = name.split("-")[1]
         cur_version[name] = cur_version['wikiconv']
-        DatasetURLs[name] = get_wikiconv_year_info(wikiconv_year)
+        DatasetURLs[name] = _get_wikiconv_year_info(wikiconv_year)
     else:
         name = name.lower()
 
@@ -130,10 +130,10 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
                     motif_file_path = dataset_path + url[url.rfind('/'):]
                     if not os.path.exists(os.path.dirname(motif_file_path)):
                         os.makedirs(os.path.dirname(motif_file_path))
-                    download_helper(motif_file_path, url, verbose, full_name, downloadeds_path)
+                    _download_helper(motif_file_path, url, verbose, full_name, downloadeds_path)
         else:
             url = DatasetURLs[name]
-            download_helper(dataset_path, url, verbose, name, downloadeds_path)
+            _download_helper(dataset_path, url, verbose, name, downloadeds_path)
     else:
 
         print("Dataset already exists at {}".format(dataset_path))
@@ -144,6 +144,7 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
 def download_local(name: str, data_dir: str):
     """
     Get path to local version of the Corpus (which may be an older version)
+    
     :param name of Corpus
     :return: string path to local Corpus
     """
@@ -192,7 +193,7 @@ def download_local(name: str, data_dir: str):
 
     return dataset_path
 
-def download_helper(dataset_path: str, url: str, verbose: bool, name: str, downloadeds_path: str) -> None:
+def _download_helper(dataset_path: str, url: str, verbose: bool, name: str, downloadeds_path: str) -> None:
 
     if url.lower().endswith(".corpus") or url.lower().endswith(".corpus.zip") or url.lower().endswith(".zip"):
         dataset_path += ".zip"
@@ -265,7 +266,7 @@ def subreddit_in_grouping(subreddit: str, grouping_key: str) -> bool:
         print(subreddit, grouping_key)
     return bounds[0] <= subreddit <= bounds[1]
 
-def get_wikiconv_year_info(year: str) -> str:
+def _get_wikiconv_year_info(year: str) -> str:
     """completes the download link for wikiconv"""
 
     # base directory of wikicon corpuses
@@ -283,29 +284,3 @@ def meta_index(corpus: Corpus=None, filename: str=None) -> Dict:
         with open(os.path.join(filename, "index.json")) as f:
             d = json.load(f)
             return d
-
-def display_thread_helper(thread: Dict[str, Utterance], root: str, indent: int=0) -> None:
-    """
-    Helper method for display_thread().
-
-    :param thread: Dict for Utterance id -> Utterance for all utterances in the thread
-    :param root: root of thread, aka thread id
-    :param indent: Level of indentation so that reply structure of thread can be visualized
-    """
-
-    print(" "*indent + thread[root].user.name)
-    children = [k for k, v in thread.items() if v.reply_to == root]
-    for child in children:
-        display_thread_helper(thread, child, indent=indent+4)
-
-def display_thread(threads: Dict[str, Dict[str, Utterance]], root: str) -> None:
-    """
-    Prints to console a compact representation of a specified thread, e.g. a comment thread on a reddit post.
-    Example usage: threads = corpus.utterance_threads(prefix_len=10, include_root=False)
-    display_thread(threads, 'e5717fs') (assuming 'e5717fs' is a valid key in threads)
-
-    :param threads: Dictionary of threads, where key is the thread id, and the value is a Dict of Utterance ids -> Utterance.
-    :param root: thread id
-    """
-
-    return display_thread_helper(threads[root], root)

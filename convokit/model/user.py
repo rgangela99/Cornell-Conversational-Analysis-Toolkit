@@ -5,23 +5,25 @@ from .corpusObject import CorpusObject
 
 @total_ordering
 class User(CorpusObject):
-    """Represents a single user in a dataset.
+    """
+    Represents a single user in a dataset.
 
-    :param name: name of the user.
-    :type name: str
+    :param id: id of the user.
+    :type id: str
     :param utts: dictionary of utterances by the user, where key is utterance id
     :param convos: dictionary of conversations started by the user, where key is conversation id
     :param meta: arbitrary dictionary of attributes associated
         with the user.
     :type meta: dict
 
-    :ivar name: name of the user.
+    :ivar id: id of the user.
     :ivar meta: dictionary of attributes associated with the user.
     """
 
-    def __init__(self, owner=None, name: str = None, utts = None, convos = None, meta: Optional[Dict] = None):
-        super().__init__(obj_type="user", owner=owner, id=name, meta=meta)
-        self._name = name
+    def __init__(self, owner=None, id: str = None, utts=None, convos = None, meta: Optional[Dict] = None):
+        super().__init__(obj_type="user", owner=owner, id=id, meta=meta)
+
+        self._name = id # to be deprecated
         self.utterances = utts if utts is not None else dict()
         self.conversations = convos if convos is not None else dict()
         # self._split_attribs = set()

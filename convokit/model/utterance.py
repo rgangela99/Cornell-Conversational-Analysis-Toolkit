@@ -13,7 +13,6 @@ class Utterance(CorpusObject):
     :param timestamp: timestamp of the utterance. Can be any
         comparable type.
     :param text: text of the utterance.
-    :type text: str
 
     :ivar id: the unique id of the utterance.
     :ivar user: the user giving the utterance.
@@ -33,6 +32,13 @@ class Utterance(CorpusObject):
         self.reply_to = reply_to
         self.timestamp = timestamp # int(timestamp) if timestamp is not None else timestamp
         self.text = text
+
+    def get_conversation(self):
+        """
+        Get the Conversation (identified by Utterance.root) this Utterance belongs to
+        :return: Conversation
+        """
+        return self.owner.get_conversation(self.root)
 
     def __hash__(self):
         return super().__hash__()

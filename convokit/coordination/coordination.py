@@ -39,6 +39,9 @@ class Coordination(Transformer):
                 speaker.meta["coord-score"] = {}
             speaker.meta["coord-score"][target.id] = score
 
+            assert isinstance(speaker, User)
+
+
         return corpus
 
     def precompute(self, corpus) -> None:
@@ -203,7 +206,7 @@ class Coordination(Transformer):
         agg1 = scores.aggregate(method=1)
         agg2 = scores.aggregate(method=2)
         agg3 = scores.aggregate(method=3)
-        return (marker_a1, marker, agg1, agg2, agg3)
+        return marker_a1, marker, agg1, agg2, agg3
 
     # helper functions
     def _compute_liwc_reverse_dict(self) -> None:

@@ -7,15 +7,15 @@ class CorpusMerge(unittest.TestCase):
         Basic merge: no overlap in utterance id
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="3", text="i like pie", user=User(name="delta")),
-            Utterance(id="4", text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="3", text="i like pie", user=User(id="delta")),
+            Utterance(id="4", text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ])
 
         merged = corpus1.merge(corpus2)
@@ -29,15 +29,15 @@ class CorpusMerge(unittest.TestCase):
         Basic merge: with overlap in utterance id (but utterance has same data & metadata)
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
-            Utterance(id="4", text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
+            Utterance(id="4", text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ])
 
         merged = corpus1.merge(corpus2)
@@ -53,15 +53,15 @@ class CorpusMerge(unittest.TestCase):
         Warning should be printed. Original utterance data should be preserved.
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="2", text="this is a test2", user=User(name="candace")),
-            Utterance(id="4", text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="2", text="this is a test2", user=User(id="candace")),
+            Utterance(id="4", text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ])
 
         merged = corpus1.merge(corpus2)
@@ -71,7 +71,7 @@ class CorpusMerge(unittest.TestCase):
         self.assertEqual(len(list(corpus2.iter_utterances())), 3)
 
         self.assertEqual(merged.get_utterance("2").text, "this is a test")
-        self.assertEqual(merged.get_utterance("2").user, User(name="charlie"))
+        self.assertEqual(merged.get_utterance("2").user, User(id="charlie"))
 
     def test_overlap_diff_metadata(self):
         """
@@ -80,16 +80,16 @@ class CorpusMerge(unittest.TestCase):
         Second corpus utterance metadata should override if the keys are the same.
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie"), meta={'hey': 'jude', 'the': 'beatles'}),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie"), meta={'hey': 'jude', 'the': 'beatles'}),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="2", text="this is a test", user=User(name="charlie"),
+            Utterance(id="2", text="this is a test", user=User(id="charlie"),
                       meta={'hey': 'jude', 'the': 'ringo', 'let it': 'be'}),
-            Utterance(id="4", text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="4", text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ])
 
         merged = corpus1.merge(corpus2)
@@ -106,15 +106,15 @@ class CorpusMerge(unittest.TestCase):
         Expect second corpus convo metadata to override if keys are the same
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", root='convo1', text="hello world", user=User(name="alice")),
-            Utterance(id="1", root='convo1', text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", root='convo1', text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", root='convo1', text="hello world", user=User(id="alice")),
+            Utterance(id="1", root='convo1', text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", root='convo1', text="this is a test", user=User(id="charlie")),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="2", root='convo1', text="this is a test", user=User(name="charlie")),
-            Utterance(id="4", root='convo1', text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", root='convo1', text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="2", root='convo1', text="this is a test", user=User(id="charlie")),
+            Utterance(id="4", root='convo1', text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", root='convo1', text="goodbye", user=User(id="foxtrot")),
         ])
 
 
@@ -136,15 +136,15 @@ class CorpusMerge(unittest.TestCase):
         Expect second corpus metadata to override if keys are the same
         """
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="3", text="i like pie", user=User(name="delta")),
-            Utterance(id="4", text="this is a sentence", user=User(name="echo")),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="3", text="i like pie", user=User(id="delta")),
+            Utterance(id="4", text="this is a sentence", user=User(id="echo")),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ])
 
         corpus1.add_meta('politeness', 0.95)
@@ -159,15 +159,15 @@ class CorpusMerge(unittest.TestCase):
 
     def test_add_utterance(self):
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie"), meta={'hey': 'jude', 'hello': 'world'}),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie"), meta={'hey': 'jude', 'hello': 'world'}),
         ])
 
         utts = [
-            Utterance(id="1", text="i like pie", user=User(name="delta")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie"), meta={'hello': 'food', 'what': 'a mood'}),
-            Utterance(id="5", text="goodbye", user=User(name="foxtrot")),
+            Utterance(id="1", text="i like pie", user=User(id="delta")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie"), meta={'hello': 'food', 'what': 'a mood'}),
+            Utterance(id="5", text="goodbye", user=User(id="foxtrot")),
         ]
         added = corpus1.add_utterances(utts)
 

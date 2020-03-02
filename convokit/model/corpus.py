@@ -4,7 +4,7 @@ import pandas as pd
 from .corpusHelper import *
 from .corpusUtil import warn
 from .convoKitIndex import ConvoKitIndex
-
+import random
 
 class Corpus:
 	"""Represents a dataset, which can be loaded from a folder or a
@@ -144,8 +144,9 @@ class Corpus:
 			 increment_version: bool = True,
 			 save_to_existing_path: bool = False,
 			 fields_to_skip=None) -> None:
-		"""Dumps the corpus and its metadata to disk.
-		Automatically increments the version number.
+		"""
+		Dumps the corpus and its metadata to disk. Automatically increments the version number.
+
 		:param name: name of corpus
 		:param base_path: base directory to save corpus in (None to save to a default directory)
 		:param increment_version: whether to increment the Corpus version number when dumping
@@ -198,40 +199,222 @@ class Corpus:
 	# with open(os.path.join(dir_name, "processed_text.index.json"), "w") as f:
 	#     json.dump(list(self.processed_text.keys()), f)
 
-	def get_utterance(self, ut_id: str) -> Utterance:
-		return self.utterances[ut_id]
+	def get_utterance(self, utt_id: str) -> Utterance:
+		"""
+		Gets Utterance of the specified id from the corpus
+
+		:param utt_id: id of Utterance
+		:return: Utterance
+		"""
+		return self.utterances[utt_id]
+
+	def get_conversation(self, convo_id: str) -> Conversation:
+		"""
+		Gets Conversation of the specified id from the corpus
+
+		:param convo_id: id of Conversation
+		:return: Conversation
+		"""
+		return self.conversations[convo_id]
+
+	def get_user(self, user_id: str) -> User:
+		"""
+		Gets User of the specified id from the corpus
+
+		:param user_id: id of User
+		:return: User
+		"""
+		return self.users[user_id]
+
+	def get_object(self, obj_type: str, oid: str):
+		"""
+		General Corpus object getter. Gets User / Utterance / Conversation of specified id from the Corpus
+
+		:param obj_type: "user", "utterance", or "conversation"
+		:param oid: object id
+		:return: Corpus object of specified object type with specified object id
+		"""
+		assert obj_type in ["user", "utterance", "conversation"]
+		if obj_type == "user":
+			return self.get_user(oid)
+		elif obj_type == "utterance":
+			return self.get_utterance(oid)
+		else:
+			return self.get_conversation(oid)
 
 	def has_utterance(self, utt_id: str) -> bool:
+		"""
+		Checks if an Utterance of the specified id exists in the Corpus
+
+		:param utt_id: id of Utterance
+		:return: True if Utterance of specified id is present, False otherwise
+		"""
 		return utt_id in self.utterances
+
+	def has_conversation(self, convo_id: str) -> bool:
+		"""
+		Checks if a Conversation of the specified id exists in the Corpus
+
+		:param convo_id: id of Conversation
+		:return: True if Conversation of specified id is present, False otherwise
+		"""
+		return convo_id in self.conversations
+
+	def has_user(self, user_id: str) -> bool:
+		"""
+		Checks if a User of the specified id exists in the Corpus
+
+		:param user_id: id of User
+		:return: True if User of specified id is present, False otherwise
+		"""
+		return user_id in self.users
+
+	def random_utterance(self) -> Utterance:
+		"""
+		Get a random Utterance from the Corpus
+
+		:return: a random Utterance
+		"""
+		return random.choice(list(self.utterances.values()))
+
+	def random_conversation(self) -> Conversation:
+		"""
+		Get a random Conversation from the Corpus
+
+		:return: a random Conversation
+		"""
+		return random.choice(list(self.conversations.values()))
+
+	def random_user(self) -> User:
+		"""
+		Get a random User from the Corpus
+
+		:return: a random User
+		"""
+		return random.choice(list(self.users.values()))
 
 	def iter_utterances(self, selector: Optional[Callable[[Utterance], bool]] = lambda utt: True) -> Generator[
 		Utterance, None, None]:
+		"""
+		Get utterances in the Corpus, with an optional selector that filters for Utterances that should be included
+
+		:param selector: a (lambda) function that takes an Utterance and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Utterances in the Corpus.
+		:return: a generator of Utterances
+		"""
 		for v in self.utterances.values():
 			if selector(v):
 				yield v
 
-	def get_utterance_ids(self, selector: Optional[Callable[[Utterance], bool]] = lambda utt: True) -> List[str]:
-		return [utt.id for utt in self.iter_utterances(selector)]
-
-	def get_conversation_ids(self, selector: Optional[Callable[[Conversation], bool]] = lambda convo: True) -> List[
-		str]:
-		return [convo.id for convo in self.iter_conversations(selector)]
-
-	def get_conversation(self, cid: str) -> Conversation:
-		return self.conversations[cid]
-
-	def has_conversation(self, cid: str) -> bool:
-		return cid in self.conversations
-
 	def iter_conversations(self, selector: Optional[Callable[[Conversation], bool]] = lambda convo: True) -> Generator[
 		Conversation, None, None]:
+		"""
+		Get conversations in the Corpus, with an optional selector that filters for Conversations that should be included
+
+		:param selector: a (lambda) function that takes a Conversation and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Conversations in the Corpus.
+		:return: a generator of Conversations
+		"""
 		for v in self.conversations.values():
 			if selector(v):
 				yield v
 
+	def iter_users(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Generator[User, None, None]:
+		"""
+		Get Users in the Corpus, with an optional selector that filters for Conversations that should be included
+
+		:param selector: a (lambda) function that takes a User and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Users in the Corpus.
+		:return: a generator of Users
+		"""
+
+		for user in self.users.values():
+			if selector(user):
+				yield user
+
+	def iter_objs(self, obj_type: str, selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
+		"""
+		Get Corpus objects of specified type from the Corpus, with an optional selector that filters for Corpus object that should be included
+
+		:param obj_type: "user", "utterance", or "conversation"
+		:param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
+		By default, the selector includes all objects of the specified type in the Corpus.
+		:return: a generator of Users
+		"""
+
+		assert obj_type in ["user", "utterance", "conversation"]
+		obj_iters = {"conversation": self.iter_conversations,
+					 "user": self.iter_users,
+					 "utterance": self.iter_utterances}
+
+		return obj_iters[obj_type](selector)
+
+	def get_utterance_ids(self, selector: Optional[Callable[[Utterance], bool]] = lambda utt: True) -> List[str]:
+		"""
+		Get a list of ids of Utterances in the Corpus, with an optional selector that filters for Utterances that should be included
+
+		:param selector: a (lambda) function that takes an Utterance and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Utterances in the Corpus.
+		:return: list of Utterance ids
+		"""
+		return [utt.id for utt in self.iter_utterances(selector)]
+
+	def get_conversation_ids(self, selector: Optional[Callable[[Conversation], bool]] = lambda convo: True) -> List[
+		str]:
+		"""
+		Get a list of ids of Conversations in the Corpus, with an optional selector that filters for Conversations that should be included
+
+		:param selector: a (lambda) function that takes a Conversation and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Conversations in the Corpus.
+		:return: list of Conversation ids
+		"""
+		return [convo.id for convo in self.iter_conversations(selector)]
+
+	def get_user_ids(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> List[
+		str]:
+		"""
+		Get a list of ids of Users in the Corpus, with an optional selector that filters for Users that should be included
+
+		:param selector: a (lambda) function that takes a User and returns True or False (i.e. include / exclude).
+		By default, the selector includes all Users in the Corpus.
+		:return: list of User ids
+		"""
+		return [user.id for user in self.iter_users(selector)]
+
+	def get_object_ids(self, obj_type: str,
+					   selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
+		"""
+		Get a list of ids of Corpus objects of the specified type in the Corpus, with an optional selector that filters for objects that should be included
+
+		:param obj_type: "user", "utterance", or "conversation"
+		:param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
+		By default, the selector includes all objects of the specified type in the Corpus.
+		:return: list of Corpus object ids
+		"""
+		assert obj_type in ["user", "utterance", "conversation"]
+		return [obj.id for obj in self.iter_objs(obj_type, selector)]
+
+	def get_usernames(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Set[str]:
+		"""Get names of users in the dataset.
+
+		This function will be deprecated and replaced by get_user_ids()
+
+		:param selector: optional function that takes in a
+			`User` and returns True to include the user's name in the
+			resulting list, or False otherwise.
+
+		:return: Set containing all user names selected by the selector
+			function, or all user names in the dataset if no selector function
+			was used.
+
+		"""
+		warn("This function is deprecated. Use get_user_ids() instead.")
+		return set([u.id for u in self.iter_users(selector)])
+
 	def filter_conversations_by(self, selector: Callable[[Conversation], bool]):
 		"""
 		Mutate the corpus by filtering for a subset of Conversations within the Corpus
+
 		:param selector: function for selecting which functions to keep
 		:return: None (mutates the corpus)
 		"""
@@ -300,28 +483,6 @@ class Corpus:
 
 		return new_corpus
 
-	def iter_objs(self, obj_type: str, selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
-		assert obj_type in ["user", "utterance", "conversation"]
-		obj_iters = {"conversation": self.iter_conversations,
-					 "user": self.iter_users,
-					 "utterance": self.iter_utterances}
-
-		return obj_iters[obj_type](selector)
-
-	def get_object_ids(self, obj_type: str,
-					   selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
-		assert obj_type in ["user", "utterance", "conversation"]
-		return [obj.id for obj in self.iter_objs(obj_type, selector)]
-
-	def get_object(self, obj_type: str, oid: str):
-		assert obj_type in ["user", "utterance", "conversation"]
-		if obj_type == "user":
-			return self.get_user(oid)
-		elif obj_type == "utterance":
-			return self.get_utterance(oid)
-		else:
-			return self.get_conversation(oid)
-
 	def utterance_threads(self, prefix_len: Optional[int] = None,
 						  suffix_len: int = 0,
 						  include_root: bool = True) -> Dict[str, Dict[str, Utterance]]:
@@ -356,50 +517,10 @@ class Corpus:
 	def add_meta(self, key: str, value) -> None:
 		self.meta[key] = value
 
-	def iter_users(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Generator[User, None, None]:
-		"""Get users in the dataset.
 
-		:param selector: optional function that takes in a
-			`User` and returns True to include the user in the
-			resulting list, or False otherwise.
-
-		:return: Set containing all users selected by the selector function,
-			or all users in the dataset if no selector function was
-			used.
-		"""
-
-		for user in self.users.values():
-			if selector(user):
-				yield user
-
-	def get_user(self, name: str) -> User:
-		return self.users[name]
-
-	def get_usernames(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Set[str]:
-		"""Get names of users in the dataset.
-
-		This function will be deprecated and replaced by get_user_ids()
-
-		:param selector: optional function that takes in a
-			`User` and returns True to include the user's name in the
-			resulting list, or False otherwise.
-
-		:return: Set containing all user names selected by the selector
-			function, or all user names in the dataset if no selector function
-			was used.
-
-		"""
-		warn("This function is deprecated. Use get_user_ids() instead.")
-		return set([u.name for u in self.iter_users(selector)])
-
-	def get_user_ids(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Set[str]:
-		return set([u.id for u in self.iter_users(selector)])
-
-	def has_user(self, user_id: str) -> bool:
-		return user_id in self.users
 
 	def speaking_pairs(self, selector: Optional[Callable[[User, User], bool]] = lambda user1, user2: True,
-					   user_names_only: bool = False) -> Set[Tuple]:
+					   user_names_only: bool = False) -> Set[Tuple[str, str]]:
 		"""Get all directed speaking pairs (a, b) of users such that a replies
 			to b at least once in the dataset.
 
@@ -426,7 +547,8 @@ class Corpus:
 
 	def pairwise_exchanges(self, selector: Optional[Callable[[User, User], bool]] = None,
 						   user_names_only: bool = False) -> Dict[Tuple, List[Utterance]]:
-		"""Get all directed pairwise exchanges in the dataset.
+		"""
+		Get all directed pairwise exchanges in the dataset.
 
 		:param selector: optional function that takes in a
 			speaker user and a replied-to user and returns True to include
@@ -450,7 +572,8 @@ class Corpus:
 
 	def iterate_by(self, iter_type: str,
 				   is_utterance_question: Callable[[str], bool]) -> Generator[Tuple[str, str, str], None, None]:
-		"""Iterator for utterances.
+		"""
+		Iterator for utterances.
 
 		Can give just questions, just answers or questions followed by their answers
 		"""
@@ -606,7 +729,6 @@ class Corpus:
 		Re-uses original Index values where possible, and avoids having NoneType as the class-type for any key.
 		Checks metadata of all Corpus objects of each type to ensure that all keys are accounted for.
 
-		Uses the
 		:return: None (sets the .meta_index of Corpus)
 		"""
 		old_index = self.meta_index
@@ -700,6 +822,7 @@ class Corpus:
 	def update_users_data(self) -> None:
 		"""
 		Updates the conversation and utterance lists of every User in the Corpus
+
 		:return: None
 		"""
 		users_utts = defaultdict(list)
@@ -728,11 +851,11 @@ class Corpus:
 
 	def get_vect_repr(self, id, field):
 		"""
-			gets a vector representation stored under the name field, for an individual object with a particular id.
+		gets a vector representation stored under the name field, for an individual object with a particular id.
 
-			:param id: id of object
-			:param field: the name of the particular representation
-			:return: a vector representation of object <id>
+		:param id: id of object
+		:param field: the name of the particular representation
+		:return: a vector representation of object <id>
 		"""
 
 		vect_obj = self.vector_reprs[field]
@@ -744,12 +867,12 @@ class Corpus:
 
 	def set_vect_reprs(self, field, keys, vects):
 		"""
-			stores a matrix where each row is a vector representation of an object
+		stores a matrix where each row is a vector representation of an object
 
-			:param field: name of representation
-			:param keys: list of object ids, where each entry corresponds to each row of the matrix
-			:param vects: matrix of vector representations
-			:return: None
+		:param field: name of representation
+		:param keys: list of object ids, where each entry corresponds to each row of the matrix
+		:param vects: matrix of vector representations
+		:return: None
 		"""
 
 		vect_obj = {'vects': vects, 'keys': keys}
@@ -789,15 +912,15 @@ class Corpus:
 
 	def load_info(self, obj_type, fields=None, dir_name=None):
 		"""
-			loads attributes of objects in a corpus from disk.
-			This function, along with dump_info, supports cases where a particular attribute is to be stored separately from the other corpus files, for organization or efficiency. These attributes will not be read when the corpus is initialized; rather, they can be loaded on-demand using this function.
+		loads attributes of objects in a corpus from disk.
+		This function, along with dump_info, supports cases where a particular attribute is to be stored separately from the other corpus files, for organization or efficiency. These attributes will not be read when the corpus is initialized; rather, they can be loaded on-demand using this function.
 
-			For each attribute with name <NAME>, will read from a file called info.<NAME>.jsonl, and load each attribute value into the respective object's .meta field.
+		For each attribute with name <NAME>, will read from a file called info.<NAME>.jsonl, and load each attribute value into the respective object's .meta field.
 
-			:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
-			:param fields: a list of names of attributes to load. if empty, will load all attributes stored in the specified directory dir_name.
-			:param dir_name: the directory to read attributes from. by default, or if set to None, will read from the directory that the Corpus was loaded from.
-			:return: None
+		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
+		:param fields: a list of names of attributes to load. if empty, will load all attributes stored in the specified directory dir_name.
+		:param dir_name: the directory to read attributes from. by default, or if set to None, will read from the directory that the Corpus was loaded from.
+		:return: None
 		"""
 		if fields is None:
 			fields = []
@@ -826,15 +949,15 @@ class Corpus:
 
 	def dump_info(self, obj_type, fields, dir_name=None):
 		"""
-			writes attributes of objects in a corpus to disk.
-			This function, along with load_info, supports cases where a particular attribute is to be stored separately from the other corpus files, for organization or efficiency. These attributes will not be read when the corpus is initialized; rather, they can be loaded on-demand using this function.
+		writes attributes of objects in a corpus to disk.
+		This function, along with load_info, supports cases where a particular attribute is to be stored separately from the other corpus files, for organization or efficiency. These attributes will not be read when the corpus is initialized; rather, they can be loaded on-demand using this function.
 
-			For each attribute with name <NAME>, will write to a file called info.<NAME>.jsonl, where rows are json-serialized dictionaries structured as {"id": id of object, "value": value of attribute}.
+		For each attribute with name <NAME>, will write to a file called info.<NAME>.jsonl, where rows are json-serialized dictionaries structured as {"id": id of object, "value": value of attribute}.
 
-			:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
-			:param fields: a list of names of attributes to write to disk.
-			:param dir_name: the directory to write attributes to. by default, or if set to None, will read from the directory that the Corpus was loaded from.
-			:return: None
+		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
+		:param fields: a list of names of attributes to write to disk.
+		:param dir_name: the directory to write attributes to. by default, or if set to None, will read from the directory that the Corpus was loaded from.
+		:return: None
 		"""
 
 		if (self.original_corpus_path is None) and (dir_name is None):
@@ -855,13 +978,13 @@ class Corpus:
 
 	def load_vector_reprs(self, field, dir_name=None):
 		"""
-			reads vector representations of Corpus objects from disk.
+		reads vector representations of Corpus objects from disk.
 
-			Will read matrices from a file called vect_info.<field>.npy and corresponding object IDs from a file called vect_info.<field>.keys,
+		Will read matrices from a file called vect_info.<field>.npy and corresponding object IDs from a file called vect_info.<field>.keys,
 
-			:param field: the name of the representation
-			:param dir_name: the directory to read from; by default, or if set to None, will read from the directory that the Corpus was loaded from.
-			:return: None
+		:param field: the name of the representation
+		:param dir_name: the directory to read from; by default, or if set to None, will read from the directory that the Corpus was loaded from.
+		:return: None
 		"""
 
 		if (self.original_corpus_path is None) and (dir_name is None):
@@ -875,13 +998,13 @@ class Corpus:
 
 	def dump_vector_reprs(self, field, dir_name=None):
 		"""
-			writes vector representations of Corpus objects to disk.
+		writes vector representations of Corpus objects to disk.
 
-			Will write matrices to a file called vect_info.<field>.npy and corresponding object IDs to a file called vect_info.<field>.keys,
+		Will write matrices to a file called vect_info.<field>.npy and corresponding object IDs to a file called vect_info.<field>.keys,
 
-			:param field: the name of the representation to write to disk
-			:param dir_name: the directory to write to. by default, or if set to None, will read from the directory that the Corpus was loaded from.
-			:return: None
+		:param field: the name of the representation to write to disk
+		:param dir_name: the directory to write to. by default, or if set to None, will read from the directory that the Corpus was loaded from.
+		:return: None
 		"""
 
 		if (self.original_corpus_path is None) and (dir_name is None):
@@ -894,17 +1017,17 @@ class Corpus:
 
 	def get_attribute_table(self, obj_type, attrs):
 		"""
-			returns a dataframe, indexed by the IDs of objects of `obj_type`, containing attributes of these objects.
+		returns a dataframe, indexed by the IDs of objects of `obj_type`, containing attributes of these objects.
 
-			:param obj_type: the type of object to get attributes for. can be `'utterance'`, `'user'` or `'conversation'`.
-			:param attrs: a list of names of attributes to get.
-			:return: a Pandas dataframe of attributes.
+		:param obj_type: the type of object to get attributes for. can be `'utterance'`, `'user'` or `'conversation'`.
+		:param attrs: a list of names of attributes to get.
+		:return: a Pandas dataframe of attributes.
 		"""
 		iterator = self.iter_objs(obj_type)
 
 		table_entries = []
 		for obj in iterator:
-			entry = {}
+			entry = dict()
 			entry['id'] = obj.id
 			for attr in attrs:
 				entry[attr] = obj.get_info(attr)
@@ -912,15 +1035,15 @@ class Corpus:
 		return pd.DataFrame(table_entries).set_index('id')
 
 	def set_user_convo_info(self, user_id, convo_id, key, value):
-		'''
-			assigns user-conversation attribute `key` with `value` to user `user_id` in conversation `convo_id`.
+		"""
+		assigns user-conversation attribute `key` with `value` to user `user_id` in conversation `convo_id`.
 
-			:param user_id: user
-			:param convo_id: conversation
-			:param key: name of attribute
-			:param value: value of attribute
-			:return: None
-		'''
+		:param user_id: user
+		:param convo_id: conversation
+		:param key: name of attribute
+		:param value: value of attribute
+		:return: None
+		"""
 
 		user = self.get_user(user_id)
 		if 'conversations' not in user.meta:
@@ -930,14 +1053,14 @@ class Corpus:
 		user.meta['conversations'][convo_id][key] = value
 
 	def get_user_convo_info(self, user_id, convo_id, key=None):
-		'''
-			retreives user-conversation attribute `key` for `user_id` in conversation `convo_id`.
+		"""
+		retreives user-conversation attribute `key` for `user_id` in conversation `convo_id`.
 
-			:param user_id: user
-			:param convo_id: conversation
-			:param key: name of attribute. if None, will return all attributes for that user-conversation.
-			:return: attribute value
-		'''
+		:param user_id: user
+		:param convo_id: conversation
+		:param key: name of attribute. if None, will return all attributes for that user-conversation.
+		:return: attribute value
+		"""
 
 		user = self.get_user(user_id)
 		if 'conversations' not in user.meta: return None
@@ -946,19 +1069,19 @@ class Corpus:
 		return user.meta['conversations'].get(convo_id, {}).get(key)
 
 	def organize_user_convo_history(self, utterance_filter=None):
-		'''
-			For each user, pre-computes a list of all of their utterances, organized by the conversation they participated in. Annotates user with the following:
-				* `n_convos`: number of conversations
-				* `start_time`: time of first utterance, across all conversations
-				* `conversations`: a dictionary keyed by conversation id, where entries consist of:
-					* `idx`: the index of the conversation, in terms of the time of the first utterance contributed by that particular user (i.e., `idx=0` means this is the first conversation the user ever participated in)
-					* `n_utterances`: the number of utterances the user contributed in the conversation
-					* `start_time`: the timestamp of the user's first utterance in the conversation
-					* `utterance_ids`: a list of ids of utterances contributed by the user, ordered by timestamp.
-			In case timestamps are not provided with utterances, the present behavior is to sort just by utterance id.
+		"""
+		For each user, pre-computes a list of all of their utterances, organized by the conversation they participated in. Annotates user with the following:
+			* `n_convos`: number of conversations
+			* `start_time`: time of first utterance, across all conversations
+			* `conversations`: a dictionary keyed by conversation id, where entries consist of:
+				* `idx`: the index of the conversation, in terms of the time of the first utterance contributed by that particular user (i.e., `idx=0` means this is the first conversation the user ever participated in)
+				* `n_utterances`: the number of utterances the user contributed in the conversation
+				* `start_time`: the timestamp of the user's first utterance in the conversation
+				* `utterance_ids`: a list of ids of utterances contributed by the user, ordered by timestamp.
+		In case timestamps are not provided with utterances, the present behavior is to sort just by utterance id.
 
-			:param utterance_filter: function that returns True for an utterance that counts towards a user having participated in that conversation. (e.g., one could filter out conversations where the user contributed less than k words per utterance)
-		'''
+		:param utterance_filter: function that returns True for an utterance that counts towards a user having participated in that conversation. (e.g., one could filter out conversations where the user contributed less than k words per utterance)
+		"""
 
 		if utterance_filter is None:
 			utterance_filter = lambda x: True
@@ -989,12 +1112,12 @@ class Corpus:
 				self.set_user_convo_info(user.id, convo_id, 'idx', idx)
 
 	def get_user_convo_attribute_table(self, attrs):
-		'''
+		"""
 		returns a table where each row lists a (user, convo) level aggregate for each attribute in attrs.
 
 		:param attrs: list of (user, convo) attribute names
 		:return: dataframe containing all user,convo attributes.
-		'''
+		"""
 
 		table_entries = []
 		for user in self.iter_users():
@@ -1012,16 +1135,16 @@ class Corpus:
 
 	def get_full_attribute_table(self, user_convo_attrs, user_attrs=None, convo_attrs=None, user_suffix='__user',
 								 convo_suffix='__convo'):
-		'''
-			returns a table where each row lists a (user, convo) level aggregate for each attribute in attrs, along with user-level and conversation-level attributes; by default these attributes are suffixed with '__user' and '__convo' respectively.
+		"""
+		returns a table where each row lists a (user, convo) level aggregate for each attribute in attrs, along with user-level and conversation-level attributes; by default these attributes are suffixed with '__user' and '__convo' respectively.
 
-			:param user_convo_attrs: list of (user, convo) attribute names
-			:param user_attrs: list of user attribute names
-			:param convo_attrs: list of conversation attribute names
-			:param user_suffix: suffix to append to names of user-level attributes
-			:param convo_suffix: suffix to append to names of conversation-level attributes.
-			:return: dataframe containing all attributes.
-		'''
+		:param user_convo_attrs: list of (user, convo) attribute names
+		:param user_attrs: list of user attribute names
+		:param convo_attrs: list of conversation attribute names
+		:param user_suffix: suffix to append to names of user-level attributes
+		:param convo_suffix: suffix to append to names of conversation-level attributes.
+		:return: dataframe containing all attributes.
+		"""
 		if user_attrs is None:
 			user_attrs = []
 		if convo_attrs is None:

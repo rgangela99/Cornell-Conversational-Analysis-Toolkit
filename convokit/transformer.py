@@ -20,7 +20,7 @@ class Transformer(ABC):
     implemented more efficiently than doing the steps separately.
     """
 
-    def fit(self, corpus: Corpus, y=None):
+    def fit(self, corpus: Corpus, y=None, **kwargs):
         """Use the provided Corpus to perform any precomputations necessary to
         later perform the actual transformation step.
 
@@ -31,7 +31,7 @@ class Transformer(ABC):
         return self
 
     @abstractmethod
-    def transform(self, corpus: Corpus) -> Corpus:
+    def transform(self, corpus: Corpus, **kwargs) -> Corpus:
         """Modify the provided corpus. This is an abstract method that must be
         implemented by any Transformer subclass
 
@@ -44,21 +44,15 @@ class Transformer(ABC):
         """
         pass
 
-    def fit_transform(self, corpus: Corpus, y=None) -> Corpus:
+    def fit_transform(self, corpus: Corpus, y=None, **kwargs) -> Corpus:
         """Fit and run the Transformer on a single Corpus.
 
         :param corpus: the Corpus to use
 
         :return: same as transform
         """
-        self.fit(corpus)
-        return self.transform(corpus)
+        self.fit(corpus, y=y, **kwargs)
+        return self.transform(corpus, **kwargs)
 
-    def summarize(self, corpus: Corpus):
-        pass
-
-    def get_model(self):
-        pass
-
-    def set_model(self, model):
+    def summarize(self, corpus: Corpus, **kwargs):
         pass

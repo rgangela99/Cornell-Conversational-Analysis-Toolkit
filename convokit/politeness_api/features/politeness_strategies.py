@@ -1,8 +1,5 @@
 import pkg_resources
 import os
-import re
-from itertools import chain
-from collections import defaultdict
 
 #####
 # Word lists
@@ -30,225 +27,207 @@ pos_filename = pkg_resources.resource_filename("convokit",
     os.path.join("data", "liu-positive-words.txt"))
 neg_filename = pkg_resources.resource_filename("convokit",
     os.path.join("data", "liu-negative-words.txt"))
-#os.path.join(local_dir, "liu-negative-words.txt")
-#os.path.join(local_dir, "liu-positive-words.txt")
+
 
 positive_words = set(map(lambda x: x.strip(), open(pos_filename).read().splitlines()))
 negative_words = set(map(lambda x: x.strip(), open(neg_filename, encoding="ISO-8859-1").read().splitlines()))
 
+#####
+# Lambda Functions
 
-####
-# Parse element accessors.
-# Given parse element string like "nsubj(dont-5, I-4)"
-# transform or return specific constituents
-
-parse_element_split_re = re.compile(r"([-\w!?]+)-(\d+)")
-getleft = lambda p: parse_element_split_re.findall(p)[0][0].lower()
-getleftpos = lambda p: int(parse_element_split_re.findall(p)[0][1])
-getright = lambda p: parse_element_split_re.findall(p)[1][0].lower()
-getrightpos = lambda p: int(parse_element_split_re.findall(p)[1][1])
-remove_numbers = lambda p: re.sub(r"\-(\d+)" , "", p)
-getdeptag = lambda p: p.split("(")[0]
-
-####
-## Strategy Functions
-## Defined as named lambda functions that return booleans
-## Each function checks for a single strategy,
-## returns True if strategy detected, False otherwise.
-## Some functions operate on dependency-parse elements,
-## some on string text inputs, some on token lists
-####
-
-####
-# Dependency-based politeness strategies
-
-please = lambda p: len(set([getleft(p), getright(p)]).intersection(["please"])) > 0 and 1 not in [getleftpos(p), getrightpos(p)]
+please = lambda p: check_word([{"tok":"_"}] + p[1:], ["please"])
 please.__name__ = "Please"
 
-pleasestart = lambda p: (getleftpos(p) == 1 and getleft(p) == "please") or (getrightpos(p) == 1 and getright(p) == "please")
-pleasestart.__name__ = "Please start"
+please_start = lambda p: check_word_at(p, 0, tok=["please"])
+please_start.__name__ = "Please start"
 
-hashedges = lambda p:   getdeptag(p) == "nsubj" and  getleft(p) in hedges
-hashedges.__name__ = "Hedges"
-
-deference = lambda p: (getleftpos(p) == 1 and getleft(p) in ["great","good","nice","good","interesting","cool","excellent","awesome"]) or (getrightpos(p) == 1 and getright(p) in ["great","good","nice","good","interesting","cool","excellent","awesome"])
-deference.__name__ = "Deference"
-
-gratitude = lambda p: getleft(p).startswith("thank") or getright(p).startswith("thank") or "(appreciate, i)" in remove_numbers(p).lower()  
-gratitude.__name__ = "Gratitude"
-
-apologize = lambda p: getleft(p) in ("sorry","woops","oops") or getright(p) in ("sorry","woops","oops") or remove_numbers(p).lower() in ("dobj(excuse, me)", "nsubj(apologize, i)", "dobj(forgive, me)")
-apologize.__name__ = "Apologizing"
-
-groupidentity = lambda p: len(set([getleft(p), getright(p)]).intersection(["we", "our", "us", "ourselves"])) > 0
-groupidentity.__name__ = "1st person pl."
-
-firstperson = lambda p: 1 not in [getleftpos(p), getrightpos(p)] and len(set([getleft(p), getright(p)]).intersection(["i", "my", "mine", "myself"])) > 0
-firstperson.__name__ = "1st person"
-
-secondperson_start = lambda p: (getleftpos(p) == 1 and getleft(p) in ("you","your","yours","yourself")) or (getrightpos(p) == 1 and getright(p) in ("you","your","yours","yourself"))
-secondperson_start.__name__ = "2nd person start"
-
-firstperson_start = lambda p: (getleftpos(p) == 1 and getleft(p) in ("i","my","mine","myself")) or (getrightpos(p) == 1 and getright(p) in ("i","my","mine","myself"))
-firstperson_start.__name__ = "1st person start"
-
-hello = lambda p: (getleftpos(p) == 1 and getleft(p) in ("hi","hello","hey")) or (getrightpos(p) == 1 and getright(p) in ("hi","hello","hey"))
-hello.__name__ = "Indirect (greeting)"
-
-really = lambda p: (getright(p) == "fact" and getdeptag(p) == "pobj" and getleft(p) == "in") or (remove_numbers(p) in ("det(point, the)","det(reality, the)","det(truth, the)") and getleftpos(p) - getrightpos(p) == 1) or len(set([getleft(p), getright(p)]).intersection(["really", "actually", "honestly", "surely"])) > 0
-really.__name__ = "Factuality"
-
-why = lambda p: (getleftpos(p) in (1,2) and getleft(p) in ("what","why","who","how")) or (getrightpos(p) in (1,2) and getright(p) in ("what","why","who","how"))
-why.__name__ = "Direct question"
-
-conj = lambda p: (getleftpos(p) == 1 and getleft(p) in ("so","then","and","but","or")) or (getrightpos(p) == 1 and getright(p) in ("so","then","and","but","or"))
-conj.__name__ = "Direct start"
-
-btw = lambda p: getdeptag(p) == "pobj" and getright(p) == "way" and getrightpos(p) == 3 and getleft(p) == "by"
-btw.__name__ = "Indirect (btw)"
-
-secondperson = lambda p: 1 not in (getleftpos(p), getrightpos(p)) and len(set([getleft(p), getright(p)]).intersection(["you","your","yours","yourself"])) > 0
-secondperson.__name__ = "2nd person"
-
-####
-# Dependency-based request identification heuristics
-
-polar_set = set([
-    "is", "are", "was", "were", "am", "have",
-    "has", "had", "can", "could", "shall",
-    "should", "will", "would", "may", "might",
-    "must", "do", "does", "did", "ought", "need",
-    "dare", "if", "when", "which", "who", "whom", "how"
-])
-initial_polar = lambda p: (getleftpos(p)==1 and getleft(p) in polar_set) or (getrightpos(p)==1 and getright(p) in polar_set)
-initial_polar.__name__ = "Initial Polar"
-
-aux_polar = lambda p: getdeptag(p) == "aux" and getright(p) in polar_set
-aux_polar.__name__ = "Aux Polar"
-
-####
-# String-based politeness strategies
-# (i.e., input is a sentence)
-
-# Verb moods
-subjunctive = lambda s: "could you" in s.lower() or "would you" in s.lower()
-subjunctive.__name__ = "SUBJUNCTIVE"
-
-indicative = lambda s: "can you" in s.lower() or "will you" in s.lower()
-indicative.__name__ = "INDICATIVE"
-
-####
-# Token list politeness strategies
-
-has_hedge = lambda l: len(set(l).intersection(hedges)) > 0
+has_hedge = lambda p: check_word(p, tok=hedges)
 has_hedge.__name__ = "HASHEDGE"
 
-has_positive = lambda l: len(positive_words.intersection(l)) > 0
+btw = lambda p: check_word_at(p, 2, up_tok=["by"], tok=["way"], dep=["pobj"])
+btw.__name__ = "Indirect (btw)"
+
+hashedges = lambda p: check_word(p, dep=["nsubj"], up_tok=hedges)
+hashedges.__name__ = "Hedges"
+
+factuality = lambda p: combine_results([check_word(p, up_tok=["in"], tok=["fact"], dep=["pobj"]),
+                                        check_word(p, tok=["the"], up_tok=["point", "reality", "truth"], dep=["det"], precede=["point", "reality", "truth"]),
+                                        check_word(p, tok=["really","actually","honestly","surely"])])
+factuality.__name__ = "Factuality"
+
+deference = lambda p: check_word_at(p, 0, tok=["great","good","nice","good","interesting","cool","excellent","awesome"])
+deference.__name__ = "Deference"
+
+gratitude = lambda p: combine_results([check_word(p, tok=["thank","thanks"]), check_word(p, tok=["i"], up_tok=["appreciate"])])
+gratitude.__name__ = "Gratitude"
+
+apologize = lambda p: combine_results([check_word(p, tok=["sorry","woops","oops"]),
+                                       check_word(p, tok=["i"], up_tok=["apologize"], dep=["nsubj"]),
+                                       check_word(p, tok=["me"], up_tok=["forgive", "excuse"], dep=["dobj"])])
+apologize.__name__ = "Apologizing"
+
+groupidentity = lambda p: check_word(p, tok=["we", "our", "us", "ourselves"])
+groupidentity.__name__ = "1st person pl."
+
+firstperson = lambda p: check_word([{"tok":"_"}] + p[1:], tok= ["i", "my", "mine", "myself"])
+firstperson.__name__ = "1st person"
+
+firstperson_start = lambda p: check_word_at(p, 0, tok=["i","my","mine","myself"])
+firstperson_start.__name__ = "1st person start"
+
+secondperson = lambda p: check_word([{"tok":"_"}] + p[1:], tok= ["you","your","yours","yourself"])
+secondperson.__name__ = "2nd person"
+
+secondperson_start = lambda p: check_word_at(p, 0, tok=["you","your","yours","yourself"])
+secondperson_start.__name__ = "2nd person start"
+
+hello = lambda p: check_word_at(p, 0, tok=["hi","hello","hey"])
+hello.__name__ = "Indirect (greeting)"
+
+why = lambda p: check_word(p[:2], tok=["what","why","who","how"])
+why.__name__ = "Direct question"
+
+conj = lambda p: check_word_at(p, 0, tok=["so","then","and","but","or"])
+conj.__name__ = "Direct start"
+
+has_positive = lambda p: check_word(p, tok=positive_words)
 has_positive.__name__ = "HASPOSITIVE"
 
-has_negative = lambda l: len(negative_words.intersection(l)) > 0
+has_negative = lambda p: check_word(p, tok=negative_words)
 has_negative.__name__ = "HASNEGATIVE"
 
+subjunctive = lambda p: check_word(p, tok=["could", "would"], precede=["you"])
+subjunctive.__name__ = "SUBJUNCTIVE"
 
-####
-# strategy_fnc application helper
-
-# For debugging, prints exceptions
-VERBOSE_ERRORS = False
-
-def check_elems_for_strategy(elems, strategy_fnc):
-    # given a strategy lambda function,
-    # see if strategy present in at least one elem
-    for elem in elems:
-        try:
-            testres = strategy_fnc(elem)
-            if testres:
-                return True
-        except Exception as e:
-            if VERBOSE_ERRORS:
-                print(strategy_fnc.__name__)
-                print(e, elem)
-    return False
+indicative = lambda p: check_word(p, tok=["can", "will"], precede=["you"])
+indicative.__name__ = "INDICATIVE"
 
 
-####
-## Feature extraction
-## Detect politeness strategies in documents
-## by applying strategy fncs.
-## Return feature dict
-####
+#####
+# Helper functions and variables
 
-# Define the dependency-based strategies to include:
-DEPENDENCY_STRATEGIES = [
-    please, pleasestart, btw,
-    hashedges, really, deference,
-    gratitude, apologize, groupidentity,
-    firstperson, firstperson_start,
-    secondperson, secondperson_start,
-    hello, why, conj
-]
-# And raw text-based strategies:
-TEXT_STRATEGIES = [subjunctive, indicative]
-# And term list strategies:
-TERM_STRATEGIES = [has_hedge, has_positive, has_negative]
-
-# Use strategies to generate list of all feature names
-# lambda function turns strategy function names into feature names
-fnc2feature_name = lambda f: "feature_politeness_==%s==" % f.__name__.replace(" ","_")
-POLITENESS_FEATURES = list(map(fnc2feature_name, chain(DEPENDENCY_STRATEGIES, TEXT_STRATEGIES, TERM_STRATEGIES)))
-#print POLITENESS_FEATURES
-
-
-def get_politeness_strategy_features(document):
+def combine_results(lst):
     """
-    :param document- pre-processed request document
-    :type document- dict with 'sentences', 'parses',
-                        and 'unigrams' fields
+    combines list of results
+    ex: [[1, ["hey", 0]], [0,[]], [1, ["you", 1]]] -> [1, [["hey", 0],["you", 1]]]
+    """
+    a = 0; b = []
+    for x in lst:
+        a = max(a, x[0])
+        if x[1] != []:
+            b += x[1]
+    return a, b
 
+def check_word_at(p, ind, tok = None, dep = None, up_tok = None, up_dep = None, precede = None):
+    """
+    Returns an indicator and a marker
+    If parameters match word at index:
+        returns 1, [tok at ind, ind]
+    Else:
+        returns 0, []
+    """
+    if len(p) <= ind:
+        return 0, []
+    if tok != None and p[ind]["tok"].lower() not in tok:
+        return 0, []
+    if dep != None and p[ind]["dep"] not in dep:
+        return 0, []
+    if up_tok != None and ("up" not in p[ind] or p[p[ind]["up"]]["tok"].lower() not in up_tok):
+        return 0, []
+    if up_dep != None and p[p[ind]["up"]]["dep"] not in up_dep:
+        return 0, []
+    if precede != None and (len(p) <= ind + 1 or p[ind+1]["tok"] not in precede):
+        return 0, []
+    return 1, [[(p[ind]["tok"], ind)]]
+    
+def check_word(p, tok = None, dep = None, up_tok = None, up_dep = None, precede = None):
+    """
+    Returns an indicator and a marker
+    If parameters match any word in the sentence:
+        returns 1, markers for each occurance
+    Else:
+        returns 0, []
+    """
+    toks = []
+    for ind, x in enumerate(p):
+        if tok != None and x["tok"].lower() not in tok:
+            continue
+        if dep != None and x["dep"] not in dep:
+            continue
+        if up_tok != None and ("up" not in x or p[x["up"]]["tok"].lower() not in up_tok):
+            continue
+        if up_dep != None and p[x["up"]]["dep"] not in up_dep:
+            continue
+        if precede != None and (len(p) <= ind + 1 or p[ind + 1]["tok"] not in precede):
+            continue
+        if up_tok != None:
+            toks += [[(x["tok"], ind), (p[x["up"]]["tok"].lower() , x["up"])]]
+        else:
+             toks += [[(x["tok"], ind)]]
+    if toks != []:
+        return 1, toks
+    else:
+        return 0, []
+
+
+# Feature function list
+F = [please, please_start, has_hedge, btw, hashedges, factuality, deference, gratitude, apologize, groupidentity,
+     firstperson, firstperson_start, secondperson, secondperson_start, hello, why, conj, has_positive, has_negative,
+     subjunctive, indicative]
+
+fnc2feature_name = lambda f, keys: [key + "_==%s==" % f.__name__.replace(" ","_") for key in keys]
+
+
+def get_politeness_strategy_features(utt):
+    """
+    :param utt- the utterance to be processed
+    :type utterance- Object with attributes including text and meta
+    
+        utt.meta is a dictionary with the following form:
         {
-          "sentences": ["sentence 1", "sentence 2"],
-          "parses": [
-            ["nsubj(dont-5, I-4)", ...],
-            ["nsubj(dont-5, I-4)", ...],
-          ],
-          "unigrams": ['a', 'b', 'c']
+            parsed: [
+                { 'rt': 5
+                  'toks': [{'dep': 'intj', 'dn': [], 'tag': 'UH', 'tok': 'hello', 'up': 2}, #sent 1, word 1
+                          ... {sent 1 word 2} ,{sent 1 word 3}...]
+                    
+                },
+                { 'rt': 12
+                'toks': [{'dep': 'nsubj', 'dn': [], 'tag': 'PRP', 'tok': 'i', 'up': 1}, # sent 2, word 1
+                         {'dep': 'ROOT', 'dn': [0, 2, 3], 'tag': 'VBP', 'tok': 'need'},
+                         ...]
+                }
+            ]
         }
-
-
-    Returns- binary feature dict
+    Returns- feature dictionary and marker dictionary
+    feature dictionary:
         {
             feature_name: 1 or 0
         }
-
-    Currently return binary features- just checking for
-    presence of a strategy. One could alternatively decide
-    to count occurrences of the strategies.
+    marker dictionary:
+        {
+            marker_name: list of [token, sentence index, word index]
+        }
     """
-    if not document.get('sentences', False) or not document.get('parses', False):
-        # Nothing here. Return all 0s
-        return {f: 0 for f in POLITENESS_FEATURES}
-
+    parsed = [x["toks"] for x in utt.meta["parsed"]]
+    
+    #build dictionary
     features = {}
+    markers = {}
+    for fnc in F:
+        f = fnc2feature_name(fnc, ["feature_politeness", "politeness_markers"]) 
+        features[f[0]] = 0
+        markers[f[1]] = []
+        
+    # runs lambda functions
+    for sent_ind, sentence in enumerate(parsed):
+        for fnc in F:
+            feature, marker = fnc(sentence)
+            f = fnc2feature_name(fnc, ["feature_politeness", "politeness_markers"])
+            features[f[0]] = max(features[f[0]], feature)
+            
+            # adds sent_ind to marker information
+            if len(marker) > 0:
+                for occ in marker:
+                    markers[f[1]] += [[(mark[0], sent_ind, mark[1]) for mark in occ]]
 
-    # Parse-based features:
-    parses = document['parses']
-    for fnc in DEPENDENCY_STRATEGIES:
-        f = fnc2feature_name(fnc)
-        features[f] = int(check_elems_for_strategy(parses, lambda p: check_elems_for_strategy(p, fnc)))
-
-    # Text-based
-    sentences = list(map(lambda s: s.lower(), document['sentences']))
-    for fnc in TEXT_STRATEGIES:
-        f = fnc2feature_name(fnc)
-        features[f] = int(check_elems_for_strategy(sentences, fnc))
-
-    # Term-based features:
-    terms = list(map(lambda x: x.lower(), document['unigrams']))
-    for fnc in TERM_STRATEGIES:
-        f = fnc2feature_name(fnc)
-        ## HACK: weird feature names right now
-        #f = f.replace("==", "=")
-        features[f] = int(check_elems_for_strategy([terms], fnc))
-
-    return features
-
+    return features, markers

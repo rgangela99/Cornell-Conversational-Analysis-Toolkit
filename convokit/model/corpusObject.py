@@ -11,7 +11,7 @@ class CorpusObject:
         if meta is None:
             meta = dict()
         self.meta = self.init_meta(meta)
-        self._id = id
+        self.id = id
 
     def get_owner(self):
         return self._owner
@@ -92,7 +92,7 @@ class CorpusObject:
                                                  self.meta)
 
     def __hash__(self):
-        return hash(self.obj_type + self.id)
+        return hash(self.obj_type + str(self.id))
 
     def __repr__(self):
         copy = self.__dict__.copy()

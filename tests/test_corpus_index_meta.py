@@ -8,9 +8,9 @@ class CorpusIndexMeta(unittest.TestCase):
         """
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         first_utt = corpus1.get_utterance("0")
@@ -27,9 +27,9 @@ class CorpusIndexMeta(unittest.TestCase):
 
     def test_key_insertion_deletion(self):
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.get_utterance("0").meta['foo'] = 'bar'
@@ -55,9 +55,9 @@ class CorpusIndexMeta(unittest.TestCase):
 
     def test_corpus_merge_add(self):
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.get_utterance("0").meta['foo'] = 'bar'
@@ -65,7 +65,7 @@ class CorpusIndexMeta(unittest.TestCase):
         corpus1.get_utterance("2").meta['hey'] = 'jude'
 
         # test that adding separately initialized utterances with new metadata updates Index
-        new_utt = Utterance(id="4", text="hello world", user=User(name="alice", meta={'donkey': 'kong'}),
+        new_utt = Utterance(id="4", text="hello world", user=User(id="alice", meta={'donkey': 'kong'}),
                             meta={'new': 'meta'})
 
         new_corpus = corpus1.add_utterances([new_utt])
@@ -74,9 +74,9 @@ class CorpusIndexMeta(unittest.TestCase):
 
     def test_corpus_dump(self):
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice")),
-            Utterance(id="1", text="my name is bob", user=User(name="bob")),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob")),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.get_utterance("0").meta['foo'] = 'bar'

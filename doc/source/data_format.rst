@@ -27,7 +27,7 @@ Note that the end users do not need to manually create these files. ConvoKit pro
 At a high level, a custom dataset can be converted to a list of utterances (custom_utterance_list), and saved with ConvoKit format for reuse by: 
 
 >>> corpus = Corpus(utterances = custom_utterance_list) 
->>> corpus.dump("custom_dataset")
+>>> corpus.dump("custom_dataset", base_path="./") # dump to local directory
 
 A more detailed example of how the `Cornell Movie--Dialogs Corpus <https://www.cs.cornell.edu/~cristian/Chameleons_in_imagined_conversations.html>`_. may be converted from its original release form to ConvoKit format can be found `here <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/tree/master/examples/converting_movie_corpus.ipynb>`_.  
 

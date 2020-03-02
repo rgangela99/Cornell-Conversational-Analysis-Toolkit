@@ -11,16 +11,41 @@ class ConvokitPipeline(Pipeline):
 	def __init__(self, steps):
 		Pipeline.__init__(self, steps)
 
-	def transform_utterance(self, utt):
+	def _parse_param_steps(self, params):
+		params_steps = {}
+		for pname, pval in params.items():
+			if '__' not in pname: continue
+			step, param = pname.split('__',1)
+			if step in params_steps:
+				params_steps[step][param] = pval
+			else:
+				params_steps[step] = {param: pval}
+		return params_steps
+
+
+	def transform(self, corpus, **params):
+		params_steps = self._parse_param_steps(params)
+		for name, transform in self.steps:
+			if name in params_steps:
+				corpus = transform.transform(corpus, **params_steps[name])
+			else:
+				corpus = transform.transform(corpus)
+		return corpus
+
+	def transform_utterance(self, utt, **params):
 		"""
 			Computes attributes of an individual string or utterance using all of the transformers in the pipeline.
 			
 			:param utt: the utterance to compute attributes for.
 			:return: the utterance, with new attributes.
 		"""
+		params_steps = self._parse_param_steps(params)
 
 		if isinstance(utt, str):
 			utt = Utterance(text=utt)
 		for name, transform in self.steps:
-			utt = transform.transform_utterance(utt)
+			if name in params_steps:
+				utt = transform.transform_utterance(utt, **params_steps[name])
+			else:
+				utt = transform.transform_utterance(utt)
 		return utt

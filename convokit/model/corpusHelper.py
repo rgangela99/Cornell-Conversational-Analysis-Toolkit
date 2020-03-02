@@ -21,11 +21,12 @@ def load_uttinfo_from_dir(dirname, utterance_start_index, utterance_end_index, e
     assert dirname is not None
     assert os.path.isdir(dirname)
 
+    if utterance_start_index is None: utterance_start_index = 0
+    if utterance_end_index is None: utterance_end_index = float('inf')
+
     if os.path.exists(os.path.join(dirname, 'utterances.jsonl')):
         with open(os.path.join(dirname, 'utterances.jsonl'), 'r') as f:
             utterances = []
-            if utterance_start_index is None: utterance_start_index = 0
-            if utterance_end_index is None: utterance_end_index = float('inf')
             idx = 0
             for line in f:
                 if utterance_start_index <= idx <= utterance_end_index:
@@ -35,6 +36,7 @@ def load_uttinfo_from_dir(dirname, utterance_start_index, utterance_end_index, e
     elif os.path.exists(os.path.join(dirname, 'utterances.json')):
         with open(os.path.join(dirname, "utterances.json"), "r") as f:
             utterances = json.load(f)
+            utterances = utterances[utterance_start_index:min(len(utterances), utterance_end_index+1)]
 
     if exclude_utterance_meta:
         for utt in utterances:
@@ -136,7 +138,7 @@ def initialize_users_and_utterances_objects(corpus, utt_dict, utterances, users_
         u = defaultdict(lambda: None, u)
         user_key = u[KeyUser]
         if user_key not in users_dict:
-            users_dict[user_key] = User(owner=corpus, name=u[KeyUser], meta=users_meta[u[KeyUser]])
+            users_dict[user_key] = User(owner=corpus, id=u[KeyUser], meta=users_meta[u[KeyUser]])
 
         user = users_dict[user_key]
 

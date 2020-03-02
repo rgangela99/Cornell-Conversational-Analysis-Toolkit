@@ -1,24 +1,12 @@
-import torch
+try:
+    import torch
+except (ModuleNotFoundError, ImportError) as e:
+    raise ModuleNotFoundError("torch is not currently installed. Run 'pip install convokit[craft]' if you would like to use the CRAFT model.")
+
 from torch import nn
 import os
-# from .craftUtil import *
 from urllib.request import urlretrieve
-from .craftUtil import CONSTANTS
-
-# configure model
-hidden_size = 500 # CONSTANTS['hidden_size']
-encoder_n_layers = 2 # CONSTANTS['encoder_n_layers']
-context_encoder_n_layers = 2 # CONSTANTS['context_encoder_n_layers']
-decoder_n_layers = 2 #CONSTANTS['decoder_n_layers']
-dropout = 0.1 # CONSTANTS['dropout']
-batch_size = 64 # CONSTANTS['batch_size']
-
-# 'hidden_size': 500,
-# 'encoder_n_layers': 2,
-# 'context_encoder_n_layers': 2,
-# 'decoder_n_layers': 2,
-# 'dropout': 0.1,
-# 'batch_size': 64
+from .CRAFTUtil import CONSTANTS
 
 class EncoderRNN(nn.Module):
     """
@@ -46,7 +34,7 @@ class EncoderRNN(nn.Module):
         # Unpack padding
         outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
         # Sum bidirectional GRU outputs
-        outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
+        outputs = outputs[:, :, :self.hidden_size] + outputs[:, :, self.hidden_size:]
         # Return output and final hidden state
         return outputs, hidden
 
@@ -156,18 +144,21 @@ def makeContextEncoderInput(utt_encoder_hidden, dialog_lengths, batch_size, batc
     # of shape [max_dialog_length, batch_size, hidden_size]
     return torch.nn.utils.rnn.pad_sequence(states_dialog_batched)
 
-def initialize_model(MODEL_URL, voc, device, device_type: str):
+def initialize_model(custom_model_path, voc, device, device_type: str, hidden_size, encoder_n_layers, dropout,
+                     context_encoder_n_layers):
     print("Loading saved parameters...")
-    if not os.path.isfile("model.tar"):
-        print("\tDownloading trained CRAFT...")
-        urlretrieve(MODEL_URL, "model.tar")
-        print("\t...Done!")
+    if custom_model_path is None:
+        if not os.path.isfile("model.tar"):
+            print("\tDownloading trained CRAFT...")
+            urlretrieve(CONSTANTS['MODEL_URL'], "model.tar")
+            print("\t...Done!")
+        custom_model_path = "model.tar"
     # If running in a non-GPU environment, you need to tell PyTorch to convert the parameters to CPU tensor format.
     # To do so, replace the previous line with the following:
     if device_type == 'cpu':
-        checkpoint = torch.load("model.tar", map_location=torch.device('cpu'))
+        checkpoint = torch.load(custom_model_path, map_location=torch.device('cpu'))
     elif device_type == 'cuda':
-        checkpoint = torch.load('model.tar')
+        checkpoint = torch.load(custom_model_path)
     encoder_sd = checkpoint['en']
     context_sd = checkpoint['ctx']
     attack_clf_sd = checkpoint['atk_clf']
@@ -179,12 +170,12 @@ def initialize_model(MODEL_URL, voc, device, device_type: str):
     embedding = nn.Embedding(voc.num_words, hidden_size)
     embedding.load_state_dict(embedding_sd)
     # Initialize utterance and context encoders
-    encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
-    context_encoder = ContextEncoderRNN(hidden_size, context_encoder_n_layers, dropout)
+    encoder: EncoderRNN = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
+    context_encoder: ContextEncoderRNN = ContextEncoderRNN(hidden_size, context_encoder_n_layers, dropout)
     encoder.load_state_dict(encoder_sd)
     context_encoder.load_state_dict(context_sd)
     # Initialize classifier
-    attack_clf = SingleTargetClf(hidden_size, dropout)
+    attack_clf: SingleTargetClf = SingleTargetClf(hidden_size, dropout)
     attack_clf.load_state_dict(attack_clf_sd)
     # Use appropriate device
     encoder = encoder.to(device)
@@ -199,3 +190,4 @@ def initialize_model(MODEL_URL, voc, device, device_type: str):
 
     # Initialize the pipeline
     return Predictor(encoder, context_encoder, attack_clf)
+

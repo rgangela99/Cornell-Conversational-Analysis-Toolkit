@@ -6,38 +6,38 @@ from .textProcessor import TextProcessor
 
 class TextParser(TextProcessor):
 	"""
-		Transformer that dependency-parses each Utterance in a Corpus. This parsing step is a prerequisite for many of the models included in ConvoKit.
+	Transformer that dependency-parses each Utterance in a Corpus. This parsing step is a prerequisite for some of the models included in ConvoKit.
 
-		By default, will perform the following:
+	By default, will perform the following:
 
-			* tokenize words and sentences
-			* POS-tags words
-			* dependency-parses sentences
+		* tokenize words and sentences
+		* POS-tags words
+		* dependency-parses sentences
 
-		However, also supports only tokenizing or only tokenizing-and-tagging. These are performed using SpaCy and nltk's sentence tokenizer (since SpaCy requires dependency parses in order to tokenize sentences).
+	However, also supports only tokenizing or only tokenizing-and-tagging. These are performed using SpaCy and nltk's sentence tokenizer (since SpaCy requires dependency parses in order to tokenize sentences).
 
-		Parses are stored as json-serializable objects, consisting of a list of parses of each sentence, where each sentence-level parse is a dict containing:
-			
-			* toks: a list of tokens in the sentence.
-			* rt: the index of the root of the dependency parse, in the list of tokens.
+	Parses are stored as json-serializable objects, consisting of a list of parses of each sentence, where each sentence-level parse is a dict containing:
 
-		Each token, in turn, is a dict containing:
+		* toks: a list of tokens in the sentence.
+		* rt: the index of the root of the dependency parse, in the list of tokens.
 
-			* tok: the text
-			* tag: the POS tag (if tagging is on)
-			* dep: the dependency between that token and its parent ('ROOT' if the token is the root). available if parsing is on.
-			* up: the index of the parent of the token in the sentence. does not exist for root tokens.
-			* dn: the indices of the children of the token in the sentence
+	Each token, in turn, is a dict containing:
 
-		Note that in principle, this data structure is readily extensible -- arbitrary fields could be added to sentences and tokens (e.g., to support NER).
+		* tok: the text
+		* tag: the POS tag (if tagging is on)
+		* dep: the dependency between that token and its parent ('ROOT' if the token is the root). available if parsing is on.
+		* up: the index of the parent of the token in the sentence. does not exist for root tokens.
+		* dn: the indices of the children of the token in the sentence
 
-		:param output_field: name of attribute to write parse to, defaults to 'parsed'.
-		:param input_field: name of the field to use as input. the field must point to a string, and defaults to utterance.text.
-		:param mode: by default, is set to "parse", which indicates that the entire parsing pipeline is to be run. if set to "tag", only tokenizing and tagging will be run; if set to "tokenize", only tokenizing will be run.
-		:param input_filter: a boolean function of signature `input_filter(utterance, aux_input)`. parses will only be computed for utterances where `input_filter` returns `True`. By default, will always return `True`, meaning that parses will be computed for all utterances.
-		:param spacy_nlp: if provided, will use this SpaCy object to do parsing; otherwise will initialize an object via `load('en')`.
-		:param sent_tokenizer: if provided, will use this sentence tokenizer; otherwise will initialize nltk's sentence tokenizer.
-		:param verbosity: frequency of status messages.
+	Note that in principle, this data structure is readily extensible -- arbitrary fields could be added to sentences and tokens (e.g., to support NER).
+
+	:param output_field: name of attribute to write parse to, defaults to 'parsed'.
+	:param input_field: name of the field to use as input. the field must point to a string, and defaults to utterance.text.
+	:param mode: by default, is set to "parse", which indicates that the entire parsing pipeline is to be run. if set to "tag", only tokenizing and tagging will be run; if set to "tokenize", only tokenizing will be run.
+	:param input_filter: a boolean function of signature `input_filter(utterance, aux_input)`. parses will only be computed for utterances where `input_filter` returns `True`. By default, will always return `True`, meaning that parses will be computed for all utterances.
+	:param spacy_nlp: if provided, will use this SpaCy object to do parsing; otherwise will initialize an object via `load('en')`.
+	:param sent_tokenizer: if provided, will use this sentence tokenizer; otherwise will initialize nltk's sentence tokenizer.
+	:param verbosity: frequency of status messages.
 	"""
 
 	def __init__(self, output_field='parsed', input_field=None, mode='parse',

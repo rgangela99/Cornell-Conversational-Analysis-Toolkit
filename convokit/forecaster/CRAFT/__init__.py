@@ -1,2 +1,2 @@
-from .craftUtil import *
-from .craftNN import *
+from .CRAFTUtil import *
+from .CRAFTNN import *

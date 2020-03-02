@@ -18,10 +18,10 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1,
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1,
                                                                                 'index': 99}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
 
@@ -46,9 +46,9 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.dump('test_corpus', './')
@@ -66,9 +66,9 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.dump('test_corpus', './')
@@ -86,9 +86,9 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.dump('test_corpus', './')
@@ -105,9 +105,9 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.dump('test_corpus', './')
@@ -123,9 +123,9 @@ class CorpusMerge(unittest.TestCase):
         utt_byte_arr2 = bytearray([110, 200, 220, 28])
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", user=User(name="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
-            Utterance(id="1", text="my name is bob", user=User(name="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
-            Utterance(id="2", text="this is a test", user=User(name="charlie")),
+            Utterance(id="0", text="hello world", user=User(id="alice", meta={'user_binary_data': user_byte_arr1}), meta={'utt_binary_data': utt_byte_arr1}),
+            Utterance(id="1", text="my name is bob", user=User(id="bob", meta={'user_binary_data': user_byte_arr2}), meta={'utt_binary_data': utt_byte_arr2}),
+            Utterance(id="2", text="this is a test", user=User(id="charlie")),
         ])
 
         corpus1.dump('test_corpus', './')

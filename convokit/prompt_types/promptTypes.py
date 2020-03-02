@@ -5,8 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import TruncatedSVD
 from sklearn.cluster import KMeans
-from sklearn.externals import joblib
-from IPython.display import display
+import joblib
 
 from convokit.transformer import Transformer
 
@@ -244,9 +243,9 @@ class PromptTypes(Transformer):
 		top_prompt = prompt_df[prompt_df.type_id == type_id].sort_values(type_id).head(k)
 		top_ref = ref_df[ref_df.type_id == type_id].sort_values(type_id).head(k)
 		print('top prompt:')
-		display(top_prompt)
+		print(top_prompt)
 		print('top response:')
-		display(top_ref)
+		print(top_ref)
 		
 		if corpus is not None:
 			prompt_df = self.train_types[type_key]['prompt_df']

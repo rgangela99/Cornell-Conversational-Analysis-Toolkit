@@ -3,7 +3,7 @@ from typing import List, Union, Callable
 import pandas as pd
 from scipy.sparse import csr_matrix
 import numpy as np
-
+from convokit.model import warn
 
 def extract_feats_from_obj(obj: CorpusObject, pred_feats: List[str]):
     """
@@ -106,7 +106,12 @@ def get_coefs_helper(clf, feature_names: List[str] = None, coef_func=None):
     :return: DataFrame of features and coefficients, indexed by feature names
     """
     if coef_func is None:
-        coefs = clf.named_steps['logreg'].coef_[0].tolist()
+        try:
+            coefs = clf.named_steps['logreg'].coef_[0].tolist()
+        except AttributeError:
+            warn("Classifier is not a pipeline with a logistic regression component, so default coefficient getter function"
+                  "did not work. Choose a valid coef_func argument.")
+            return
     else:
         coefs = coef_func(clf)
 
