@@ -137,6 +137,11 @@ class Conversation(CorpusObject):
                     if utt_id is not None:
                         warn("ERROR: Missing utterance {}".format(utt_id))
             return False
+        else:
+            root_id = list(root_utt_id)[0]
+            if root_id is not None:
+                if verbose: warn("ERROR: Missing utterance {}".format(root_id))
+                return False
 
         # sanity check
         utts_replying_to_none = 0
