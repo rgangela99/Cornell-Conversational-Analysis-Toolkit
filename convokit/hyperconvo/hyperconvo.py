@@ -79,7 +79,7 @@ class HyperConvo(Transformer):
         convo_id_to_feats = self.retrieve_feats(corpus)
 
         for convo in corpus.iter_conversations():
-            convo.add_meta("hyperconvo", convo_id_to_feats.get(convo.id, None))
+            convo.add_meta(self.feat_name, convo_id_to_feats.get(convo.id, None))
         return corpus
 
     @staticmethod
