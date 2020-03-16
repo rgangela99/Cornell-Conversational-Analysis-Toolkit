@@ -31,3 +31,5 @@ venv/
 venv-triadmotif/
 .ipynb_checkpoints
 *.tar
+*.DS_Store
+.DS_Store
