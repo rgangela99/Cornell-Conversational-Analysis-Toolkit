@@ -78,8 +78,18 @@ class HyperConvo(Transformer):
 
         convo_id_to_feats = self.retrieve_feats(corpus)
 
-        for convo in corpus.iter_conversations():
+        for convo in corpus.iter_conversations(selector):
             convo.add_meta(self.feat_name, convo_id_to_feats.get(convo.id, None))
+        return corpus
+
+    def sliding_transform(self, corpus: Corpus, selector=lambda convo:True):
+        convo_id_to_feats = self.retrieve_sliding_feats(corpus, selector)
+
+        for convo in corpus.iter_conversations():
+            if convo_id_to_feats.get(convo.id, None) is None:
+                continue
+            for idx, feats in convo_id_to_feats.get(convo.id).items():
+                convo.add_meta(self.feat_name+"-"+str(idx), feats)
         return corpus
 
     @staticmethod
@@ -105,7 +115,6 @@ class HyperConvo(Transformer):
         :param exclude_id: id of utterance to exclude from Hypergraph construction
         :return: A stats dictionary, i.e. a dictionary of feature names to feature values. For degree-related features specifically.
         """
-
         stats = {}
         for from_hyper in [False, True]:
             for to_hyper in [False, True]:
@@ -176,4 +185,35 @@ class HyperConvo(Transformer):
             for k, v in HyperConvo._degree_feats(graph=G_mid, name_ext="mid-thread ").items(): stats[k] = v
             for k, v in HyperConvo._motif_feats(graph=G_mid, name_ext=" over mid-thread").items(): stats[k] = v
             threads_stats[convo.id] = stats
+        return threads_stats
+
+    def retrieve_sliding_feats(self, corpus: Corpus, selector) -> Dict[str, Dict]:
+        """
+        Retrieve all hypergraph features for a given corpus (viewed as a set
+        of conversation threads).
+
+        See init() for further documentation.
+        :param corpus: target Corpus
+        :param selector: (lambda) function selecting the Conversations that features should be computed for.
+        :return: A dictionary from a thread root id to its stats dictionary,
+            which is a dictionary from feature names to feature values. For degree-related
+            features specifically.
+        """
+
+        threads_stats = dict()
+
+        for convo in corpus.iter_conversations(selector):
+            ordered_utts = convo.get_chronological_utterance_list()
+            if len(ordered_utts) < self.min_thread_len: continue
+            threads_stats[convo.id] = dict()
+            for idx in range(self.min_thread_len - self.prefix_len):
+                utts = ordered_utts[idx:idx + self.prefix_len]
+                stats = {}
+                G = Hypergraph.init_from_utterances(utterances=utts)
+                G_mid = Hypergraph.init_from_utterances(utterances=utts[1:]) # exclude root
+                for k, v in HyperConvo._degree_feats(graph=G).items(): stats[k] = v
+                for k, v in HyperConvo._motif_feats(graph=G).items(): stats[k] = v
+                for k, v in HyperConvo._degree_feats(graph=G_mid, name_ext="mid-thread ").items(): stats[k] = v
+                for k, v in HyperConvo._motif_feats(graph=G_mid, name_ext=" over mid-thread").items(): stats[k] = v
+                threads_stats[convo.id][idx] = stats
         return threads_stats

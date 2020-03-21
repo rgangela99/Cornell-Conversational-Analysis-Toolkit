@@ -1,0 +1,496 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>Report (long + new hyperconv)</h1>
+    <br>
+    <h3>Factor: 1</h3>
+    <img src='graphs/factorplot_1.png' />
+    <p><b>Positive subreddits: </b>Frugal, SquaredCircle, NoFap, movies, books</p>
+    <p><b>Negative subreddits: </b>AskTrumpSupporters, Random_Acts_Of_Amazon, singapore, MakeupAddiction, relationships</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['Frugal', 'SquaredCircle', 'NoFap', 'movies', 'books'], 'neg_subreddits': ['AskTrumpSupporters', 'Random_Acts_Of_Amazon', 'singapore', 'MakeupAddiction', 'relationships'], 'pos_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+    <br>
+    <h3>Factor: 2</h3>
+    <img src='graphs/factorplot_2.png' />
+    <p><b>Positive subreddits: </b>relationships, IAmA, aww, politics, SquaredCircle</p>
+    <p><b>Negative subreddits: </b>POLITIC, pokemontrades, electronic_cigarette, Christianity, CanadaPolitics</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['relationships', 'IAmA', 'aww', 'politics', 'SquaredCircle'], 'neg_subreddits': ['POLITIC', 'pokemontrades', 'electronic_cigarette', 'Christianity', 'CanadaPolitics'], 'pos_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']}), 'neg_features': defaultdict(<class 'list'>, {('incoming.png', False): ['count'], ('incoming.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 3</h3>
+    <img src='graphs/factorplot_3.png' />
+    <p><b>Positive subreddits: </b>pokemontrades, techsupport, POLITIC, buildapc, teenagers</p>
+    <p><b>Negative subreddits: </b>Random_Acts_Of_Amazon, ShingekiNoKyojin, AskWomen, books, Fitness</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_outdegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['pokemontrades', 'techsupport', 'POLITIC', 'buildapc', 'teenagers'], 'neg_subreddits': ['Random_Acts_Of_Amazon', 'ShingekiNoKyojin', 'AskWomen', 'books', 'Fitness'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('nTon_outdegree.png', False): ['2nd-argmax'], ('hTon_indegree.png', False): ['max'], ('hToh_indegree.png', False): ['max', 'mean-nonzero'], ('incoming.png', False): ['count'], ('nTon_outdegree.png', True): ['2nd-argmax']}), 'neg_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 4</h3>
+    <img src='graphs/factorplot_4.png' />
+    <p><b>Positive subreddits: </b>ShingekiNoKyojin, books, AskWomen, anime, singapore</p>
+    <p><b>Negative subreddits: </b>techsupport, POLITIC, relationships, IAmA, AmItheAsshole</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['ShingekiNoKyojin', 'books', 'AskWomen', 'anime', 'singapore'], 'neg_subreddits': ['techsupport', 'POLITIC', 'relationships', 'IAmA', 'AmItheAsshole'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hToh_indegree.png', False): ['max', 'mean-nonzero'], ('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {('external_reciprocity.png', False): ['count'], ('outgoing.png', False): ['count'], ('external_reciprocity.png', True): ['count'], ('incoming.png', True): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 5</h3>
+    <img src='graphs/factorplot_5.png' />
+    <p><b>Positive subreddits: </b>pokemontrades, techsupport, POLITIC, teenagers, buildapc</p>
+    <p><b>Negative subreddits: </b>books, Marvel, ShingekiNoKyojin, gifs, anime</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['pokemontrades', 'techsupport', 'POLITIC', 'teenagers', 'buildapc'], 'neg_subreddits': ['books', 'Marvel', 'ShingekiNoKyojin', 'gifs', 'anime'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hToh_indegree.png', False): ['max', 'mean-nonzero'], ('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 6</h3>
+    <img src='graphs/factorplot_6.png' />
+    <p><b>Positive subreddits: </b>pokemontrades, POLITIC, techsupport, teenagers, buildapc</p>
+    <p><b>Negative subreddits: </b>ShingekiNoKyojin, gifs, books, Music, anime</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['pokemontrades', 'POLITIC', 'techsupport', 'teenagers', 'buildapc'], 'neg_subreddits': ['ShingekiNoKyojin', 'gifs', 'books', 'Music', 'anime'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hToh_indegree.png', False): ['max'], ('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 7</h3>
+    <img src='graphs/factorplot_7.png' />
+    <p><b>Positive subreddits: </b>pokemontrades, techsupport, POLITIC, teenagers, Random_Acts_Of_Amazon</p>
+    <p><b>Negative subreddits: </b>AskWomen, MakeupAddiction, books, IAmA, gifs</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_outdegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['pokemontrades', 'techsupport', 'POLITIC', 'teenagers', 'Random_Acts_Of_Amazon'], 'neg_subreddits': ['AskWomen', 'MakeupAddiction', 'books', 'IAmA', 'gifs'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['2nd-argmax'], ('hTon_indegree.png', False): ['2nd-argmax'], ('nTon_indegree.png', True): ['2nd-argmax'], ('hTon_indegree.png', True): ['2nd-argmax']}), 'neg_features': defaultdict(<class 'list'>, {('hTon_outdegree.png', False): ['2nd-argmax'], ('hToh_outdegree.png', False): ['2nd-argmax'], ('incoming.png', False): ['count'], ('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 8</h3>
+    <img src='graphs/factorplot_8.png' />
+    <p><b>Positive subreddits: </b>relationships, AskTrumpSupporters, MakeupAddiction, IAmA, Random_Acts_Of_Amazon</p>
+    <p><b>Negative subreddits: </b>pokemontrades, POLITIC, NoFap, techsupport, explainlikeimfive</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['relationships', 'AskTrumpSupporters', 'MakeupAddiction', 'IAmA', 'Random_Acts_Of_Amazon'], 'neg_subreddits': ['pokemontrades', 'POLITIC', 'NoFap', 'techsupport', 'explainlikeimfive'], 'pos_features': defaultdict(<class 'list'>, {}), 'neg_features': defaultdict(<class 'list'>, {('outgoing.png', False): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 9</h3>
+    <img src='graphs/factorplot_9.png' />
+    <p><b>Positive subreddits: </b>aww, DotA2, WTF, lotr, gifs</p>
+    <p><b>Negative subreddits: </b>pokemontrades, Random_Acts_Of_Amazon, POLITIC, changemyview, DebateReligion</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['aww', 'DotA2', 'WTF', 'lotr', 'gifs'], 'neg_subreddits': ['pokemontrades', 'Random_Acts_Of_Amazon', 'POLITIC', 'changemyview', 'DebateReligion'], 'pos_features': defaultdict(<class 'list'>, {}), 'neg_features': defaultdict(<class 'list'>, {('incoming.png', False): ['count'], ('outgoing.png', False): ['count'], ('incoming.png', True): ['count']})}</p>-->
+    
+</body>
+
+</html>

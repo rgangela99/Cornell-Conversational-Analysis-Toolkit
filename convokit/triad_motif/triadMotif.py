@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from typing import Tuple, Dict, List, Optional
-from graphviz import Digraph
+# from graphviz import Digraph
 from convokit.model import Utterance
 
 
