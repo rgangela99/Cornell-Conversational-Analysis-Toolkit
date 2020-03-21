@@ -13,11 +13,7 @@ Dataset details
 User-level information
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this corpus are Reddit users, identified by their account names. The corpus includes the following activity statistics:
-
-* num_posts: number of posts from the user
-* num_comments: number of comments from the user
-
+Users in this corpus are Reddit users, identified by their account names.
 
 Utterance-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,7 +95,7 @@ Number of Conversations: 10744
 Number of Users: 53067
 Number of Utterances: 1148299
 Number of Conversations: 121007
->>> merged_corpus = cornell_corpus.merge(a2c_corpus, warnings=False)
+>>> merged_corpus = cornell_corpus.merge(a2c_corpus)
 >>> merged_corpus.print_summary_stats()
 Number of Users: 59739
 Number of Utterances: 1222766
@@ -109,25 +105,25 @@ Notice that the numbers of Utterances and Conversations in the merged corpus are
 
 However, the number of users is not the sum of those of the constituent corpora -- undoubtedly because some Users have posted to both r/ApplyingToCollege and r/Cornell.
 
-During the merge step, we turned warnings off because there would be warnings printed for every instance of conflicting User metadata.
+.. During the merge step, we turned warnings off because there would be warnings printed for every instance of conflicting User metadata.
 
-Recall that the User metadata consists of (1) the number of posts the User has made and (2) the number of comments the User has made. A User that is present in both subreddit corpora will likely have very different values for these two metrics, and we would thus expect a large volume of warnings.
+.. Recall that the User metadata consists of (1) the number of posts the User has made and (2) the number of comments the User has made. A User that is present in both subreddit corpora will likely have very different values for these two metrics, and we would thus expect a large volume of warnings.
 
-We illustrate this below:
+.. We illustrate this below:
 
->>> merged_corpus = cornell_corpus.merge(a2c_corpus) # warnings are on by default
-WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_posts. Taking the latest one found
-WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_comments. Taking the latest one found
-WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_posts. Taking the latest one found
-WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_comments. Taking the latest one found
-...
+.. merged_corpus = cornell_corpus.merge(a2c_corpus) # warnings are on by default
+.. WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_posts. Taking the latest one found
+.. WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_comments. Taking the latest one found
+..  WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_posts. Taking the latest one found
+.. WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_comments. Taking the latest one found
+.. ...
 
-Since the num_posts and num_comments metadata is incorrect for the Users now, we can simply update them for this new Corpus as follows:
+.. Since the num_posts and num_comments metadata is incorrect for the Users now, we can simply update them for this new Corpus as follows:
 
->>> for user in merged_corpus.iter_users():
->>>  num_posts = sum(utt.root == utt.id for utt in user.iter_utterances())
->>>  user.add_meta("num_posts", num_posts)
->>>  user.add_meta("num_comments", len(user.get_utterance_ids()) - num_posts)
+.. for user in merged_corpus.iter_users():
+..  num_posts = sum(utt.root == utt.id for utt in user.iter_utterances())
+.. user.add_meta("num_posts", num_posts)
+.. user.add_meta("num_comments", len(user.get_utterance_ids()) - num_posts)
 
 
 Additional notes

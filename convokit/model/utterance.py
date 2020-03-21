@@ -20,6 +20,8 @@ class Utterance(CorpusObject):
     :ivar reply_to: id of the utterance this was a reply to.
     :ivar timestamp: timestamp of the utterance.
     :ivar text: text of the utterance.
+    :ivar meta: A dictionary-like view object providing read-write access to
+        utterance-level metadata.
     """
 
     def __init__(self, owner=None, id: Optional[str] = None, user: Optional[User] = None,

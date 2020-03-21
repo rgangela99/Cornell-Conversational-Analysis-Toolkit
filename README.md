@@ -30,7 +30,7 @@ Example: [user conversation attributes and diversity example on ChangeMyView](ht
 
 ### [CRAFT: Online forecasting of conversational outcomes](https://arxiv.org/abs/1909.01362) <sub><sup>[(API)](https://zissou.infosci.cornell.edu/convokit/documentation/forecaster.html)</sup></sub>
 A neural model for forecasting future outcomes of conversations (e.g., derailment into personal attacks) as they develop.  
-Available as an interactive notebook: [fine-tuning](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/forecaster/CRAFT/demos/craft_demo_training.ipynb) or [inference-only](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/forecaster/CRAFT/demos/craft_demo_new.ipynb).
+Available as an interactive notebook: [full version (fine-tuning + inference)](https://colab.research.google.com/drive/1SH4iMEHdoH4IovN-b9QOSK4kG4DhAwmb) or [inference-only](https://colab.research.google.com/drive/1GvICZN0VwZQSWw3pJaEVY-EQGoO-L5lH).
 
 ## Datasets
 ConvoKit ships with several datasets ready for use "out-of-the-box".

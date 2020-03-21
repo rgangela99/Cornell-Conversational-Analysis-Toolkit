@@ -86,7 +86,7 @@ class CRAFTModel(ForecasterModel):
         print(self.options)
 
         if model_path is not None:
-            if not os.path.isfile(model_path) or model_path.endswith(".tar"):
+            if not os.path.isfile(model_path) or not model_path.endswith(".tar"):
                 print("Could not find CRAFT model tar file at: {}".format(model_path))
                 model_path = None
         self.predictor: Predictor = initialize_model(model_path, self.voc, self.device, self.device_type,

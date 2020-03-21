@@ -41,7 +41,14 @@ Metadata for utterances include:
 Conversational-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Conversations are indexed by the id of the first utterance that make the conversation. 
+Conversations are indexed by the id of the first utterance that make the conversation. For each conversation we provide:
+
+* movie_idx: index of the movie from which this utterance occurs
+* movie_name: title of the movie
+* release_year: year of movie release
+* rating: IMDB rating of the movie
+* votes: number of IMDB votes
+* genre: a list of genres this movie belongs to 
 
 
 Corpus-level information
@@ -49,12 +56,8 @@ Corpus-level information
 
 Additional information for the movies these conversations occur are included as Corpus-level metadata, which includes, for each movie:
 
-* title: movie title
-* url: url from which the raw sources were retrieved
-* release_year: year of movie release
-* rating: IMDB rating of the movie
-* votes: number of IMDB votes
-* genre: a list of genres this movie belongs to 
+* url: a dictionary mapping movie_idx to the url from which the raw sources were retrieved
+* name: name of the corpus
 
 
 Usage

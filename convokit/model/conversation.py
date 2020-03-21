@@ -17,9 +17,7 @@ class Conversation(CorpusObject):
 
     :ivar id: the ID of the Conversation
     :ivar meta: A dictionary-like view object providing read-write access to
-        conversation-level metadata. For utterance-level metadata, use
-        Utterance.meta. For user-level metadata, use User.meta. For corpus-level
-        metadata, use Corpus.meta.
+        conversation-level metadata.
     """
 
     def __init__(self, owner, id: Optional[str] = None,
@@ -108,7 +106,7 @@ class Conversation(CorpusObject):
         # any Utterances
         return self._owner.get_user(username)
 
-    def iter_users(self) -> Generator[User, None, None]:
+    def iter_users(self, selector: Callable[[User], bool] = lambda user: True) -> Generator[User, None, None]:
         """
         Generator allowing iteration over all users in the Conversation.
         Provides no ordering guarantees.
@@ -123,6 +121,16 @@ class Conversation(CorpusObject):
                 self._user_ids.add(ut.user.id)
         for user_id in self._user_ids:
             yield self._owner.get_user(user_id)
+
+    def get_chronological_user_list(self, selector: Callable[[User], bool] = lambda user: True):
+        """
+        Get the users in the conversation sorted in chronological order (users may appear more than once)
+
+        :param selector: (lambda) function for which users should be included; all users are included by default
+        :return: list of users for each chronological utterance
+        """
+        chrono_utts = sorted(list(self.iter_utterances()), key=lambda utt: utt.timestamp)
+        return [utt.user for utt in chrono_utts if selector(utt.user)]
 
     def check_integrity(self, verbose=True):
         if verbose: print("Checking reply-to chain of Conversation", self.id)

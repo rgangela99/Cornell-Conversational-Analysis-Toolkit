@@ -4,7 +4,6 @@ import os
 import zipfile
 import json
 from typing import Dict
-from convokit.model import Utterance, Corpus
 import requests
 
 
@@ -60,7 +59,7 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
     DatasetURLs = dataset_config['DatasetURLs']
 
     if name.startswith("subreddit"):
-        subreddit_name = name.split("-")[1]
+        subreddit_name = name.split("-", maxsplit=1)[1]
         # print(subreddit_name)
         cur_version[name] = cur_version['subreddit']
         DatasetURLs[name] = get_subreddit_info(subreddit_name)
@@ -275,7 +274,7 @@ def _get_wikiconv_year_info(year: str) -> str:
 
     return data_dir + year + "/full.corpus.zip"
 
-def meta_index(corpus: Corpus=None, filename: str=None) -> Dict:
+def meta_index(corpus=None, filename: str=None) -> Dict:
     keys = ["utterances-index", "conversations-index", "users-index",
             "overall-index"]
     if corpus is not None:
@@ -284,3 +283,11 @@ def meta_index(corpus: Corpus=None, filename: str=None) -> Dict:
         with open(os.path.join(filename, "index.json")) as f:
             d = json.load(f)
             return d
+
+def warn(text: str):
+    """
+    Pre-pends a red-colored 'WARNING: ' to [text].
+    :param text: Warning message
+    :return: 'WARNING: [text]'
+    """
+    print('\033[91m'+ "WARNING: " + '\033[0m' + text)

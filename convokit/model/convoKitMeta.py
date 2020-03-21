@@ -18,7 +18,7 @@ class ConvoKitMeta(MutableMapping, dict):
         if not isinstance(key, str):
             warn("Metadata keys must be strings. Input key has been casted to a string.")
         key = str(key)
-        if key not in self.__dict__:
+        if key not in self.index.indices[self.obj_type]:
             # update Corpus index
             try:
                 json.dumps(value)

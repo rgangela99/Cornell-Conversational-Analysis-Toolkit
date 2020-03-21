@@ -1,7 +1,5 @@
-from warnings import warn
-# from abc import ABC, abstractmethod
 from .convoKitMeta import ConvoKitMeta
-
+from convokit.util import warn
 
 class CorpusObject:
 
@@ -51,33 +49,40 @@ class CorpusObject:
     #     return self_keys == other_keys and all([self.__dict__[k] == other.__dict__[k] for k in self_keys])
 
     def retrieve_meta(self, key: str):
+        """
+        Retrieves a value stored under the key of the metadata of corpus object
+
+        :param key: name of metadata
+        :return: value (if key not found, raises an error)
+        """
         return self.meta[key]
 
     def add_meta(self, key: str, value) -> None:
         """
-        Adds a key-value pair to the metadata of the User
+        Adds a key-value pair to the metadata of the corpus object
 
+        :param key: name of metadata
         :return: None
         """
         self.meta[key] = value
 
     def get_info(self, key):
         """
-            Gets attribute <key> of the user. Returns None if the user does not have this attribute.
+        Gets attribute <key> of the corpus object. Returns None if the corpus object does not have this attribute.
 
-            :param key: name of attribute
-            :return: attribute <key>
+        :param key: name of attribute
+        :return: attribute <key>
         """
 
         return self.meta.get(key, None)
 
     def set_info(self, key, value):
         """
-            Sets attribute <key> of the user to <value>.
+        Sets attribute <key> of the corpus object to <value>.
 
-            :param key: name of attribute
-            :param value: value to set
-            :return: None
+        :param key: name of attribute
+        :param value: value to set
+        :return: None
         """
 
         self.meta[key] = value

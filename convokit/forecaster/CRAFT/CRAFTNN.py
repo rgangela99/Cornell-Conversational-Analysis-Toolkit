@@ -161,7 +161,9 @@ def initialize_model(custom_model_path, voc, device, device_type: str, hidden_si
         checkpoint = torch.load(custom_model_path)
     encoder_sd = checkpoint['en']
     context_sd = checkpoint['ctx']
-    attack_clf_sd = checkpoint['atk_clf']
+    if 'atk_clf' in checkpoint:
+        attack_clf_sd = checkpoint['atk_clf']
+
     embedding_sd = checkpoint['embedding']
     voc.__dict__ = checkpoint['voc_dict']
 
@@ -176,7 +178,8 @@ def initialize_model(custom_model_path, voc, device, device_type: str, hidden_si
     context_encoder.load_state_dict(context_sd)
     # Initialize classifier
     attack_clf: SingleTargetClf = SingleTargetClf(hidden_size, dropout)
-    attack_clf.load_state_dict(attack_clf_sd)
+    if 'atk_clf' in checkpoint:
+        attack_clf.load_state_dict(attack_clf_sd)
     # Use appropriate device
     encoder = encoder.to(device)
     context_encoder = context_encoder.to(device)

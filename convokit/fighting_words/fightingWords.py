@@ -62,10 +62,10 @@ class FightingWords(Transformer):
             raise ValueError("If using a non-uniform prior, you must pass a count vectorizer with "
                              "the vocabulary parameter set.")
         if self.cv is None:
-            print("Initializing default CountVectorizer...", end="")
+            print("Initializing default CountVectorizer", end=" ")
             if self.ngram_range is None:
                 self.ngram_range = (1, 3)
-            print("with ngram_range {}".format(self.ngram_range), end="")
+            print("with ngram_range {}...".format(self.ngram_range), end=" ")
             self.cv = CV(decode_error='ignore', min_df=10, max_df=.5, ngram_range=self.ngram_range,
                          binary=False, max_features=15000)
             print("Done.")
@@ -309,14 +309,15 @@ class FightingWords(Transformer):
             else:
                 colors.append(insig_color)
                 annots.append(None)
+        # fig, ax = plt.subplots()
+        plt.figure(dpi=200, figsize=(9, 6))
 
-        fig, ax = plt.subplots()
-        ax.scatter(x_vals, y_vals, c=colors, s=sizes, linewidth=0)
+        plt.scatter(x_vals, y_vals, c=colors, s=sizes, linewidth=0)
         for i, annot in enumerate(annots):
             if annot is not None:
-                ax.annotate(annot, (x_vals[i], y_vals[i]), color=colors[i], size=sizes[i])
-        ax.set_xscale('log')
-        ax.set_title("Weighted log-odds ratio against Frequency of word within topic")
+                plt.annotate(annot, (x_vals[i], y_vals[i]), color=colors[i], size=sizes[i])
+        plt.xscale('log')
+        plt.title("Weighted log-odds ratio against Frequency of word within topic")
         plt.show()
 
     def get_model(self):

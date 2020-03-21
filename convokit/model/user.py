@@ -17,7 +17,8 @@ class User(CorpusObject):
     :type meta: dict
 
     :ivar id: id of the user.
-    :ivar meta: dictionary of attributes associated with the user.
+    :ivar meta: A dictionary-like view object providing read-write access to
+        user-level metadata.
     """
 
     def __init__(self, owner=None, id: str = None, utts=None, convos = None, meta: Optional[Dict] = None):

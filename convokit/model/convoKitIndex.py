@@ -16,7 +16,6 @@ class ConvoKitIndex:
                         'corpus': self.overall_index}
         self.version = version
 
-
     def update_index(self, obj_type: str, key: str, class_type: str):
         assert type(key) == str
         assert 'class' in class_type or class_type == 'bin'
@@ -33,10 +32,10 @@ class ConvoKitIndex:
                 del corpus_obj.meta[key]
 
     def update_from_dict(self, meta_index: Dict):
-        self.conversations_index = meta_index["conversations-index"]
-        self.utterances_index = meta_index["utterances-index"]
-        self.users_index = meta_index["users-index"]
-        self.overall_index = meta_index["overall-index"]
+        self.conversations_index.update(meta_index["conversations-index"])
+        self.utterances_index.update(meta_index["utterances-index"])
+        self.users_index.update(meta_index["users-index"])
+        self.overall_index.update(meta_index["overall-index"])
         self.version = meta_index["version"]
 
     def to_dict(self, increment_version=False):

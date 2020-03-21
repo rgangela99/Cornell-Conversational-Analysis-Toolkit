@@ -5,6 +5,7 @@ from .corpusHelper import *
 from .corpusUtil import warn
 from .convoKitIndex import ConvoKitIndex
 import random
+from .convoKitMeta import ConvoKitMeta
 
 class Corpus:
 	"""Represents a dataset, which can be loaded from a folder or a
@@ -39,8 +40,9 @@ class Corpus:
 		else:
 			self.original_corpus_path = os.path.dirname(filename)
 
-		self.meta = {}
 		self.meta_index = ConvoKitIndex(self)
+		self.meta = ConvoKitMeta(self.meta_index, 'corpus')
+
 		self.vector_reprs = {}
 
 		convos_meta = defaultdict(dict)
