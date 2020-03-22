@@ -52,14 +52,14 @@ class Hypergraph:
         for speaker_utt_id, target_utt_id in reply_edges:
             hypergraph.add_edge(speaker_utt_id, target_utt_id)
 
-        # user to utterance response edges
+        # hypernode to node response edges
         for user, reply_tos in speaker_to_reply_tos.items():
             for reply_to in reply_tos:
                 hypergraph.add_edge(user, reply_to)
 
-        # user to user response edges
-        for user, target, utt_info in speaker_target_pairs:
-            hypergraph.add_edge(user, target, utt_info)
+        # hypernode to hypernode response edges
+        for user, target, utt in speaker_target_pairs:
+            hypergraph.add_edge(user, target, utt)
 
         return hypergraph
 
@@ -113,14 +113,22 @@ class Hypergraph:
                     self.hypernodes)
 
     def outdegrees(self, from_hyper: bool=False, to_hyper: bool=False) -> List[int]:
-        return [sum([len(l) for v, l in self.adj_out[u].items() if v in
-                     (self.hypernodes if to_hyper else self.nodes)]) for u in
-                (self.hypernodes if from_hyper else self.nodes)]
+        retval = []
+        from_nodes = self.hypernodes if from_hyper else self.nodes
+        to_nodes = self.hypernodes if to_hyper else self.nodes
+
+        for node in from_nodes:
+            retval.append(sum([len(l) for v, l in self.adj_out[node].items() if v in to_nodes]))
+        return retval
 
     def indegrees(self, from_hyper: bool=False, to_hyper: bool=False) -> List[int]:
-        return [sum([len(l) for u, l in self.adj_in[v].items() if u in
-                     (self.hypernodes if from_hyper else self.nodes)]) for v in
-                (self.hypernodes if to_hyper else self.nodes)]
+        retval = []
+        from_nodes = self.hypernodes if from_hyper else self.nodes
+        to_nodes = self.hypernodes if to_hyper else self.nodes
+
+        for node in to_nodes:
+            retval.append(sum([len(l) for u, l in self.adj_in[node].items() if u in from_nodes]))
+        return retval
 
     def reciprocity_motifs(self) -> List[Tuple]:
         """
@@ -167,7 +175,7 @@ class Hypergraph:
         """
         motifs = []
         for C1 in self.hypernodes:
-            incoming = list(self.adj_in[C1].keys())
+            incoming = [C for C in self.adj_in[C1].keys() if C not in self.nodes]
             for C2, C3 in itertools.combinations(incoming, 2):
                 motifs += [(C1, C2, C3, self.adj_out[C2][C1], self.adj_out[C3][C1])]
         return motifs
@@ -178,7 +186,7 @@ class Hypergraph:
         """
         motifs = []
         for C1 in self.hypernodes:
-            outgoing = list(self.adj_out[C1].keys())
+            outgoing = [C for C in self.adj_out[C1].keys() if C not in self.nodes]
             for C2, C3 in itertools.combinations(outgoing, 2):
                 motifs += [(C1, C2, C3, self.adj_out[C1][C2], self.adj_out[C1][C3])]
         return motifs

@@ -236,16 +236,17 @@ class Conversation(CorpusObject):
         children_utt_ids = [k for k, v in reply_to_dict.items() if v == root]
         for child_utt_id in children_utt_ids:
             self._print_convo_helper(root=child_utt_id, indent=indent+4,
-                                     reply_to_dict=reply_to_dict, utt_info_func=utt_info_func,
-                                     limit=limit)
+                                     reply_to_dict=reply_to_dict, utt_info_func=utt_info_func, limit=limit)
 
-    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.user.id, limit=None) -> None:
+    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.user.id, limit: int = None) -> None:
         """
-        Prints an indented representation of utterances in the Conversation with conversation reply-to structure
-        determining the indented level. The details of each utterance to be printed can be configured.
+        Prints an indented representation of utterances in the Conversation with conversation reply-to structure determining the indented level. The details of each utterance to be printed can be configured.
+
+        If limit is set to a value other than None, this will annotate utterances with an 'order' metadata indicating their temporal order in the conversation, where the first utterance in the conversation is annotated with 1.
 
         :param utt_info_func: callable function taking an utterance as input and returning a string of the desired
                               utterance information. By default, this is a lambda function returning the utterance's user's id
+        :param limit: maximum number of utterances to print out. if k, this includes the first k utterances.
         :return: None. Prints to stdout.
         """
         if not self.check_integrity(verbose=False):

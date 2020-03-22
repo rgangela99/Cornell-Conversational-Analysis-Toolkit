@@ -118,6 +118,7 @@ class HyperConvo(Transformer):
         stats = {}
         for from_hyper in [False, True]:
             for to_hyper in [False, True]:
+                if not from_hyper and to_hyper: continue # skip c->C
                 if from_hyper:
                     outdegrees = np.array(graph.outdegrees(from_hyper, to_hyper))
                 indegrees = np.array(graph.indegrees(from_hyper, to_hyper))
