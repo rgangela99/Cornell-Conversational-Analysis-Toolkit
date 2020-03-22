@@ -224,17 +224,22 @@ class Conversation(CorpusObject):
                 return utt_node
 
     def _print_convo_helper(self, root: str, indent: int, reply_to_dict: Dict[str, str],
-                            utt_info_func: Callable[[Utterance], str]) -> None:
+                            utt_info_func: Callable[[Utterance], str],
+                            limit=None) -> None:
         """
         Helper function for print_conversation_structure()
         """
+        if limit is not None:
+            if self.get_utterance(root).meta['order'] > limit:
+                return
         print(" "*indent + utt_info_func(self.get_utterance(root)))
         children_utt_ids = [k for k, v in reply_to_dict.items() if v == root]
         for child_utt_id in children_utt_ids:
             self._print_convo_helper(root=child_utt_id, indent=indent+4,
-                                     reply_to_dict=reply_to_dict, utt_info_func=utt_info_func)
+                                     reply_to_dict=reply_to_dict, utt_info_func=utt_info_func,
+                                     limit=limit)
 
-    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.user.id) -> None:
+    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.user.id, limit=None) -> None:
         """
         Prints an indented representation of utterances in the Conversation with conversation reply-to structure
         determining the indented level. The details of each utterance to be printed can be configured.
@@ -247,10 +252,16 @@ class Conversation(CorpusObject):
             raise ValueError("Could not print conversation structure: The utterance reply-to chain is broken. "
                              "Try check_integrity() to diagnose the problem.")
 
+        if limit is not None:
+            assert isinstance(limit, int)
+            for idx, utt in enumerate(self.get_chronological_utterance_list()):
+                utt.meta['order'] = idx + 1
+
         root_utt_id = [utt for utt in self.iter_utterances() if utt.reply_to is None][0].id
         reply_to_dict = {utt.id: utt.reply_to for utt in self.iter_utterances()}
 
-        self._print_convo_helper(root=root_utt_id, indent=0, reply_to_dict=reply_to_dict, utt_info_func=utt_info_func)
+        self._print_convo_helper(root=root_utt_id, indent=0, reply_to_dict=reply_to_dict,
+                                 utt_info_func=utt_info_func, limit=limit)
 
     def get_chronological_utterance_list(self, selector: Callable[[Utterance], bool] = lambda utt: True):
         """
