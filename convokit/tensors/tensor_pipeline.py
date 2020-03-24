@@ -16,13 +16,18 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import random
 from weasyprint import HTML
+import warnings
 
 IMAGE_WIDTH = 50
-CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+warnings.filterwarnings('error')
+
+# CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_sliding"
-PLOT_DIR = "html/graphs_sliding"
-hyperconv_range = range(0, 9+1)
+DATA_DIR = "data_fixed"
+PLOT_DIR = "html/graphs"
+# hyperconv_range = range(0, 9+1)
+hyperconv_range = range(3, 20+1)
 rank_range = range(9, 9+1)
 max_rank = max(rank_range)
 anomaly_threshold = 1.5
@@ -262,15 +267,15 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 
 
 if __name__ == "__main__":
-    # os.makedirs(DATA_DIR, exist_ok=True)
-    # os.makedirs(PLOT_DIR, exist_ok=True)
-    generate_data_and_tensor(sliding=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(PLOT_DIR, exist_ok=True)
+    generate_data_and_tensor(sliding=False)
     decompose_tensor()
     generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report (Sliding) - Fixed hyperconv",
-                  graph_filepath='graphs_sliding',
-                  output_html='report_sliding_fixed.html')
+                  title="Report (Fixed)",
+                  graph_filepath='graphs',
+                  output_html='report_fixed.html')
 
     # generate_detailed_examples()
 

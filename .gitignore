@@ -33,3 +33,4 @@ venv-triadmotif/
 *.tar
 *.DS_Store
 .DS_Store
+*.xlsx
