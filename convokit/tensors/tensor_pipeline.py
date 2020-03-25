@@ -2,7 +2,7 @@
 Run only on fully intact corpora.
 Conversations ARE threads.
 """
-from convokit import Corpus, download, HyperConvo
+from convokit import Corpus, HyperConvo
 import pickle
 import numpy as np
 import os
@@ -15,17 +15,17 @@ from jinja2 import Environment, FileSystemLoader
 import matplotlib.pyplot as plt
 import seaborn as sns
 import random
-from weasyprint import HTML
 import warnings
 
 IMAGE_WIDTH = 50
 warnings.filterwarnings('error')
 
-# CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
-CORPUS_DIR = "reddit-corpus-small"
+CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+LIWC_CORPUS_DIR = "longreddit_construction/long-reddit-corpus-liwc"
+# CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_fixed"
-PLOT_DIR = "html/graphs"
+DATA_DIR = "data_liwc"
+PLOT_DIR = "html/graphs_liwc"
 # hyperconv_range = range(0, 9+1)
 hyperconv_range = range(3, 20+1)
 rank_range = range(9, 9+1)
@@ -59,7 +59,7 @@ def construct_tensor(corpus, hyperconv_range, impute_na=None):
     """
     num_convos = len(list(corpus.iter_conversations()))
     num_feature_sets = len(hyperconv_range)
-    tensor = np.zeros((num_feature_sets, num_convos, 164))
+    tensor = np.zeros((num_feature_sets, num_convos, 140))
 
     for convo_idx, convo in enumerate(corpus.iter_conversations()):
         for hyperconvo_idx in hyperconv_range:
@@ -97,6 +97,37 @@ def generate_data_and_tensor(sliding=False):
         pickle.dump(hg_features, f)
     print("Saved.\n")
 
+def generate_liwc_data_and_tensor(sliding=False):
+    print("Loading corpus from {}...".format(LIWC_CORPUS_DIR), end="")
+    corpus = Corpus(filename=LIWC_CORPUS_DIR)
+    print("Done.\n")
+
+    # getting corpus details
+    subreddits, convo_ids = save_corpus_details(corpus)
+
+    print("Constructing tensor...", end="")
+
+    num_convos = len(list(corpus.iter_conversations()))
+    num_feature_sets = len(corpus.random_utterance())
+    tensor = np.zeros((num_feature_sets, num_convos, 140))
+
+    for convo_idx, convo in enumerate(corpus.iter_conversations()):
+        for hyperconvo_idx in hyperconv_range:
+            tensor[hyperconvo_idx-3][convo_idx] = list(convo.meta['hyperconvo-{}'.format(hyperconvo_idx)].values())
+
+    if impute_na is not None:
+        tensor[np.isnan(tensor)] = impute_na
+
+    tensor = construct_tensor(corpus, hyperconv_range, impute_na=-1)
+    print("Done.\n")
+
+    print("Saving tensor...", end="")
+    with open(os.path.join(DATA_DIR, 'tensor.p'), 'wb') as f:
+        pickle.dump(tensor, f)
+    hg_features = list(next(corpus.iter_conversations()).meta['hyperconvo-3'])
+    with open(os.path.join(DATA_DIR, 'hg_features.p'), 'wb') as f:
+        pickle.dump(hg_features, f)
+    print("Saved.\n")
 
 def decompose_tensor():
     print("Decomposing tensor into factors...")
@@ -166,7 +197,7 @@ def generate_high_level_summary():
 
     time_factor = rank_to_factors[max_rank][0] # (9, 9)
     thread_factor = rank_to_factors[max_rank][1] # (10000, 9)
-    feature_factor = rank_to_factors[max_rank][2] # (164, 9)
+    feature_factor = rank_to_factors[max_rank][2] # (140, 9)
 
     idx_to_distinctive_threads = defaultdict(dict)
     idx_to_distinctive_features = defaultdict(dict)
@@ -222,7 +253,7 @@ def generate_detailed_examples():
 
     time_factor = rank_to_factors[max_rank][0] # (9, 9)
     thread_factor = rank_to_factors[max_rank][1] # (10000, 9)
-    feature_factor = rank_to_factors[max_rank][2] # (164, 9)
+    feature_factor = rank_to_factors[max_rank][2] # (140, 9)
 
     print("Reloading corpus...", end="")
     corpus = Corpus(filename=CORPUS_DIR)
@@ -273,9 +304,9 @@ if __name__ == "__main__":
     decompose_tensor()
     generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report (Fixed)",
-                  graph_filepath='graphs',
-                  output_html='report_fixed.html')
+                  title="Report - LIWC",
+                  graph_filepath='graphs_liwc',
+                  output_html='report_sliding_fixed.html')
 
     # generate_detailed_examples()
 
