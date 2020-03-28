@@ -118,7 +118,7 @@ class Hypergraph:
         to_nodes = self.hypernodes if to_hyper else self.nodes
 
         for node in from_nodes:
-            retval.append(sum([len(l) for v, l in self.adj_out[node].items() if v in to_nodes]))
+            retval.append(sum([1 for v, l in self.adj_out[node].items() if v in to_nodes]))
         return retval
 
     def indegrees(self, from_hyper: bool=False, to_hyper: bool=False) -> List[int]:
@@ -127,7 +127,7 @@ class Hypergraph:
         to_nodes = self.hypernodes if to_hyper else self.nodes
 
         for node in to_nodes:
-            retval.append(sum([len(l) for u, l in self.adj_in[node].items() if u in from_nodes]))
+            retval.append(sum([1 for u, l in self.adj_in[node].items() if u in from_nodes]))
         return retval
 
     def reciprocity_motifs(self) -> List[Tuple]:

@@ -20,16 +20,16 @@ import warnings
 IMAGE_WIDTH = 50
 warnings.filterwarnings('error')
 
-CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+LIWC_CORPUS_DIR = "longreddit_construction/long-reddit-corpus-liwc"
 # CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_sliding_fixed"
-PLOT_DIR = "html/graphs_sliding"
-hyperconv_range = range(0, 9+1)
-# hyperconv_range = range(3, 20+1)
+DATA_DIR = "data_liwc"
+PLOT_DIR = "html/graphs_liwc"
+# hyperconv_range = range(0, 9+1)
 rank_range = range(9, 9+1)
 max_rank = max(rank_range)
 anomaly_threshold = 1.5
+WINDOW_SIZE = 10
 
 def save_corpus_details(corpus):
     subreddits = [convo.get_utterance(convo.id).meta['subreddit'] for convo in corpus.iter_conversations()]
@@ -42,58 +42,36 @@ def save_corpus_details(corpus):
         pickle.dump(convo_ids, f)
     return subreddits, convo_ids
 
-def multi_hyperconv_transform(corpus, hyperconv_range):
-    hc_transformers = [HyperConvo(prefix_len=i, feat_name="hyperconvo-{}".format(i)) for i in hyperconv_range]
-    for idx, hc in enumerate(list(reversed(hc_transformers))):
-        print(hyperconv_range[-1]-idx)
-        hc.transform(corpus)
-
-def construct_tensor(corpus, hyperconv_range, impute_na=None):
-    """
-
-    :param corpus:
-    :param hyperconv_range:
-    :param impute_na: If set to an int, replace all NaNs with the set integer.
-    :return:
-    """
-    num_convos = len(list(corpus.iter_conversations()))
-    num_feature_sets = len(hyperconv_range)
-    tensor = np.zeros((num_feature_sets, num_convos, 140))
-
-    for convo_idx, convo in enumerate(corpus.iter_conversations()):
-        for hyperconvo_idx in hyperconv_range:
-            tensor[hyperconvo_idx-3][convo_idx] = list(convo.meta['hyperconvo-{}'.format(hyperconvo_idx)].values())
-
-    if impute_na is not None:
-        tensor[np.isnan(tensor)] = impute_na
-    return tensor
-
-def generate_data_and_tensor(sliding=False):
-    print("Loading corpus from {}...".format(CORPUS_DIR), end="")
-    corpus = Corpus(filename=CORPUS_DIR)
+def generate_liwc_data_and_tensor(sliding=False):
+    print("Loading corpus from {}...".format(LIWC_CORPUS_DIR), end="")
+    corpus = Corpus(filename=LIWC_CORPUS_DIR)
     print("Done.\n")
 
     # getting corpus details
     subreddits, convo_ids = save_corpus_details(corpus)
 
-    print("Doing Hyperconvo Transformations...")
-    if sliding:
-        hyperconv = HyperConvo(prefix_len=10, min_thread_len=20)
-        hyperconv.sliding_transform(corpus)
-    else:
-        multi_hyperconv_transform(corpus, hyperconv_range)
-    print("Done.\n")
-
     print("Constructing tensor...", end="")
-    tensor = construct_tensor(corpus, hyperconv_range, impute_na=-1)
+
+    num_convos = len(list(corpus.iter_conversations()))
+    # sliding window of size 10, so we get 11 windows
+    num_feature_sets = 11
+    num_liwc_feats = len(corpus.random_conversation().get_chronological_utterance_list()[0].meta['liwc'])
+    tensor = np.zeros((num_feature_sets, num_convos, num_liwc_feats))
+
+    for convo_idx, convo in enumerate(corpus.iter_conversations()):
+        liwc_mat = convo.meta['liwc']
+        for idx in range(0, 20+1-WINDOW_SIZE):
+            tensor[idx][convo_idx] = liwc_mat[idx:idx+WINDOW_SIZE].sum(axis=0)
+
     print("Done.\n")
 
     print("Saving tensor...", end="")
     with open(os.path.join(DATA_DIR, 'tensor.p'), 'wb') as f:
         pickle.dump(tensor, f)
-    hg_features = list(next(corpus.iter_conversations()).meta['hyperconvo-3'])
-    with open(os.path.join(DATA_DIR, 'hg_features.p'), 'wb') as f:
-        pickle.dump(hg_features, f)
+
+    liwc_features = list(corpus.random_conversation().get_chronological_utterance_list()[0].meta['liwc'])
+    with open(os.path.join(DATA_DIR, 'liwc_features.p'), 'wb') as f:
+        pickle.dump(liwc_features, f)
     print("Saved.\n")
 
 def decompose_tensor():
@@ -156,8 +134,8 @@ def generate_high_level_summary():
     with open(os.path.join(DATA_DIR, 'rank_to_factors.p'), 'rb') as f:
         rank_to_factors = pickle.load(f)
 
-    with open(os.path.join(DATA_DIR, 'hg_features.p'), 'rb') as f:
-        hg_features = pickle.load(f)
+    with open(os.path.join(DATA_DIR, 'liwc_features.p'), 'rb') as f:
+        liwc_features = pickle.load(f)
 
     with open(os.path.join(DATA_DIR, 'subreddits.p'), 'rb') as f:
         subreddits = pickle.load(f)
@@ -165,7 +143,6 @@ def generate_high_level_summary():
     time_factor = rank_to_factors[max_rank][0] # (9, 9)
     thread_factor = rank_to_factors[max_rank][1] # (10000, 9)
     feature_factor = rank_to_factors[max_rank][2] # (140, 9)
-
     idx_to_distinctive_threads = defaultdict(dict)
     idx_to_distinctive_features = defaultdict(dict)
 
@@ -182,8 +159,8 @@ def generate_high_level_summary():
             idx_to_distinctive_threads[idx]['neg_threads'][subreddit] /= subreddit_totals[subreddit]
 
         pos_features, neg_features = get_anomalous_points(feature_factor, idx)
-        idx_to_distinctive_features[idx]['pos_features'] = [hg_features[i] for i in pos_features]
-        idx_to_distinctive_features[idx]['neg_features'] = [hg_features[i] for i in neg_features]
+        idx_to_distinctive_features[idx]['pos_features'] = [liwc_features[i] for i in pos_features]
+        idx_to_distinctive_features[idx]['neg_features'] = [liwc_features[i] for i in neg_features]
 
     factor_to_details = dict()
     for idx in range(max(rank_range)):
@@ -195,8 +172,8 @@ def generate_high_level_summary():
                                 key=lambda x: x[1], reverse=True)
         factor_to_details[idx]['neg_subreddits'] = [k for k, v in neg_subreddits[:5]]
 
-        factor_to_details[idx]['pos_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['pos_features'][:10])
-        factor_to_details[idx]['neg_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['neg_features'][:10])
+        factor_to_details[idx]['pos_features'] = ', '.join(idx_to_distinctive_features[idx]['pos_features'][:10])
+        factor_to_details[idx]['neg_features'] = ', '.join(idx_to_distinctive_features[idx]['neg_features'][:10])
 
     return factor_to_details
 
@@ -209,8 +186,8 @@ def generate_detailed_examples():
     with open(os.path.join(DATA_DIR, 'rank_to_factors.p'), 'rb') as f:
         rank_to_factors = pickle.load(f)
 
-    with open(os.path.join(DATA_DIR, 'hg_features.p'), 'rb') as f:
-        hg_features = pickle.load(f)
+    with open(os.path.join(DATA_DIR, 'liwc_features.p'), 'rb') as f:
+        liwc_features = pickle.load(f)
 
     with open(os.path.join(DATA_DIR, 'subreddits.p'), 'rb') as f:
         subreddits = pickle.load(f)
@@ -223,7 +200,7 @@ def generate_detailed_examples():
     feature_factor = rank_to_factors[max_rank][2] # (140, 9)
 
     print("Reloading corpus...", end="")
-    corpus = Corpus(filename=CORPUS_DIR)
+    corpus = Corpus(filename=LIWC_CORPUS_DIR)
     print("Done.\n")
 
     print("Annotating utterances with arrival information...", end="")
@@ -254,7 +231,7 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
     root = os.path.dirname(os.path.abspath(__file__))
     factor_to_details = generate_high_level_summary()
     env = Environment(loader=FileSystemLoader(os.path.join(root, 'template')))
-    template = env.get_template('report.html')
+    template = env.get_template('liwc_report.html')
     filename = os.path.join(root, 'html', output_html)
     with open(filename, 'w') as fh:
         fh.write(
@@ -265,15 +242,15 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 
 
 if __name__ == "__main__":
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(PLOT_DIR, exist_ok=True)
-    generate_data_and_tensor(sliding=True)
-    decompose_tensor()
-    generate_plots()
+    # os.makedirs(DATA_DIR, exist_ok=True)
+    # os.makedirs(PLOT_DIR, exist_ok=True)
+    # generate_liwc_data_and_tensor()
+    # decompose_tensor()
+    # generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report - Sliding (fixed)",
-                  graph_filepath='graphs_sliding',
-                  output_html='report_sliding_fixed.html')
+                  title="Report - LIWC",
+                  graph_filepath='graphs_liwc',
+                  output_html='report_liwc.html')
 
     # generate_detailed_examples()
 

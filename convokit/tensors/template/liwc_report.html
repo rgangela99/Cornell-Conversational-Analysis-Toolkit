@@ -1,0 +1,29 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>{{title}}</h1>
+    {% for d in factor_to_details %}
+    <br>
+    <h3>Factor: {{d+1   }}</h3>
+    <img src='{{graph_filepath}}/factorplot_{{d+1}}.png' />
+    <p><b>Positive subreddits: </b>{{", ".join(factor_to_details[d]['pos_subreddits'])}}</p>
+    <p><b>Negative subreddits: </b>{{", ".join(factor_to_details[d]['neg_subreddits'])}}</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        {{factor_to_details[d]['pos_features']}}
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        {{factor_to_details[d]['neg_features']}}
+    </div>
+    <hr>
+<!--    <p>{{factor_to_details[d]}}</p>-->
+    {% endfor %}
+</body>
+
+</html>
