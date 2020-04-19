@@ -2,13 +2,12 @@
 Run only on fully intact corpora.
 Conversations ARE threads.
 """
-from convokit import Corpus, HyperConvo
+from convokit import Corpus
 import pickle
 import numpy as np
 import os
 from tensorly.decomposition import parafac
 from convokit.tensors.utils import plot_factors
-from convokit.tensors.graphics import get_graphic_dict
 from sklearn.preprocessing import StandardScaler
 from collections import defaultdict, Counter
 from jinja2 import Environment, FileSystemLoader
@@ -74,7 +73,7 @@ def generate_liwc_data_and_tensor(sliding=False):
         pickle.dump(liwc_features, f)
     print("Saved.\n")
 
-def decompose_tensor():
+def decompose_tensor(normalize=False):
     print("Decomposing tensor into factors...")
     with open(os.path.join(DATA_DIR, 'tensor.p'), 'rb') as f:
         tensor = pickle.load(f)
@@ -140,9 +139,11 @@ def generate_high_level_summary():
     with open(os.path.join(DATA_DIR, 'subreddits.p'), 'rb') as f:
         subreddits = pickle.load(f)
 
+    print(len(liwc_features))
     time_factor = rank_to_factors[max_rank][0] # (9, 9)
     thread_factor = rank_to_factors[max_rank][1] # (10000, 9)
     feature_factor = rank_to_factors[max_rank][2] # (140, 9)
+    print(feature_factor.shape)
     idx_to_distinctive_threads = defaultdict(dict)
     idx_to_distinctive_features = defaultdict(dict)
 
@@ -242,11 +243,11 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 
 
 if __name__ == "__main__":
-    # os.makedirs(DATA_DIR, exist_ok=True)
-    # os.makedirs(PLOT_DIR, exist_ok=True)
-    # generate_liwc_data_and_tensor()
-    # decompose_tensor()
-    # generate_plots()
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(PLOT_DIR, exist_ok=True)
+    generate_liwc_data_and_tensor()
+    decompose_tensor()
+    generate_plots()
     generate_html(generate_high_level_summary(),
                   title="Report - LIWC",
                   graph_filepath='graphs_liwc',

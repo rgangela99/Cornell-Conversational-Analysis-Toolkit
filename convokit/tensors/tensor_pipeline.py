@@ -23,10 +23,10 @@ warnings.filterwarnings('error')
 CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
 # CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_sliding_fixed"
-PLOT_DIR = "html/graphs_sliding"
-hyperconv_range = range(0, 9+1)
-# hyperconv_range = range(3, 20+1)
+DATA_DIR = "data_from2"
+PLOT_DIR = "html/graphs_from2"
+# hyperconv_range = range(0, 9+1)
+hyperconv_range = range(2, 20+1)
 rank_range = range(9, 9+1)
 max_rank = max(rank_range)
 anomaly_threshold = 1.5
@@ -96,10 +96,24 @@ def generate_data_and_tensor(sliding=False):
         pickle.dump(hg_features, f)
     print("Saved.\n")
 
-def decompose_tensor():
+def min_max_scale(mat):
+    max_ = np.max(mat)
+    min_ = np.min(mat)
+    return (mat - min_) / (max_ - min_)
+
+def min_max_tensor(tensor):
+    tensor = tensor.copy()
+    for i in range(tensor.shape[2]):
+        tensor[:, :, i] = min_max_scale(tensor[:, :, i])
+    return tensor
+
+def decompose_tensor(normalize=False):
     print("Decomposing tensor into factors...")
     with open(os.path.join(DATA_DIR, 'tensor.p'), 'rb') as f:
         tensor = pickle.load(f)
+    if normalize:
+        print("Normalizing...")
+        tensor = min_max_tensor(tensor)
     rank_to_factors = dict()
     for rank in rank_range:
         print("Rank {}".format(rank))
@@ -267,13 +281,13 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(PLOT_DIR, exist_ok=True)
-    generate_data_and_tensor(sliding=True)
-    decompose_tensor()
+    generate_data_and_tensor(sliding=False)
+    decompose_tensor(normalize=False)
     generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report - Sliding (fixed)",
-                  graph_filepath='graphs_sliding',
-                  output_html='report_sliding_fixed.html')
+                  title="Report (Standard, from 2)",
+                  graph_filepath='graphs_from2',
+                  output_html='report_from2.html')
 
     # generate_detailed_examples()
 
