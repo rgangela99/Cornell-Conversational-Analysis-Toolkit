@@ -41,7 +41,7 @@ def save_corpus_details(corpus):
         pickle.dump(convo_ids, f)
     return subreddits, convo_ids
 
-def generate_liwc_data_and_tensor(sliding=False):
+def generate_liwc_data_and_tensor(sliding=False, POS_only=False):
     print("Loading corpus from {}...".format(LIWC_CORPUS_DIR), end="")
     corpus = Corpus(filename=LIWC_CORPUS_DIR)
     print("Done.\n")
@@ -53,7 +53,8 @@ def generate_liwc_data_and_tensor(sliding=False):
 
     num_convos = len(list(corpus.iter_conversations()))
     # sliding window of size 10, so we get 11 windows
-    num_feature_sets = 11
+    num_feature_sets = 11 if sliding else 20
+    if not sliding: WINDOW_SIZE = 1
     num_liwc_feats = len(corpus.random_conversation().get_chronological_utterance_list()[0].meta['liwc'])
     tensor = np.zeros((num_feature_sets, num_convos, num_liwc_feats))
 
@@ -84,6 +85,7 @@ def decompose_tensor(normalize=False):
     with open(os.path.join(DATA_DIR, 'rank_to_factors.p'), 'wb') as f:
         pickle.dump(rank_to_factors, f)
     print("Finished decomposition and saved.\n")
+
 
 def plot_factors(factors, d=3):
     a, b, c = factors
@@ -245,7 +247,7 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(PLOT_DIR, exist_ok=True)
-    generate_liwc_data_and_tensor()
+    generate_liwc_data_and_tensor(sliding=False)
     decompose_tensor()
     generate_plots()
     generate_html(generate_high_level_summary(),

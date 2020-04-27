@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import random
 import warnings
+from typing import List
+import pandas as pd
 
 IMAGE_WIDTH = 50
 warnings.filterwarnings('error')
@@ -23,8 +25,8 @@ warnings.filterwarnings('error')
 CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
 # CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_from2"
-PLOT_DIR = "html/graphs_from2"
+DATA_DIR = "data_from2_fixed"
+PLOT_DIR = "html/graphs_from2_fixed"
 # hyperconv_range = range(0, 9+1)
 hyperconv_range = range(2, 20+1)
 rank_range = range(9, 9+1)
@@ -62,7 +64,7 @@ def construct_tensor(corpus, hyperconv_range, impute_na=None):
 
     for convo_idx, convo in enumerate(corpus.iter_conversations()):
         for hyperconvo_idx in hyperconv_range:
-            tensor[hyperconvo_idx-3][convo_idx] = list(convo.meta['hyperconvo-{}'.format(hyperconvo_idx)].values())
+            tensor[hyperconvo_idx-min(hyperconv_range)][convo_idx] = list(convo.meta['hyperconvo-{}'.format(hyperconvo_idx)].values())
 
     if impute_na is not None:
         tensor[np.isnan(tensor)] = impute_na
@@ -218,6 +220,27 @@ def get_convo_details(convo):
     print("Subreddit: {}".format(convo.get_utterance(convo.id).meta['subreddit']))
     convo.print_conversation_structure(lambda utt: str(utt.meta['order']) + ". " + utt.user.id)
 
+def get_convo_tensor(convo_id, feats: List[str]):
+    with open(os.path.join(DATA_DIR, 'tensor.p'), 'rb') as f:
+        tensor = pickle.load(f)
+
+    with open(os.path.join(DATA_DIR, 'hg_features.p'), 'rb') as f:
+        hg_features = pickle.load(f)
+
+    with open(os.path.join(DATA_DIR, 'convo_ids.p'), 'rb') as f:
+        convo_ids = pickle.load(f)
+
+    features_dict = {v: idx for idx, v in enumerate(hg_features)}
+
+    convo_idx = convo_ids.index(convo_id)
+    features_idx = [features_dict[f] for f in feats]
+
+    convo_tensor = tensor[:, convo_idx][:, features_idx]
+    convo_df = pd.DataFrame(convo_tensor, columns=feats, index=range(1, convo_tensor.shape[0]+1)).T
+    plt.plot(convo_df.T)
+    plt.legend(feats)
+    return convo_df
+
 def generate_detailed_examples():
     print("Generating detailed examples for manual examination")
     with open(os.path.join(DATA_DIR, 'rank_to_factors.p'), 'rb') as f:
@@ -285,9 +308,9 @@ if __name__ == "__main__":
     decompose_tensor(normalize=False)
     generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report (Standard, from 2)",
-                  graph_filepath='graphs_from2',
-                  output_html='report_from2.html')
+                  title="Report (Standard, from 2, fixed)",
+                  graph_filepath='graphs_from2_fixed',
+                  output_html='report_from2_fixed.html')
 
     # generate_detailed_examples()
 
