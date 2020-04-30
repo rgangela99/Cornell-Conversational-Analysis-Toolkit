@@ -22,16 +22,18 @@ import pandas as pd
 IMAGE_WIDTH = 50
 warnings.filterwarnings('error')
 
-CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+# CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
+CORPUS_DIR = "../thread_generator/fake-corpus"
 # CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_from2_fixed"
-PLOT_DIR = "html/graphs_from2_fixed"
+DATA_DIR = "data_fake"
+PLOT_DIR = "html/graphs_fake"
 # hyperconv_range = range(0, 9+1)
 hyperconv_range = range(2, 20+1)
-rank_range = range(9, 9+1)
+# rank_range = range(9, 9+1)
+rank_range = range(3, 3+1)
 max_rank = max(rank_range)
-anomaly_threshold = 1.5
+anomaly_threshold = 2
 
 def save_corpus_details(corpus):
     subreddits = [convo.get_utterance(convo.id).meta['subreddit'] for convo in corpus.iter_conversations()]
@@ -302,15 +304,15 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 
 
 if __name__ == "__main__":
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(PLOT_DIR, exist_ok=True)
-    generate_data_and_tensor(sliding=False)
-    decompose_tensor(normalize=False)
-    generate_plots()
+    # os.makedirs(DATA_DIR, exist_ok=True)
+    # os.makedirs(PLOT_DIR, exist_ok=True)
+    # generate_data_and_tensor(sliding=False)
+    # decompose_tensor(normalize=False)
+    # generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report (Standard, from 2, fixed)",
-                  graph_filepath='graphs_from2_fixed',
-                  output_html='report_from2_fixed.html')
+                  title="Report (Fake - 2)",
+                  graph_filepath='graphs_fake',
+                  output_html='report_fake2.html')
 
     # generate_detailed_examples()
 

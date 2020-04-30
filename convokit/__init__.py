@@ -19,5 +19,6 @@ from .bag_of_words import *
 from .triad_motif import *
 from .thread_dynamics import *
 from .tensors import *
+from .thread_generator import *
 
 #__path__ = __import__('pkgutil').extend_path(__path__, __name__)

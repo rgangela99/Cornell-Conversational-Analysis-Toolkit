@@ -1,0 +1,235 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>Report (Fake)</h1>
+    
+    <br>
+    <h3>Factor: 1</h3>
+    <img src='graphs_fake/factorplot_1.png' />
+    <p><b>Positive subreddits: </b></p>
+    <p><b>Negative subreddits: </b>spawn_group_2</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': [], 'neg_subreddits': ['spawn_group_2'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hToh_indegree.png', False): ['max'], ('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+    <br>
+    <h3>Factor: 2</h3>
+    <img src='graphs_fake/factorplot_2.png' />
+    <p><b>Positive subreddits: </b>spawn_group_3, spawn_group_1</p>
+    <p><b>Negative subreddits: </b>spawn_group_2, spawn_group_1, spawn_group_3</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>max, 2nd-largest</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['spawn_group_3', 'spawn_group_1'], 'neg_subreddits': ['spawn_group_2', 'spawn_group_1', 'spawn_group_3'], 'pos_features': defaultdict(<class 'list'>, {}), 'neg_features': defaultdict(<class 'list'>, {('hTon_outdegree.png', False): ['max', '2nd-largest'], ('hToh_indegree.png', False): ['max'], ('reciprocity.png', False): ['count'], ('external_reciprocity.png', False): ['count'], ('outgoing.png', False): ['count'], ('hTon_outdegree.png', True): ['max'], ('reciprocity.png', True): ['count'], ('incoming.png', True): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 3</h3>
+    <img src='graphs_fake/factorplot_3.png' />
+    <p><b>Positive subreddits: </b>spawn_group_1</p>
+    <p><b>Negative subreddits: </b>spawn_group_3, spawn_group_1</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>max, 2nd-largest, mean, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_subreddits': ['spawn_group_1'], 'neg_subreddits': ['spawn_group_3', 'spawn_group_1'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['2nd-argmax'], ('hTon_outdegree.png', False): ['max', '2nd-largest', 'mean', 'mean-nonzero'], ('hTon_indegree.png', False): ['2nd-argmax'], ('reciprocity.png', False): ['count'], ('nTon_indegree.png', True): ['2nd-argmax'], ('hTon_outdegree.png', True): ['max'], ('hTon_indegree.png', True): ['2nd-argmax']}), 'neg_features': defaultdict(<class 'list'>, {('external_reciprocity.png', False): ['count'], ('outgoing.png', False): ['count'], ('external_reciprocity.png', True): ['count'], ('incoming.png', True): ['count'], ('outgoing.png', True): ['count']})}</p>-->
+    
+</body>
+
+</html>
