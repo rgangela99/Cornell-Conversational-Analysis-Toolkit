@@ -23,11 +23,11 @@ IMAGE_WIDTH = 50
 warnings.filterwarnings('error')
 
 # CORPUS_DIR = "longreddit_construction/long-reddit-corpus"
-CORPUS_DIR = "../thread_generator/fake-corpus"
+CORPUS_DIR = "../thread_generator/fake-corpus-trajectory"
 # CORPUS_DIR = "reddit-corpus-small"
 # CORPUS_DIR =
-DATA_DIR = "data_fake"
-PLOT_DIR = "html/graphs_fake"
+DATA_DIR = "data_fake_trajectory"
+PLOT_DIR = "html/graphs_fake_trajectory"
 # hyperconv_range = range(0, 9+1)
 hyperconv_range = range(2, 20+1)
 # rank_range = range(9, 9+1)
@@ -304,15 +304,15 @@ def generate_html(factor_to_details, title="Report", graph_filepath='graphs', ou
 
 
 if __name__ == "__main__":
-    # os.makedirs(DATA_DIR, exist_ok=True)
-    # os.makedirs(PLOT_DIR, exist_ok=True)
-    # generate_data_and_tensor(sliding=False)
-    # decompose_tensor(normalize=False)
-    # generate_plots()
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(PLOT_DIR, exist_ok=True)
+    generate_data_and_tensor(sliding=False)
+    decompose_tensor(normalize=False)
+    generate_plots()
     generate_html(generate_high_level_summary(),
-                  title="Report (Fake - 2)",
-                  graph_filepath='graphs_fake',
-                  output_html='report_fake2.html')
+                  title="Report (Fake - trajectory)",
+                  graph_filepath='graphs_fake_trajectory',
+                  output_html='report_fake_trajectory.html')
 
     # generate_detailed_examples()
 

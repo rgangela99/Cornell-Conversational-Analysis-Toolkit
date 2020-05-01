@@ -5,7 +5,8 @@ import random
 
 class ThreadSpawner:
     # alternate
-    def __init__(self, participant_factor: int, recip_factor: float, expansion_factor: float):
+    def __init__(self, participant_factor: int, recip_factor: (lambda idx: 0.5),
+                 expansion_factor: (lambda idx: 0.5)):
         """
         TODO: Note multiple spawns from same user -- generate user pool first!
 
@@ -26,7 +27,7 @@ class ThreadSpawner:
                          timestamp=comment_idx)
 
     def spawn_utt(self, utts, user_pool, thread_idx, comment_idx):
-        if random.random() < self.recip_factor:
+        if random.random() < self.recip_factor(comment_idx):
             # respond!
             prev_utt = utts[-1]
             pprev_utt = utts[-2]
@@ -42,7 +43,8 @@ class ThreadSpawner:
 
             has_not_responded_before = lambda next_user, target_utt, utts: all([not (utt.reply_to == target_utt and utt.user.id == next_user.id) for utt in utts])
             # pick between deepen / broaden behavior
-            if random.random() < self.expansion_factor and next_user.id != hex(1) and has_not_responded_before(next_user, utts[0].id, utts): # avoid root user replying to himself, avoid multiple responses to same comment
+            if random.random() < self.expansion_factor(comment_idx) and next_user.id != hex(1) and \
+                    has_not_responded_before(next_user, utts[0].id, utts): # avoid root user replying to himself, avoid multiple responses to same comment
                 # broaden
                 return ThreadSpawner.construct_utt(thread_idx, comment_idx, next_user, 1)
             else:
