@@ -1,4 +1,4 @@
-from typing import Dict, List, Callable, Generator, Optional
+from typing import Dict, List, Callable, Generator, Optional, Set
 from .utterance import Utterance
 from .user import User
 from .corpusUtil import warn
@@ -25,9 +25,14 @@ class Conversation(CorpusObject):
                  meta: Optional[Dict] = None):
         super().__init__(obj_type="conversation", owner=owner, id=id, meta=meta)
         self._owner = owner
-        self._utterance_ids = utterances
+        self._utterance_ids: List[str] = utterances
         self._user_ids = None
         self.tree: Optional[UtteranceNode] = None
+
+    def _add_utterance(self, utt: Utterance):
+        self._utterance_ids.append(utt.id)
+        self._user_ids = None
+        self.tree = None
 
     def get_utterance_ids(self) -> List[str]:
         """Produces a list of the unique IDs of all utterances in the

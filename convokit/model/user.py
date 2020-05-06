@@ -21,10 +21,10 @@ class User(CorpusObject):
         user-level metadata.
     """
 
-    def __init__(self, owner=None, id: str = None, utts=None, convos = None, meta: Optional[Dict] = None):
-        super().__init__(obj_type="user", owner=owner, id=id, meta=meta)
+    def __init__(self, owner=None, id: str = None, name: str = None, utts=None, convos = None, meta: Optional[Dict] = None):
+        name_var = id if id is not None else name # to be deprecated
+        super().__init__(obj_type="user", owner=owner, id=name_var, meta=meta)
 
-        self._name = id # to be deprecated
         self.utterances = utts if utts is not None else dict()
         self.conversations = convos if convos is not None else dict()
         # self._split_attribs = set()
@@ -46,14 +46,22 @@ class User(CorpusObject):
     #     self._split_attribs = set(attribs)
     #     # self._update_uid()
 
-    def _get_name(self): return self._name
+    def _get_name(self):
+        warn("This attribute will be removed in a future release. Use User.id instead.")
+        return self._id
 
     def _set_name(self, value: str):
         warn("This attribute will be removed in a future release. Use User.id instead.")
-        self._name = value
+        self._id = value
         # self._update_uid()
 
     name = property(_get_name, _set_name)
+
+    def _add_utterance(self, utt):
+        self.utterances[utt.id] = utt
+
+    def _add_conversation(self, convo):
+        self.conversations[convo.id] = convo
 
     def get_utterance(self, ut_id: str): #-> Utterance:
         """

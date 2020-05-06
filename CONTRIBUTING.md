@@ -26,7 +26,7 @@ Once you have created a Corpus representation of your dataset, follow these step
 * Include the following information in the issue: 
   * the name of the dataset
   * brief description
-  * the dataset details, i.e. User-, Utterance-, Conversation-, Corpus-level data and metadata (refer to [this](https://zissou.infosci.cornell.edu/convokit/documentation/chromium.html) for an example)
+  * the dataset details, i.e. User-, Utterance-, Conversation-, Corpus-level data and metadata (refer to [this](https://convokit.cornell.edu/documentation/chromium.html) for an example)
   * licensing information
   * publication to be cited with the dataset (if any)
   * contact information (for acknowledgement purposes)

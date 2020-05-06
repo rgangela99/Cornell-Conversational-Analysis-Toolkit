@@ -55,8 +55,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'convokit'
-copyright = '2020 Cornell NLP'
-author = 'Cornell NLP'
+copyright = '2017-2020 The ConvoKit Developers'
+author = 'The ConvoKit Developers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

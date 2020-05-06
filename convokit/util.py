@@ -43,6 +43,8 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
             A corpus made from the given subreddit
         -  "chromium-corpus": Chromium Conversations Corpus
             A collection of almost 1.5 million conversations and 2.8 million comments posted by developers reviewing proposed code changes in the Chromium project.
+        -  "wikipedia-politeness-corpus": A corpus of politeness annotations on requests from Wikipedia talk pages.
+        -  "stack-exchange-politeness-corpus": A corpus of politeness annotations on requests from stack exchange.
     :param verbose: Print checkpoint statements for download
     :param data_dir: Output path of downloaded file (default: ~/.convokit)
     :param use_newest_version: Re-download if new version is found

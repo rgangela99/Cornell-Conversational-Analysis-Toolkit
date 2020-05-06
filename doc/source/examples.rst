@@ -3,7 +3,7 @@ Examples
 
 An index of useful examples to help you interactively explore ConvoKit's features.
 
-Be sure to take a look at the `high-level tutorial <https://zissou.infosci.cornell.edu/convokit/documentation/tutorial.html>`_ before exploring these examples!
+Be sure to take a look at the `high-level tutorial <https://convokit.cornell.edu/documentation/tutorial.html>`_ before exploring these examples!
 
 Conversational data loading and processing with ConvoKit
 --------------------------------------------------------

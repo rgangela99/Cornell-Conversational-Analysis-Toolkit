@@ -11,11 +11,9 @@ class BoWTransformer(Transformer):
     Runs on the Corpus's Users, Utterances, or Conversations (as specified by obj_type)
 
     :param obj_type: "user", "utterance", or "conversation"
-    :param vectorizer: a sklearn vectorizer object; default is CountVectorizer(min_df=10, max_df=.5, ngram_range(1,
-    1), binary=False, max_features=15000)
+    :param vectorizer: a sklearn vectorizer object; default is CountVectorizer(min_df=10, max_df=.5, ngram_range(1, 1), binary=False, max_features=15000)
     :param vector_name: the name of the metadata key to store the vector under
-    :param text_func: a (lambda) function to extract the textual element from the Corpus object. By default,
-    the function uses the 'text' attribute of Utterance
+    :param text_func: a (lambda) function to extract the textual element from the Corpus object. By default, the function uses the 'text' attribute of Utterance
 
     """
     def __init__(self, obj_type: str, vectorizer=None, vector_name="bow_vector",
@@ -34,12 +32,10 @@ class BoWTransformer(Transformer):
 
     def fit(self, corpus: Corpus, y=None, selector: Callable[[CorpusObject], bool] = lambda x: True):
         """
-        Fit the Transformer's internal vectorizer on the Corpus objects' texts, with an optional selector that
-        filters for objects to be fit on.
+        Fit the Transformer's internal vectorizer on the Corpus objects' texts, with an optional selector that filters for objects to be fit on.
 
         :param corpus: the target Corpus
-        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include /
-        exclude). By default, the selector includes all objects of the specified type in the Corpus.
+        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type in the Corpus.
         :return: the fitted BoWTransformer
         """
         # collect texts for vectorization
@@ -57,8 +53,7 @@ class BoWTransformer(Transformer):
         of 'None' instead of the vector.
 
         :param corpus: the target Corpus
-        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
-		By default, the selector includes all objects of the specified type in the Corpus.
+        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type in the Corpus.
 
         :return: the target Corpus annotated
         """

@@ -815,21 +815,59 @@ class Corpus:
 
 		return new_corpus
 
-	def add_utterances(self, utterances=List[Utterance], warnings: bool = False):
+	def add_utterances(self, utterances=List[Utterance], warnings: bool = False, with_checks=True):
 		"""
-		Add utterances to the Corpus
+		Add utterances to the Corpus.
 
 		If the corpus has utterances that share an id with an utterance in the input utterance list,
 
-		Warnings will be printed:
+		Optional warnings will be printed:
 		- if the utterances with same id do not share the same data (added utterance is ignored)
 		- added utterances' metadata have the same key but different values (added utterance's metadata will overwrite)
 
 		:param utterances: Utterances to be added to the Corpus
-		:return: a new Corpus with the utterances from this Corpus and the input utterances combined
+		:param warnings: set to True for warnings to be printed
+		:param with_checks: set to True if checks on utterance and metadata overlaps are desired. Set to False if newly added utterances are guaranteed to be new and share the same set of metadata keys.
+		:return: a Corpus with the utterances from this Corpus and the input utterances combined
 		"""
-		helper_corpus = Corpus(utterances=utterances)
-		return self.merge(helper_corpus, warnings=warnings)
+		if with_checks:
+			helper_corpus = Corpus(utterances=utterances)
+			return self.merge(helper_corpus, warnings=warnings)
+		else:
+			new_users = {u.user.id: u.user for u in utterances}
+			new_utterances = {u.id: u for u in utterances}
+			for user in new_users.values():
+				user.owner = self
+			for utt in new_utterances.values():
+				utt.owner = self
+
+			# update corpus users
+			for new_user_id, new_user in new_users.items():
+				if new_user_id not in self.users:
+					self.users[new_user_id] = new_user
+
+			# update corpus utterances + (link user -> utt)
+			for new_utt_id, new_utt in new_utterances.items():
+				if new_utt_id not in self.utterances:
+					self.utterances[new_utt_id] = new_utt
+					self.users[new_utt.user.id]._add_utterance(new_utt)
+
+			# update corpus conversations + (link convo <-> utt)
+			new_convos = defaultdict(list)
+			for utt in new_utterances.values():
+				if utt.root in self.conversations:
+					self.conversations[utt.root]._add_utterance(utt)
+				else:
+					new_convos[utt.root].append(utt.id)
+			for convo_id, convo_utts in new_convos.items():
+				new_convo = Conversation(owner=self, id=convo_id,
+										 utterances=convo_utts,
+										 meta=None)
+				self.conversations[convo_id] = new_convo
+				# (link user -> convo)
+				new_convo_user = self.users[new_convo.get_utterance(convo_id).user.id]
+				new_convo_user._add_conversation(new_convo)
+		return self
 
 	def update_users_data(self) -> None:
 		"""

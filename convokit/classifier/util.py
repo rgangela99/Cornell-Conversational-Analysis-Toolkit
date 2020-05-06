@@ -4,6 +4,8 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 import numpy as np
 from convokit.model import warn
+from scipy.sparse import vstack
+
 
 def extract_feats_from_obj(obj: CorpusObject, pred_feats: List[str]):
     """
@@ -96,6 +98,25 @@ def extract_feats_and_label(corpus: Corpus, obj_type: str, pred_feats: List[str]
 
     return csr_matrix(X.values), np.array(y)
 
+def extract_feats_and_label_bow(corpus, objs, obj_type, vector_name,
+                                labeller, selector):
+    if ((corpus is None) and (objs is None)) or ((corpus is not None) and (objs is not None)):
+        raise ValueError("This function takes in either a Corpus or a list of users / utterances / conversations")
+
+    if corpus:
+        print("Using corpus objects...")
+        objs = list(corpus.iter_objs(obj_type, selector))
+    else:
+        assert objs is not None
+        print("Using input list of corpus objects...")
+    vectors = []
+    y = []
+    print()
+    for obj in objs:
+        vectors.append(obj.meta[vector_name])
+        y.append(labeller(obj))
+    X, y = vstack(vectors), np.array(y)
+    return X, y
 
 def get_coefs_helper(clf, feature_names: List[str] = None, coef_func=None):
     """
