@@ -308,6 +308,16 @@ class Corpus:
 			if selector(v):
 				yield v
 
+	def view_utterances(self, selector: Optional[Callable[[Utterance], bool]] = lambda utt: True):
+		"""
+		Get utterances in the Corpus, with an optional selector that filters for Utterances that should be included
+		Returns a dataframe of the utterances with data and metadata values
+		:param selector:
+		:return:
+		"""
+		for utt in self.iter_utterances(selector):
+			pass
+
 	def iter_conversations(self, selector: Optional[Callable[[Conversation], bool]] = lambda convo: True) -> Generator[
 		Conversation, None, None]:
 		"""
