@@ -95,6 +95,7 @@ def extract_feats_and_label(corpus: Corpus, obj_type: str, pred_feats: List[str]
 
     y = X_y_df['y']
     X = X_y_df.drop(columns='y')
+    X = X.astype('float64')
 
     return csr_matrix(X.values), np.array(y)
 
