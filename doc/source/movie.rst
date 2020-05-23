@@ -10,10 +10,10 @@ Distributed together with:
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are movie characters. We take user index from the original data release as the user name. For each character, we further provide the following information as user-level metadata:
+speakers in this dataset are movie characters. We take speaker index from the original data release as the speaker name. For each character, we further provide the following information as speaker-level metadata:
 
 * character_name: name of the character in the movie
 * movie_idx: index of the movie this character appears in
@@ -27,7 +27,7 @@ Utterance-level information
 For each utterance, we provide:
 
 * id: index of the utterance
-* user: the user who authored the utterance
+* speaker: the speaker who authored the utterance
 * root: index of the conversation root of the utterance
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
@@ -71,13 +71,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-304713
->>> len(corpus.get_usernames())
-9035
->>> len(corpus.get_conversation_ids())
-83097
-
+>>> corpus.print_summary_stats()
+Number of Speakers: 9035
+Number of Utterances: 304713
+Number of Conversations: 83097
 
 Additional note
 ---------------

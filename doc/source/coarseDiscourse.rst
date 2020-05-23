@@ -19,10 +19,10 @@ Coarse Discourse, the Reddit dataset that contains ~9K threads, with comments an
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this Corpus are Reddit users, with their name being their Reddit username. Users who deleted their accounts have their name listed as ‘[deleted]’. 
+Speakers in this Corpus are Reddit users, with their name being their Reddit username. Speakers who deleted their accounts have their name listed as ‘[deleted]’.
 
 
 Utterance-level information
@@ -66,12 +66,11 @@ To download directly with ConvoKit:
 
 Some stats on the data set:
 
->>> len(corpus.get_utterance_ids()) 
-115827
->>> len(corpus.get_usernames())
-63573
->>> len(corpus.get_conversation_ids())
-9483
+>>> corpus.print_summary_stats()
+Number of Speakers: 63573
+Number of Utterances: 115827
+Number of Conversations: 9483
+
 
 Additional notes
 ----------------

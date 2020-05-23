@@ -1,6 +1,6 @@
 from typing import Tuple, List, Dict, Collection
 from collections import defaultdict
-from convokit import Utterance, User
+from convokit import Utterance, Speaker
 import itertools
 
 class Hypergraph:
@@ -15,7 +15,7 @@ class Hypergraph:
         # public
         self.nodes: Dict[str, Utterance] = dict()
         self.hypernodes = dict()
-        self.users = dict()
+        self.speakers = dict()
 
         # private
         self.adj_out = dict()  # out edges for each (hyper)node
@@ -24,42 +24,42 @@ class Hypergraph:
     @staticmethod
     def init_from_utterances(utterances: List[Utterance]):
         utt_dict = {utt.id: utt for utt in utterances}
-        utt_to_user_id = {utt.id: utt.user.id for utt in utterances}
+        utt_to_speaker_id = {utt.id: utt.speaker.id for utt in utterances}
         hypergraph = Hypergraph()
-        user_to_utt_ids = dict()
+        speaker_to_utt_ids = dict()
         reply_edges = []
         speaker_to_reply_tos = defaultdict(list)
         speaker_target_pairs = list()
 
         # nodes (utts)
         for utt in sorted(utterances, key=lambda h: h.timestamp):
-            if utt.user not in user_to_utt_ids:
-                user_to_utt_ids[utt.user] = set()
-            user_to_utt_ids[utt.user].add(utt.id)
+            if utt.speaker not in speaker_to_utt_ids:
+                speaker_to_utt_ids[utt.speaker] = set()
+            speaker_to_utt_ids[utt.speaker].add(utt.id)
 
             if utt.reply_to is not None and utt.reply_to in utt_dict:
                 reply_edges.append((utt.id, utt.reply_to))
-                speaker_to_reply_tos[utt.user.id].append(utt.reply_to)
-                speaker_target_pairs.append([utt.user.id, utt_dict[utt.reply_to].user.id,
-                                          {'utt': utt, 'target_user': utt_to_user_id[utt.reply_to]}])
+                speaker_to_reply_tos[utt.speaker.id].append(utt.reply_to)
+                speaker_target_pairs.append([utt.speaker.id, utt_dict[utt.reply_to].speaker.id,
+                                             {'utt': utt, 'target_speaker': utt_to_speaker_id[utt.reply_to]}])
             hypergraph.add_node(utt)
 
-        # hypernodes (users)
-        for user, utt_ids in user_to_utt_ids.items():
-            hypergraph.add_hypernode(user, utt_ids)
+        # hypernodes (speakers)
+        for speaker, utt_ids in speaker_to_utt_ids.items():
+            hypergraph.add_hypernode(speaker, utt_ids)
 
         # reply edges (utt to utt)
         for speaker_utt_id, target_utt_id in reply_edges:
             hypergraph.add_edge(speaker_utt_id, target_utt_id)
 
         # hypernode to node response edges
-        for user, reply_tos in speaker_to_reply_tos.items():
+        for speaker, reply_tos in speaker_to_reply_tos.items():
             for reply_to in reply_tos:
-                hypergraph.add_edge(user, reply_to)
+                hypergraph.add_edge(speaker, reply_to)
 
         # hypernode to hypernode response edges
-        for user, target, utt in speaker_target_pairs:
-            hypergraph.add_edge(user, target, utt)
+        for speaker, target, utt in speaker_target_pairs:
+            hypergraph.add_edge(speaker, target, utt)
 
         return hypergraph
 
@@ -68,11 +68,11 @@ class Hypergraph:
         self.adj_out[utt.id] = dict()
         self.adj_in[utt.id] = dict()
 
-    def add_hypernode(self, user: User, nodes: Collection[str]) -> None:
-        self.hypernodes[user.id] = set(nodes)
-        self.users[user.id] = user
-        self.adj_out[user.id] = dict()
-        self.adj_in[user.id] = dict()
+    def add_hypernode(self, speaker: Speaker, nodes: Collection[str]) -> None:
+        self.hypernodes[speaker.id] = set(nodes)
+        self.speakers[speaker.id] = speaker
+        self.adj_out[speaker.id] = dict()
+        self.adj_in[speaker.id] = dict()
 
     # edge or hyperedge
     def add_edge(self, u: str, v: str, info=None) -> None:

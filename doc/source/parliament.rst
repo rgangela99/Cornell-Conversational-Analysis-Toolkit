@@ -10,17 +10,17 @@ Distributed together with:
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The users in the dataset are members of the Parliament. For each user, the dataset further includes the following metadata:
+The speakers in the dataset are members of the Parliament. For each speaker, the dataset further includes the following metadata:
 
-* name: name of the user
-* member_start: start time of the user as the member of the Parliament 
-* member_end: end time of the user as the member of the Parliament
-* changed_parties: whether the user has changed parties
-* first_party: first party the user is affiliated with
-* last_party: last party the user is affiliated with
+* name: name of the speaker
+* member_start: start time of the speaker as the member of the Parliament
+* member_end: end time of the speaker as the member of the Parliament
+* changed_parties: whether the speaker has changed parties
+* first_party: first party the speaker is affiliated with
+* last_party: last party the speaker is affiliated with
 
 
 Utterance-level information
@@ -29,7 +29,7 @@ Utterance-level information
 Each question or answer is viewed as an utterance. For each utterance, we provide:
 
 * id: index of the utterance
-* user: the user who author the utterance
+* speaker: the speaker who author the utterance
 * root: index of the conversation root of the utterance
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
@@ -40,10 +40,10 @@ Additional metadata include:
 * is_question: whether the utterance is a question
 * is_answer: whether the utterance is an answer to a question
 * pair_idx: index of the question-answer pair
-* is_incubent: whether the user is an Incumbent
-* is_minister: whether the user is a Minister
-* is_oppn: whether the user is from the opposition party
-* party: party affiliation of the user
+* is_incubent: whether the speaker is an Incumbent
+* is_minister: whether the speaker is a Minister
+* is_oppn: whether the speaker is from the opposition party
+* party: party affiliation of the speaker
 * parsed: parsed version of the utterance text, represented as a SpaCy Doc
 
 
@@ -58,12 +58,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-433787
->>> len(corpus.get_usernames())
-1978
->>> len(corpus.get_conversation_ids())
-216894
+>>> corpus.print_summary_stats()
+Number of Speakers: 1978
+Number of Utterances: 433787
+Number of Conversations: 216894
 
 
 Additional note

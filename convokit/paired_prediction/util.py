@@ -27,7 +27,6 @@ def generate_bow_paired_X_y(pair_orientation_feat_name, pair_id_to_objs, vector_
         orientation = pair_id_to_objs[pair_id][0].meta[pair_orientation_feat_name]
 
         assert orientation in ["pos", "neg"]
-
         if orientation == "pos":
             y.append(1)
             diff = pos_feats - neg_feats
@@ -59,8 +58,8 @@ def generate_paired_X_y(pred_feats, pair_orientation_feat_name, pair_id_to_objs)
     pair_ids = list(pair_id_to_objs)
     shuffle(pair_ids)
     for pair_id in pair_ids:
-        pos_feats = np.array(pos_obj_df.loc[pair_id])
-        neg_feats = np.array(neg_obj_df.loc[pair_id])
+        pos_feats = np.array(pos_obj_df.loc[pair_id]).astype('float64')
+        neg_feats = np.array(neg_obj_df.loc[pair_id]).astype('float64')
         orientation = pair_id_to_objs[pair_id][0].meta[pair_orientation_feat_name]
 
         assert orientation in ["pos", "neg"]

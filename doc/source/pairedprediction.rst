@@ -16,9 +16,10 @@ do this to look only at Conversations where Rachel, Monica, and Chandler are all
 utterances where Rachel speaks to Monica and Rachel speaks to Chandler *within* that Conversation and look
 for differences between these paired sets of utterances.
 
-Example usage: `paired prediction, predicting for whether a science in Friends goes on to have all six friends
-participating, based on features from the first 5 utterances <https://github
-.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/tree/master/convokit/fighting_words>`_.
+Example usage: `Using Hyperconvo features to predict conversation growth on Reddit in a paired setting <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/hyperconvo/predictive_tasks.ipynb>`_
+
+Example usage: `Paired prediction for whether a scene in Friends goes on to have all six friends
+participating, based on features from the first 5 utterances <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/paired_prediction/demo/paired_prediction_demo.ipynb>`_.
 
 .. automodule:: convokit.paired_prediction.pairedPrediction
     :members:

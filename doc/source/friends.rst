@@ -10,10 +10,10 @@ The original dataset is available `here <https://github.com/emorynlp/character-m
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are characters in a given scene. The original dataset provides each character's name as a string, e.g. "Monica Geller". We index Users by their names.
+Speakers in this dataset are characters in a given scene. The original dataset provides each character's name as a string, e.g. "Monica Geller". We index Speakers by their names.
 
 Note we add a dummy user named and indexed as "TRANSCRIPT_NOTE" for utterances that are not a character speaking, but instead a note in the transcript, i.e. *"[Time Lapse, Ross has entered.]"*.
 
@@ -36,7 +36,7 @@ The available metadata varies by seasons, but can include: character entities (o
 - transcript_with_note: ``<str>``, a version of the text with an action note (e.g. "(to Ross) Hand me the coffee" vs. "Hand me the coffee"). Available for some but not all utterances; ``None`` if unavailable.
 - tokens_with_note: ``list <str>``, a tokenized representation of the above.
 - caption: ``<str>``, contains the begin time, end time, and text sans punctuation. Available for some but not all utterances; `None` if unavailable. Only available for seasons 6-9.
-- character_entities: ``list <str>``, lists of characters who the User is speaking to and/or about. For example, say we have the tokenized utterances *[["There", "'s", "nothing", "to", "tell", "!"],["He", "'s", "just", "some", "guy", "I", "work", "with", "!"]]* and character entities *[[],[[0, 1, "Paul the Wine Guy"], [4, 5, "Paul the Wine Guy"], [5, 6, "Monica Geller"]]]*. The character entities tell us no one gets referred in the first sentence, and in the second sentence, "He" at index 0 and "guy" at index 4 refer to "Paul the Wine Guy", and "I" at index 5 refers to "Monica Geller". Available for some but not all utterances; ``None`` if unavailable.
+- character_entities: ``list <str>``, lists of characters who the Speaker is speaking to and/or about. For example, say we have the tokenized utterances *[["There", "'s", "nothing", "to", "tell", "!"],["He", "'s", "just", "some", "guy", "I", "work", "with", "!"]]* and character entities *[[],[[0, 1, "Paul the Wine Guy"], [4, 5, "Paul the Wine Guy"], [5, 6, "Monica Geller"]]]*. The character entities tell us no one gets referred in the first sentence, and in the second sentence, "He" at index 0 and "guy" at index 4 refer to "Paul the Wine Guy", and "I" at index 5 refers to "Monica Geller". Available for some but not all utterances; ``None`` if unavailable.
 
 Conversation-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ To download directly with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 700
+Number of Speakers: 700
 Number of Utterances: 67373
 Number of Conversations: 3107
 

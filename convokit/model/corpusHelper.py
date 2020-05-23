@@ -2,19 +2,19 @@ import os
 import json
 from collections import defaultdict
 import pickle
-from .user import User
+from .speaker import Speaker
 from .utterance import Utterance
 from .conversation import Conversation
 from typing import Dict
 
 BIN_DELIM_L, BIN_DELIM_R = "<##bin{", "}&&@**>"
 KeyId = "id"
-KeyUser = "user"
-KeyConvoRoot = "root"
+KeySpeaker = "speaker"
+KeyConvoId = "conversation_id"
 KeyReplyTo = "reply-to"
 KeyTimestamp = "timestamp"
 KeyText = "text"
-DefinedKeys = {KeyId, KeyUser, KeyConvoRoot, KeyReplyTo, KeyTimestamp, KeyText}
+DefinedKeys = {KeyId, KeySpeaker, KeyConvoId, KeyReplyTo, KeyTimestamp, KeyText}
 KeyMeta = "meta"
 
 def load_uttinfo_from_dir(dirname, utterance_start_index, utterance_end_index, exclude_utterance_meta):
@@ -46,13 +46,14 @@ def load_uttinfo_from_dir(dirname, utterance_start_index, utterance_end_index, e
     return utterances
 
 
-def load_users_meta_from_dir(filename, exclude_user_meta):
-    with open(os.path.join(filename, "users.json"), "r") as f:
-        users_meta = defaultdict(dict)
+def load_speakers_meta_from_dir(filename, exclude_speaker_meta):
+    speaker_file = "speakers.json" if "speakers.json" in os.listdir(filename) else "users.json"
+    with open(os.path.join(filename, speaker_file), "r") as f:
+        speakers_meta = defaultdict(dict)
         for k, v in json.load(f).items():
-            if k in exclude_user_meta: continue
-            users_meta[k] = v
-    return users_meta
+            if k in exclude_speaker_meta: continue
+            speakers_meta[k] = v
+    return speakers_meta
 
 
 def load_convos_meta_from_dir(filename, exclude_conversation_meta):
@@ -91,14 +92,14 @@ def unpack_binary_data_for_utts(utterances, filename, utterance_index, exclude_m
 
 def unpack_binary_data(filename, obj_meta, object_index, obj_type, exclude_meta):
     """
-    Unpack binary data for Users or Conversations
+    Unpack binary data for Speakers or Conversations
     """
-    # unpack user meta
+    # unpack speaker meta
     for field, field_type in object_index.items():
         if field_type == "bin" and field not in exclude_meta:
             with open(os.path.join(filename, field + "-{}-bin.p".format(obj_type)), "rb") as f:
                 l_bin = pickle.load(f)
-            for user, metadata in obj_meta.items():
+            for speaker, metadata in obj_meta.items():
                 for k, v in metadata.items():
                     if k == field and type(v) == str and str(v).startswith(BIN_DELIM_L) and \
                             str(v).endswith(BIN_DELIM_R):
@@ -130,40 +131,44 @@ def load_from_utterance_file(filename, utterance_start_index, utterance_end_inde
             raise Exception("Could not load corpus. Expected json file, encountered error: \n" + str(e))
     return utterances
 
-def initialize_users_and_utterances_objects(corpus, utt_dict, utterances, users_dict, users_meta):
+def initialize_speakers_and_utterances_objects(corpus, utt_dict, utterances, speakers_dict, speakers_meta):
     """
-    Initialize User and Utterance objects
+    Initialize Speaker and Utterance objects
     """
+    if len(utterances) > 0: # utterances might be empty for invalid corpus start/end indices
+        KeySpeaker = "user" if "user" in utterances[0] else "speaker"
+        KeyConvoId = "root" if "root" in utterances[0] else "conversation_id"
+
     for i, u in enumerate(utterances):
         u = defaultdict(lambda: None, u)
-        user_key = u[KeyUser]
-        if user_key not in users_dict:
-            users_dict[user_key] = User(owner=corpus, id=u[KeyUser], meta=users_meta[u[KeyUser]])
+        speaker_key = u[KeySpeaker]
+        if speaker_key not in speakers_dict:
+            speakers_dict[speaker_key] = Speaker(owner=corpus, id=u[KeySpeaker], meta=speakers_meta[u[KeySpeaker]])
 
-        user = users_dict[user_key]
+        speaker = speakers_dict[speaker_key]
 
         # temp fix for reddit reply_to
         if "reply_to" in u:
             reply_to_data = u["reply_to"]
         else:
             reply_to_data = u[KeyReplyTo]
-        utt = Utterance(owner=corpus, id=u[KeyId], user=user,
-                       root=u[KeyConvoRoot],
-                       reply_to=reply_to_data, timestamp=u[KeyTimestamp],
-                       text=u[KeyText], meta=u[KeyMeta])
+        utt = Utterance(owner=corpus, id=u[KeyId], speaker=speaker,
+                        conversation_id=u[KeyConvoId],
+                        reply_to=reply_to_data, timestamp=u[KeyTimestamp],
+                        text=u[KeyText], meta=u[KeyMeta])
 
         utt_dict[utt.id] = utt
 
 def merge_utterance_lines(utt_dict):
     """
-    For merging adjacent utterances by the same user
+    For merging adjacent utterances by the same speaker
     """
     new_utterances = {}
     for uid, utt in utt_dict.items():
         merged = False
-        if utt.reply_to is not None and utt.user is not None:
+        if utt.reply_to is not None and utt.speaker is not None:
             u0 = utt_dict[utt.reply_to]
-            if u0.root == utt.root and u0.user == utt.user:
+            if u0.conversation_id == utt.conversation_id and u0.speaker == utt.speaker:
                 new_utterances[u0.id].text += " " + utt.text
                 merged = True
         if not merged:
@@ -177,7 +182,7 @@ def initialize_conversations(corpus, utt_dict, convos_meta):
     # organize utterances by conversation
     convo_to_utts = defaultdict(list) # temp container identifying utterances by conversation
     for u in utt_dict.values():
-        convo_key = u.root # each root is considered a separate conversation
+        convo_key = u.conversation_id # each conversation_id is considered a separate conversation
         convo_to_utts[convo_key].append(u.id)
     conversations = {}
     for convo_id in convo_to_utts:
@@ -233,9 +238,9 @@ def dump_utterances(corpus, dir_name, fields_to_skip):
         for ut in corpus.iter_utterances():
             ut_obj = {
                 KeyId: ut.id,
-                KeyConvoRoot: ut.root,
+                KeyConvoId: ut.conversation_id,
                 KeyText: ut.text,
-                KeyUser: ut.user.id,
+                KeySpeaker: ut.speaker.id,
                 KeyMeta: dump_helper_bin(ut.meta, d_bin, fields_to_skip.get('utterance', [])),
                 KeyReplyTo: ut.reply_to,
                 KeyTimestamp: ut.timestamp

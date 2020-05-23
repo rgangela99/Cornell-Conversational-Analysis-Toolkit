@@ -5,8 +5,7 @@ from .politenessStrategies import *
 from .transformer import *
 from .convokitPipeline import *
 from .hyperconvo import *
-from .hyperconvo_orig import *
-from .userConvoDiversity import *
+from .speakerConvoDiversity import *
 from .text_processing import *
 from .phrasing_motifs import *
 from .prompt_types import *

@@ -1,7 +1,7 @@
-from typing import Dict, List, Callable, Generator, Optional, Set
+from typing import Dict, List, Callable, Generator, Optional
 from .utterance import Utterance
-from .user import User
-from .corpusUtil import warn
+from .speaker import Speaker
+from convokit.util import deprecation, warn
 from .corpusObject import CorpusObject
 from collections import defaultdict
 from .utteranceNode import UtteranceNode
@@ -11,7 +11,7 @@ class Conversation(CorpusObject):
     reply-to chain.
 
     :param owner: The Corpus that this Conversation belongs to
-    :param cid: The unique ID of this Conversation
+    :param id: The unique ID of this Conversation
     :param utterances: A list of the IDs of the Utterances in this Conversation
     :param meta: Table of initial values for conversation-level metadata
 
@@ -26,12 +26,12 @@ class Conversation(CorpusObject):
         super().__init__(obj_type="conversation", owner=owner, id=id, meta=meta)
         self._owner = owner
         self._utterance_ids: List[str] = utterances
-        self._user_ids = None
+        self._speaker_ids = None
         self.tree: Optional[UtteranceNode] = None
 
     def _add_utterance(self, utt: Utterance):
         self._utterance_ids.append(utt.id)
-        self._user_ids = None
+        self._speaker_ids = None
         self.tree = None
 
     def get_utterance_ids(self) -> List[str]:
@@ -42,7 +42,7 @@ class Conversation(CorpusObject):
         :return: a list of IDs of Utterances in the Conversation
         """
         # we construct a new list instead of returning self._utterance_ids in
-        # order to prevent the user from accidentally modifying the internal
+        # order to prevent the speaker from accidentally modifying the internal
         # ID list (since lists are mutable)
         return [ut_id for ut_id in self._utterance_ids]
 
@@ -60,7 +60,7 @@ class Conversation(CorpusObject):
         """Generator allowing iteration over all utterances in the Conversation.
         Provides no ordering guarantees.
 
-        :return: Generator that produces Users
+        :return: Generator that produces Utterances
         """
         for ut_id in self._utterance_ids:
             utt = self._owner.get_utterance(ut_id)
@@ -68,74 +68,83 @@ class Conversation(CorpusObject):
                 yield utt
 
     def get_usernames(self) -> List[str]:
-        """Produces a list of names of all users in the Conversation, which can
-        be used in calls to get_user() to retrieve specific users. Provides no
+        """Produces a list of names of all speakers in the Conversation, which can
+        be used in calls to get_speaker() to retrieve specific speakers. Provides no
         ordering guarantees for the list.
 
         :return: a list of usernames
         """
-        warn("This function is deprecated and will be removed in a future release. Use get_user_ids() instead.")
-        if self._user_ids is None:
-            # first call to get_usernames or iter_users; precompute cached list
+        deprecation("get_usernames()", "get_speaker_ids()")
+        if self._speaker_ids is None:
+            # first call to get_usernames or iter_speakers; precompute cached list
             # of usernames
-            self._user_ids = set()
+            self._speaker_ids = set()
             for ut_id in self._utterance_ids:
                 ut = self._owner.get_utterance(ut_id)
-                self._user_ids.add(ut.user.name)
-        return list(self._user_ids)
+                self._speaker_ids.add(ut.speaker.name)
+        return list(self._speaker_ids)
 
-    def get_user_ids(self) -> List[str]:
-        """Produces a list of ids of all users in the Conversation, which can
-        be used in calls to get_user() to retrieve specific users. Provides no
+    def get_speaker_ids(self) -> List[str]:
+        """Produces a list of ids of all speakers in the Conversation, which can
+        be used in calls to get_speaker() to retrieve specific speakers. Provides no
         ordering guarantees for the list.
 
-        :return: a list of usernames
+        :return: a list of speaker ids
         """
-        if self._user_ids is None:
-            # first call to get_usernames or iter_users; precompute cached list
-            # of usernames
-            self._user_ids = set()
+        if self._speaker_ids is None:
+            # first call to get_speaker_ids or iter_speakers; precompute cached list of speaker ids
+            self._speaker_ids = set()
             for ut_id in self._utterance_ids:
                 ut = self._owner.get_utterance(ut_id)
-                self._user_ids.add(ut.user.name)
-        return list(self._user_ids)
+                self._speaker_ids.add(ut.speaker.name)
+        return list(self._speaker_ids)
 
-    def get_user(self, username: str) -> User:
+    def get_speaker(self, speaker_id: str) -> Speaker:
         """
-        Looks up the User with the given name. Raises a KeyError if no user
+        Looks up the Speaker with the given name. Raises a KeyError if no speaker
         with that name exists.
 
-        :return: the User with the given username
+        :return: the Speaker with the given speaker_id
         """
         # delegate to the owner Corpus since Conversation does not itself own
         # any Utterances
-        return self._owner.get_user(username)
+        return self._owner.get_speaker(speaker_id)
 
-    def iter_users(self, selector: Callable[[User], bool] = lambda user: True) -> Generator[User, None, None]:
+    def get_user(self, speaker_id: str):
+        deprecation("get_user()", "get_speaker()")
+        return self.get_speaker(speaker_id)
+
+    def iter_speakers(self, selector: Callable[[Speaker], bool] = lambda speaker: True) -> Generator[Speaker, None, None]:
         """
-        Generator allowing iteration over all users in the Conversation.
+        Generator allowing iteration over all speakers in the Conversation.
         Provides no ordering guarantees.
 
-        :return: Generator that produces Users.
+        :return: Generator that produces Speakers.
         """
-        if self._user_ids is None:
-            # first call to get_ids or iter_users; precompute cached list of usernames
-            self._user_ids = set()
+        if self._speaker_ids is None:
+            # first call to get_ids or iter_speakers; precompute cached list of speaker ids
+            self._speaker_ids = set()
             for ut_id in self._utterance_ids:
                 ut = self._owner.get_utterance(ut_id)
-                self._user_ids.add(ut.user.id)
-        for user_id in self._user_ids:
-            yield self._owner.get_user(user_id)
+                self._speaker_ids.add(ut.speaker.id)
+        for speaker_id in self._speaker_ids:
+            speaker = self._owner.get_speaker(speaker_id)
+            if selector(speaker):
+                yield speaker
 
-    def get_chronological_user_list(self, selector: Callable[[User], bool] = lambda user: True):
+    def iter_users(self, selector=lambda speaker: True):
+        deprecation("iter_users()", "iter_speakers()")
+        return self.iter_speakers(selector)
+
+    def get_chronological_speaker_list(self, selector: Callable[[Speaker], bool] = lambda speaker: True):
         """
-        Get the users in the conversation sorted in chronological order (users may appear more than once)
+        Get the speakers in the conversation sorted in chronological order (speakers may appear more than once)
 
-        :param selector: (lambda) function for which users should be included; all users are included by default
-        :return: list of users for each chronological utterance
+        :param selector: (lambda) function for which speakers should be included; all speakers are included by default
+        :return: list of speakers for each chronological utterance
         """
         chrono_utts = sorted(list(self.iter_utterances()), key=lambda utt: utt.timestamp)
-        return [utt.user for utt in chrono_utts if selector(utt.user)]
+        return [utt.speaker for utt in chrono_utts if selector(utt.speaker)]
 
     def check_integrity(self, verbose=True):
         if verbose: print("Checking reply-to chain of Conversation", self.id)
@@ -243,14 +252,14 @@ class Conversation(CorpusObject):
             self._print_convo_helper(root=child_utt_id, indent=indent+4,
                                      reply_to_dict=reply_to_dict, utt_info_func=utt_info_func, limit=limit)
 
-    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.user.id, limit: int = None) -> None:
+    def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.speaker.id, limit: int = None) -> None:
         """
         Prints an indented representation of utterances in the Conversation with conversation reply-to structure determining the indented level. The details of each utterance to be printed can be configured.
 
         If limit is set to a value other than None, this will annotate utterances with an 'order' metadata indicating their temporal order in the conversation, where the first utterance in the conversation is annotated with 1.
 
         :param utt_info_func: callable function taking an utterance as input and returning a string of the desired
-                              utterance information. By default, this is a lambda function returning the utterance's user's id
+                              utterance information. By default, this is a lambda function returning the utterance's speaker's id
         :param limit: maximum number of utterances to print out. if k, this includes the first k utterances.
         :return: None. Prints to stdout.
         """

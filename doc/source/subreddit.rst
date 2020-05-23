@@ -10,10 +10,10 @@ We also provide a small sample of the collection (see :doc:`reddit-small`).
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this corpus are Reddit users, identified by their account names.
+Speakers in this corpus are Reddit speakers, identified by their account names.
 
 Utterance-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -21,7 +21,7 @@ Utterance-level information
 Each individual post or comment is viewed as an utterance. For each utterance, we provide:
 
 * id: index of the utterance
-* user: the user who author the utterance
+* speaker: the speaker who author the utterance
 * root: index of the conversation root of the utterance (i.e., the index of the post the utterance belongs to)
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
@@ -60,7 +60,7 @@ Corpus-level information
 * subreddit: the list of subreddits included in this corpus 
 * num_posts: total number of posts included in this corpus
 * num_comments: total number of comments in this corpus
-* num_user: number of unique users in this corpus
+* num_speaker: number of unique speakers in this corpus
 
 
 Usage
@@ -74,7 +74,7 @@ A subreddit corpus name is always the name of the subreddit with the prefix "sub
 For some quick stats on this subreddit:
 
 >>> corpus.print_summary_stats()
-Number of Users: 7568
+Number of Speakers: 7568
 Number of Utterances: 74467
 Number of Conversations: 10744
 
@@ -83,47 +83,47 @@ Combining different subreddits
 
 A common use case for the subreddit corpora might be to combine related subreddit corpora for further analysis. This is straightforward with the Corpus's merge functionality, which we demonstrate below.
 
-We use the Cornell and ApplyingToCollege subreddits as we would expect some overlap in Users that the merge functionality will take into account.
+We use the Cornell and ApplyingToCollege subreddits as we would expect some overlap in Speakers that the merge functionality will take into account.
 
 >>> cornell_corpus = Corpus(filename=download("subreddit-Cornell"))
 >>> cornell_corpus.print_summary_stats()
-Number of Users: 7568
+Number of Speakers: 7568
 Number of Utterances: 74467
 Number of Conversations: 10744
 >>> a2c_corpus = Corpus(filename=download("subreddit-ApplyingToCollege"))
 >>> a2c_corpus.print_summary_stats()
-Number of Users: 53067
+Number of Speakers: 53067
 Number of Utterances: 1148299
 Number of Conversations: 121007
 >>> merged_corpus = cornell_corpus.merge(a2c_corpus)
 >>> merged_corpus.print_summary_stats()
-Number of Users: 59739
+Number of Speakers: 59739
 Number of Utterances: 1222766
 Number of Conversations: 131751
 
 Notice that the numbers of Utterances and Conversations in the merged corpus are simply the sum of those in the constituent corpora. This is to be expected since the Utterances and Conversations from these two subreddits are distinct and non-overlapping.
 
-However, the number of users is not the sum of those of the constituent corpora -- undoubtedly because some Users have posted to both r/ApplyingToCollege and r/Cornell.
+However, the number of speakers is not the sum of those of the constituent corpora -- undoubtedly because some Speakers have posted to both r/ApplyingToCollege and r/Cornell.
 
-.. During the merge step, we turned warnings off because there would be warnings printed for every instance of conflicting User metadata.
+.. During the merge step, we turned warnings off because there would be warnings printed for every instance of conflicting Speaker metadata.
 
-.. Recall that the User metadata consists of (1) the number of posts the User has made and (2) the number of comments the User has made. A User that is present in both subreddit corpora will likely have very different values for these two metrics, and we would thus expect a large volume of warnings.
+.. Recall that the Speaker metadata consists of (1) the number of posts the Speaker has made and (2) the number of comments the Speaker has made. A Speaker that is present in both subreddit corpora will likely have very different values for these two metrics, and we would thus expect a large volume of warnings.
 
 .. We illustrate this below:
 
 .. merged_corpus = cornell_corpus.merge(a2c_corpus) # warnings are on by default
-.. WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_posts. Taking the latest one found
-.. WARNING: Multiple values found for User([('name', 'Aleeo34152')]) for meta key: num_comments. Taking the latest one found
-..  WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_posts. Taking the latest one found
-.. WARNING: Multiple values found for User([('name', 'DrowsyTiger22')]) for meta key: num_comments. Taking the latest one found
+.. WARNING: Multiple values found for Speaker([('name', 'Aleeo34152')]) for meta key: num_posts. Taking the latest one found
+.. WARNING: Multiple values found for Speaker([('name', 'Aleeo34152')]) for meta key: num_comments. Taking the latest one found
+..  WARNING: Multiple values found for Speaker([('name', 'DrowsyTiger22')]) for meta key: num_posts. Taking the latest one found
+.. WARNING: Multiple values found for Speaker([('name', 'DrowsyTiger22')]) for meta key: num_comments. Taking the latest one found
 .. ...
 
-.. Since the num_posts and num_comments metadata is incorrect for the Users now, we can simply update them for this new Corpus as follows:
+.. Since the num_posts and num_comments metadata is incorrect for the Speakers now, we can simply update them for this new Corpus as follows:
 
-.. for user in merged_corpus.iter_users():
-..  num_posts = sum(utt.root == utt.id for utt in user.iter_utterances())
-.. user.add_meta("num_posts", num_posts)
-.. user.add_meta("num_comments", len(user.get_utterance_ids()) - num_posts)
+.. for speaker in merged_corpus.iter_speakers():
+..  num_posts = sum(utt.root == utt.id for utt in speaker.iter_utterances())
+.. speaker.add_meta("num_posts", num_posts)
+.. speaker.add_meta("num_comments", len(speaker.get_utterance_ids()) - num_posts)
 
 
 Additional notes
@@ -133,5 +133,5 @@ Additional notes
 
 2. This is a beta version release. Not all subreddits that exist are included, and the completeness of subreddit history is not guaranteed. Note that this also implies that some thread structures may be broken: for some utterances, the reply-to ID may not match any utterance that exists in the current version of the data. We hope to provide a more complete version of the dataset in the next release.
 
-3. In some cases, the user activity information (i.e., number of posts/comments) may be inflated by duplicated entries in intermediate processing steps. We plan to release further updates to fix this issue.
+3. In some cases, the speaker activity information (i.e., number of posts/comments) may be inflated by duplicated entries in intermediate processing steps. We plan to release further updates to fix this issue.
 

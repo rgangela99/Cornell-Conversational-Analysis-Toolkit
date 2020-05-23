@@ -19,5 +19,5 @@ These are the main offerings of ConvoKit: standalone modules implementing variou
    PolitenessStrategies <politenessStrategies.rst>
    PromptTypes <promptTypes.rst>
    Ranker <ranker.rst>
-   UserConvoDiversity <userConvoDiversity.rst>
+   SpeakerConvoDiversity <speakerConvoDiversity.rst>
    Transformer base class <transformer.rst>

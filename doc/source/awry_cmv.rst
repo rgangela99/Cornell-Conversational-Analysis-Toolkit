@@ -8,10 +8,10 @@ Distributed together with: Trouble on the Horizon: Forecasting the Derailment of
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are Reddit users; their account names are taken as the user names. 
+Speakers in this dataset are Reddit users; their account names are taken as the user names.
 
 Utterance-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,13 +58,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-42964
->>> len(corpus.get_usernames())
-9548
->>> len(corpus.get_conversation_ids())
-6842
-
+>>> corpus.print_summary_stats()
+Number of Speakers: 9548
+Number of Utterances: 42964
+Number of Conversations: 6842
 
 Contact
 ^^^^^^^

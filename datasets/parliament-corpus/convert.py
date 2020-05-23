@@ -43,7 +43,7 @@ ID = "id" # equal to question_text_idx if current utterance is a question
 ROOT = "root" # this will always be equal to question_text_idx
 REPLY_TO = "reply-to" # non existant if this utterance is a question,
                     # equal to question_text_idx if this is an answer
-USER = "user" # equal to asker if current utterance is a question
+USER = "speaker" # equal to asker if current utterance is a question
             # equal to answerer if current utterance is an answer
 TEXT = "text" # equal to question_text if current utterance is a question
         # equal to answer_text if current utterance is an answer
@@ -65,9 +65,9 @@ YEAR = "year"
 SPANS_PER_QUESTION = "spans_per_question"
 HAS_LATENT_REPR = "has_latent_repr"
 
-USER_INFO = "user-info" # container for extra information
+USER_INFO = "speaker-info" # container for extra information
 
-# Keys within user-info
+# Keys within speaker-info
 PARTY = "party" # to represent party_asker or party_answerer
 IS_INCUMBENT = "is_incumbent" # to represent is_incumbent_asker or is_incumbent_answerer
 IS_OPPN = "is_oppn" # to represent is_oppn_asker or is_oppn_answerer

@@ -13,9 +13,8 @@ class PairedBoW(PairedPrediction):
     """
     Transformer for doing a Paired Prediction with bag-of-words vectors.
 
-    :param pairing_func: the Corpus object characteristic to pair on, e.g. to pair on the first 10 characters of a well structured id, use lambda obj: obj.id[:10]
-    :param pos_label_func: The function to check if the object is a positive instance
-    :param neg_label_func: The function to check if the object is a negative instance
+    :param obj_type: corpus object type to do a paired BoW on
+    :param vector_name: meta key containing the BoW vector
     :param clf: optional classifier to be used in the paired prediction
     :param pair_id_feat_name: metadata feature name to use in annotating object with pair id, default: "pair_id"
     :param label_feat_name: metadata feature name to use in annotating object with predicted label, default: "label"
@@ -28,7 +27,7 @@ class PairedBoW(PairedPrediction):
                  label_feat_name: str = "pair_obj_label",
                  pair_orientation_feat_name: str = "pair_orientation"):
 
-        assert obj_type in ["user", "utterance", "conversation"]
+        assert obj_type in ["speaker", "utterance", "conversation"]
         self.obj_type = obj_type
         self.vector_name = vector_name
 

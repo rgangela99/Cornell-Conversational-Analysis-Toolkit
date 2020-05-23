@@ -4,7 +4,7 @@ from convokit.util import warn
 class CorpusObject:
 
     def __init__(self, obj_type: str, owner=None, id=None, meta=None):
-        self.obj_type = obj_type  # utterance, user, conversation
+        self.obj_type = obj_type  # utterance, speaker, conversation
         self._owner = owner
         if meta is None:
             meta = dict()
@@ -43,7 +43,7 @@ class CorpusObject:
 
     # def __eq__(self, other):
     #     if type(self) != type(other): return False
-    #     # do not compare 'utterances' and 'conversations' in User.__dict__. recursion loop will occur.
+    #     # do not compare 'utterances' and 'conversations' in Speaker.__dict__. recursion loop will occur.
     #     self_keys = set(self.__dict__).difference(['_owner', 'meta', 'utterances', 'conversations'])
     #     other_keys = set(other.__dict__).difference(['_owner', 'meta', 'utterances', 'conversations'])
     #     return self_keys == other_keys and all([self.__dict__[k] == other.__dict__[k] for k in self_keys])
@@ -101,10 +101,10 @@ class CorpusObject:
 
     def __repr__(self):
         copy = self.__dict__.copy()
-        if 'utterances' in copy:
-            del copy['utterances']
-        if 'conversations' in copy:
-            del copy['conversations']
+        deleted_keys = ['utterances', 'conversations', 'user']
+        for k in deleted_keys:
+            if k in copy:
+                del copy[k]
         try:
             return self.obj_type.capitalize() + "(" + str(copy) + ")"
         except AttributeError: # for backwards compatibility when corpus objects are saved as binary data, e.g. wikiconv

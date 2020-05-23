@@ -12,8 +12,8 @@ The original dataset and additional information can be found `here <http://compp
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this dataset, users are the participants in the phone conversations (two per conversation). The user's name is the same as the ID used in the original SwDA dataset. 
 
@@ -31,7 +31,7 @@ Utterance-level information
 Each utterance corresponds to a turn by one speaker. 
 
 * id: the unique ID of the utterance. It is formatted as "_conversation_id_"-"_position_of_utterance_". For example, ID 4325-0 is the first utterance in the conversation with ID 4325.
-* user: the User giving the utterance
+* user: the Speaker giving the utterance
 * root: id of the root utterance of the conversation. For example, the root of the utterance with ID 4325-1 would be 4325-0.
 * reply_to: id of the utterance this replies to (None if the utterance is not a reply)
 * timestamp: timestamp of the utterance (not applicable in SwDA, set to None)
@@ -69,7 +69,7 @@ To download directly with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 440
+Number of Speakers: 440
 Number of Utterances: 122646
 Number of Conversations: 1155
 

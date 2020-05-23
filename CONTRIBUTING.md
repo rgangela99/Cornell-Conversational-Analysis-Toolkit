@@ -58,7 +58,13 @@ Please ensure that your contributions adhere to the existing coding style used t
 
 ### Testing
 
-Please ensure that all contributions have been tested for integration with existing ConvoKit code. This is particularly pertinent for contributions that make changes to existing functions or modules. At the moment, the best way to do this is to run the example scripts and notebooks in the examples directory and ensure that the output is either unchanged, or that any changes are consistent with your intentions. In the future, we hope to incorporate a unit testing framework to formalize this process.
+Please ensure that all contributions have been tested for integration with existing ConvoKit code. This is particularly pertinent for contributions that make changes to existing functions or modules. Unit tests will run automatically on Github when a pull request is opened, and may be run locally with
+
+```
+cd tests/ && python run_all_tests.py
+```
+
+after installing `pip install -r requirements.txt` and `pip install .` from the project directory.
 
 ### Documentation
 

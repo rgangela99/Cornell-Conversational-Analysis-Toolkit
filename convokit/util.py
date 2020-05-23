@@ -5,7 +5,7 @@ import zipfile
 import json
 from typing import Dict
 import requests
-
+import warnings
 
 # returns a path to the dataset file
 def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_version: bool = True,
@@ -37,18 +37,36 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
         -  "tennis-corpus": Tennis post-match press conferences transcripts
             Transcripts for tennis singles post-match press conferences for major tournaments between 2007 to 2015
             (see http://www.cs.cornell.edu/~liye/tennis.html)
-        -  "reddit-corpus-small" Reddit Corpus (sampled):
+        -  "reddit-corpus-small": Reddit Corpus (sampled):
             A sample from 100 highly-active subreddits
         -  "subreddit-<subreddit-name>": Subreddit Corpus
             A corpus made from the given subreddit
+        -  "friends-corpus": Friends TV show Corpus
+            A collection of all the conversations that occurred over 10 seasons of Friends, a popular American TV sitcom
+            that ran in the 1990s.
+        -  "switchboard-corpus": Switchboard Dialog Act Corpus
+             A collection of 1,155 five-minute telephone conversations between two participants,
+            annotated with speech act tags.
+        -  "persuasionforgood-corpus": Persuasion For Good Corpus
+            A collection of online conversations where a persuader tries to convince a persuadee to donate to charity.
+        -  "iq2-corpus": Intelligence Squared Debates Corpus
+            Transcripts of debates held as part of Intelligence Squared Debates.
+        -  "diplomacy-corpus": Deception in Diplomacy Corpus
+            Dataset with intended and perceived deception labels in the negotiation-based game Diplomacy.
+        -  "reddit-coarse-discourse-corpus": Coarse Discourse Sequence Corpus
+            Reddit dataset with utterances containing discourse act labels.
         -  "chromium-corpus": Chromium Conversations Corpus
-            A collection of almost 1.5 million conversations and 2.8 million comments posted by developers reviewing proposed code changes in the Chromium project.
-        -  "wikipedia-politeness-corpus": A corpus of politeness annotations on requests from Wikipedia talk pages.
-        -  "stack-exchange-politeness-corpus": A corpus of politeness annotations on requests from stack exchange.
+            A collection of almost 1.5 million conversations and 2.8 million comments posted by developers reviewing
+            proposed code changes in the Chromium project.
+        -  "wikipedia-politeness-corpus": Wikipedia Politeness Corpus
+            A corpus of politeness annotations on requests from Wikipedia talk pages.
+        -  "stack-exchange-politeness-corpus": Stack Exchange Politeness Corpus
+            A corpus of politeness annotations on requests from stack exchange.
     :param verbose: Print checkpoint statements for download
     :param data_dir: Output path of downloaded file (default: ~/.convokit)
     :param use_newest_version: Re-download if new version is found
-    :param use_local: if True, use the local version of corpus if it exists (regardless of whether a newer version exists)
+    :param use_local: if True, use the local version of corpus if it exists
+        (regardless of whether a newer version exists)
 
     :return: The path to the downloaded item.
     """
@@ -144,9 +162,9 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
 
 def download_local(name: str, data_dir: str):
     """
-    Get path to local version of the Corpus (which may be an older version)
+    Get path to a previously-downloaded local version of the corpus (which may be an older version).
     
-    :param name of Corpus
+    :param name: name of Corpus
     :return: string path to local Corpus
     """
     custom_data_dir = data_dir
@@ -202,10 +220,10 @@ def _download_helper(dataset_path: str, url: str, verbose: bool, name: str, down
     with urllib.request.urlopen(url) as response, \
             open(dataset_path, "wb") as out_file:
         if verbose:
-            l = float(response.info()["Content-Length"])
-            length = str(round(l / 1e6, 1)) + "MB" \
-                if l > 1e6 else \
-                str(round(l / 1e3, 1)) + "KB"
+            length = float(response.info()["Content-Length"])
+            length = str(round(length / 1e6, 1)) + "MB" \
+                if length > 1e6 else \
+                str(round(length / 1e3, 1)) + "KB"
             print("Downloading", name, "from", url,
                   "(" + length + ")...", end=" ", flush=True)
         shutil.copyfileobj(response, out_file)
@@ -276,8 +294,9 @@ def _get_wikiconv_year_info(year: str) -> str:
 
     return data_dir + year + "/full.corpus.zip"
 
-def meta_index(corpus=None, filename: str=None) -> Dict:
-    keys = ["utterances-index", "conversations-index", "users-index",
+
+def meta_index(corpus=None, filename: str = None) -> Dict:
+    keys = ["utterances-index", "conversations-index", "speakers-index",
             "overall-index"]
     if corpus is not None:
         return {k: v for k, v in corpus.meta_index.items() if k in keys}
@@ -288,8 +307,22 @@ def meta_index(corpus=None, filename: str=None) -> Dict:
 
 def warn(text: str):
     """
-    Pre-pends a red-colored 'WARNING: ' to [text].
+    Pre-pends a red-colored 'WARNING: ' to [text]. This is a printed warning and cannot be suppressed.
+
     :param text: Warning message
     :return: 'WARNING: [text]'
     """
     print('\033[91m'+ "WARNING: " + '\033[0m' + text)
+
+
+def _deprecation_format(message, category, filename, lineno, file=None, line=None):
+    return '{}:{}: {}: {}\n'.format(filename, lineno, category.__name__, message)
+
+
+def deprecation(prev_name: str, new_name: str, stacklevel: int = 3):
+    """
+    Suppressable deprecation warning.
+    """
+    warnings.formatwarning = _deprecation_format
+    warnings.warn("{} is deprecated and will be removed in a future release. "
+                  "Use {} instead.".format(prev_name, new_name), category=FutureWarning, stacklevel=stacklevel)

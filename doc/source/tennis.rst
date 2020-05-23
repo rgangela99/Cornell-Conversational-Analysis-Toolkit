@@ -11,10 +11,10 @@ IJCAI workshop on NLP meets Journalism, 2016.
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are tennis professional players, represented by their real names. As this dataset do not contain information about individual reporters, we use a single pseudo user with username "REPORTER" to represent them. 
+Speakers in this dataset are tennis professional players, represented by their real names. As this dataset do not contain information about individual reporters, we use a single pseudo user with username "REPORTER" to represent them.
 
 For each player, additional metadata include:
 
@@ -66,12 +66,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-163948
->>> len(corpus.get_usernames())
-359
->>> len(corpus.get_conversation_ids())
-81974
+>>> corpus.print_summary_stats()
+Number of Speakers: 359
+Number of Utterances: 163948
+Number of Conversations: 81974
 
 Additional note
 ---------------

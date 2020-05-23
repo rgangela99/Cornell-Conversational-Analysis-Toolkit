@@ -41,23 +41,23 @@ We can examine the corpus metadata:
 >>> corpus.meta
 {'num_comments': 288846,
  'num_posts': 8286,
- 'num_user': 119889,
+ 'num_speaker': 119889,
  'subreddit': 'reddit-corpus-small'}
 
 So the corpus includes 288846 comments and 8286 posts. This is a total of 297132 Utterances. (An Utterance is either a post or a comment in a reddit corpus.)
 
-These 297132 Utterances were made by 119889 different users.
+These 297132 Utterances were made by 119889 different Speakers.
 
-We can get iterators of Utterances, Users, and Conversations, and confirm their sizes match the metadata.
+We can get iterators of Utterances, Speakers, and Conversations, and confirm their sizes match the metadata.
 
->>> len(list(corpus.iter_users()))
+>>> len(list(corpus.iter_speakers()))
 119889
 >>> len(list(corpus.iter_utterances()))
 297132
 >>> len(list(corpus.iter_conversations()))
 8286
 
-The iterator functions are the **preferred** way of iterating through Users, Utterances, or Conversations in the Corpus.
+The iterator functions are the **preferred** way of iterating through Speakers, Utterances, or Conversations in the Corpus.
 
 We can also get a list of Utterance ids.
 
@@ -73,17 +73,17 @@ Let's take the first Utterance id and examine the Utterance it corresponds to:
 >>> utter_ids[0]
 '9c716m'
 >>> corpus.get_utterance(utter_ids[0])
-Utterance({'id': '9c716m', 'user': User([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
+Utterance({'id': '9c716m', 'speaker': Speaker([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
 
 We could also access the first Utterance by using `iter_utterances()`.
 
 >>> next(corpus.iter_utterances())
-Utterance({'id': '9c716m', 'user': User([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
+Utterance({'id': '9c716m', 'speaker': Speaker([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
 
 Alternatively, we could access a random Utterance:
 
 >>> corpus.random_utterance()
-Utterance({'obj_type': 'utterance', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'score': 1, 'top_level_comment': 'e5yoyg6', 'retrieved_on': 1539048055, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'tifu', 'stickied': False, 'permalink': '/r/tifu/comments/9frsfi/tifu_big_time_i_slept_with_someone_last_night_and/e5yrxtk/', 'author_flair_text': ''}, '_id': 'e5yrxtk', 'user': User({'obj_type': 'user', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'num_posts': 0, 'num_comments': 2}, '_id': 'condoriano27', '_name': 'condoriano27'}), 'root': '9frsfi', 'reply_to': 'e5ypcii', 'timestamp': 1536933792, 'text': "America's Least Wanted "})
+Utterance({'obj_type': 'utterance', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'score': 1, 'top_level_comment': 'e5yoyg6', 'retrieved_on': 1539048055, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'tifu', 'stickied': False, 'permalink': '/r/tifu/comments/9frsfi/tifu_big_time_i_slept_with_someone_last_night_and/e5yrxtk/', 'author_flair_text': ''}, '_id': 'e5yrxtk', 'speaker': Speaker({'obj_type': 'speaker', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'num_posts': 0, 'num_comments': 2}, '_id': 'condoriano27', '_name': 'condoriano27'}), 'root': '9frsfi', 'reply_to': 'e5ypcii', 'timestamp': 1536933792, 'text': "America's Least Wanted "})
 
 Let's explore the Utterance object further.
 
@@ -102,9 +102,9 @@ Let's explore the Utterance object further.
 '9c716m'
 >>> utt.timestamp # the unix timestamp for when the utterance was posted
 1535839576
->>> utt.user # the User who posted the Utterance
-User([('name', 'AutoModerator')])
->>> utt.user.meta # User-level metadata
+>>> utt.speaker # the Speaker who posted the Utterance
+Speaker([('name', 'AutoModerator')])
+>>> utt.speaker.meta # Speaker-level metadata
 {'num_posts': 200, 'num_comments': 27}
 
 Applying a transformer
@@ -112,7 +112,7 @@ Applying a transformer
 
 We initialize a Fighting Words transformer, which captures words that capture key differences in speech by two different groups.
 
-For FightingWords specifically, these features are saved to their corresponding Utterance's metadata. Other transformers may update User, Utterance, or Corpus metadata instead.
+For FightingWords specifically, these features are saved to their corresponding Utterance's metadata. Other transformers may update Speaker, Utterance, or Corpus metadata instead.
 
 >>> from convokit import FightingWords
 >>> fw = FightingWords()
@@ -211,7 +211,7 @@ As we can see, r/Christianity is comparatively more likely to use terms like 'go
 We also note that there are some (seemingly odd) n-grams like 'number number' and 'url'. This is because FightingWords applies a text cleaner to the Utterance's text prior to model fitting.
 This cleaner converts all urls to [url] and numeric values to [number]. (This text cleaning function is configurable.)
 
-This suggests that r/atheism users are more likely to include links in their comments.
+This suggests that r/atheism speakers are more likely to include links in their comments.
 As for r/Christianity, their citation of biblical verses, e.g. John 3:16 -> John [number]:[number] -> John number number (after special punctuation is removed), is likely what causes 'number number' to be a salient n-gram.
 
 The Transformer also has other methods for analyzing n-grams now that it is fitted.
@@ -246,7 +246,7 @@ Let's look at some corpus Utterances from r/Christianity that contain some salie
 >>> for utt in corpus.iter_utterances(selector=lambda utt: utt.meta['subreddit'] == 'Christianity'):
 >>>     print(utt)
 >>>     break
-Utterance('id': '9c0knf', 'root': 9c0knf, 'reply-to': None, 'user': User('id': Aiming_For_The_Light, 'meta': {'num_posts': 1, 'num_comments': 8}), 'timestamp': 1535778411, 'text': '', 'meta': {'score': 25, 'top_level_comment': None, 'retrieved_on': 1540058137, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c0knf/states_expected_to_push_ahead_with_mandatory/', 'author_flair_text': 'Uniting Church in Australia', 'fighting_words_class1': [], 'fighting_words_class2': []})
+Utterance('id': '9c0knf', 'root': 9c0knf, 'reply-to': None, 'speaker': Speaker('id': Aiming_For_The_Light, 'meta': {'num_posts': 1, 'num_comments': 8}), 'timestamp': 1535778411, 'text': '', 'meta': {'score': 25, 'top_level_comment': None, 'retrieved_on': 1540058137, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c0knf/states_expected_to_push_ahead_with_mandatory/', 'author_flair_text': 'Uniting Church in Australia', 'fighting_words_class1': [], 'fighting_words_class2': []})
 
 Notice that meta['fighting_words_class1'] and meta['fighting_words_class1'] are empty lists. This makes sense since this particular Utterance has no text.
 
@@ -256,7 +256,7 @@ Let's refine our selector so that we get what we want:
 >>> for utt in corpus.iter_utterances(selector=christianity_salient):
 >>>     print(utt)
 >>>     break
-Utterance('id': '9c6un6', 'root': 9c6un6, 'reply-to': None, 'user': User('id': alittlehappy, 'meta': {'num_posts': 1, 'num_comments': 0}), 'timestamp': 1535838106, 'text': "Parents are strict, Orthodox and religious. Father is a priest. I was born in a country where the majority were Orthodox so I've grown up with faith. We moved to American a decade ago and it's been the same since.\n\n\nBut now, I feel so disillusioned. I feel so guilty about this but I simply don't believe in God like I used to. I despise going to church because of how strict it is. My whole family has to get up at 4am and attend church from 5am-10am. Not only that, but we have to stand 95% of the time. Every Sunday, I'm exhausted, bored out of my mind because it's in a language I don't understand and self conscious whenever I sit.\n\n\nI don't know if it's just me losing faith or if I just *really* dislike my church environment. What I wouldn't give to go to a church in the afternoon or late morning with a 2 hour service where I could sit....but I can't even bring it up to my parents because they would 110% take it as a betrayal. I can see why considering my dad preaches/prays in our church so it's like he's not good enough/our religion isn't good enough but ugh.\n\n\nI fear that if they continue to force me and pressure me to go to church I'm going to end up hating Christianity. ", 'meta': {'score': 6, 'top_level_comment': None, 'retrieved_on': 1540061807, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c6un6/losing_faith/', 'author_flair_text': '', 'fighting_words_class1': ['religion', 'religious', 'an', 'it', 'her', 'get'], 'fighting_words_class2': ['sin', 'church', 'men', 'and', 'priest', 'am', 'our']})
+Utterance('id': '9c6un6', 'root': 9c6un6, 'reply-to': None, 'speaker': Speaker('id': alittlehappy, 'meta': {'num_posts': 1, 'num_comments': 0}), 'timestamp': 1535838106, 'text': "Parents are strict, Orthodox and religious. Father is a priest. I was born in a country where the majority were Orthodox so I've grown up with faith. We moved to American a decade ago and it's been the same since.\n\n\nBut now, I feel so disillusioned. I feel so guilty about this but I simply don't believe in God like I used to. I despise going to church because of how strict it is. My whole family has to get up at 4am and attend church from 5am-10am. Not only that, but we have to stand 95% of the time. Every Sunday, I'm exhausted, bored out of my mind because it's in a language I don't understand and self conscious whenever I sit.\n\n\nI don't know if it's just me losing faith or if I just *really* dislike my church environment. What I wouldn't give to go to a church in the afternoon or late morning with a 2 hour service where I could sit....but I can't even bring it up to my parents because they would 110% take it as a betrayal. I can see why considering my dad preaches/prays in our church so it's like he's not good enough/our religion isn't good enough but ugh.\n\n\nI fear that if they continue to force me and pressure me to go to church I'm going to end up hating Christianity. ", 'meta': {'score': 6, 'top_level_comment': None, 'retrieved_on': 1540061807, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c6un6/losing_faith/', 'author_flair_text': '', 'fighting_words_class1': ['religion', 'religious', 'an', 'it', 'her', 'get'], 'fighting_words_class2': ['sin', 'church', 'men', 'and', 'priest', 'am', 'our']})
 
 In summary
 ----------
@@ -279,6 +279,3 @@ Additional notes
 2. It is possible to `merge two different Corpora (even when there are overlaps or conflicts in Corpus data) <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/merging/corpus_merge_demo.ipynb>`_
 
 3. See :doc:`examples` for more illustrations of Corpus and Transformer functionality.
-
-
-

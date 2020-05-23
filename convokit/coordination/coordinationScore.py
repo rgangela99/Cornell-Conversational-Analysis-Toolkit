@@ -1,6 +1,5 @@
-import pkg_resources
-import re
-from convokit.model import Corpus, User, Utterance
+from convokit.model import Speaker
+from convokit.util import deprecation
 from collections import defaultdict
 from typing import Callable, Tuple, List, Dict, Optional, Collection, Hashable, Union
 
@@ -22,14 +21,14 @@ class CoordinationScore(dict):
             ...
         }
 
-    The keys are of the same types as the input: if a username was
-    passed in, the corresponding key will be a username, etc. For pairwise
+    The keys are of the same types as the input: if a speaker_id was
+    passed in, the corresponding key will be a speaker_id, etc. For pairwise
     scores, the keys are tuples (speaker, target).
 
     There are also helper functions for filtering scores or getting aggregate
     scores:
     """
-    def scores_for_marker(self, marker: str) -> Dict[Union[User, Hashable], float]:
+    def scores_for_marker(self, marker: str) -> Dict[Union[Speaker, Hashable], float]:
         """Return a dictionary from speakers to their scores for just the given
         marker.
 
@@ -37,7 +36,13 @@ class CoordinationScore(dict):
         """
         return {speaker: scores[marker] for speaker, scores in self.items()}
 
-    def averages_by_user(self) -> Dict[Union[User, Hashable], float]:
+    def averages_by_user(self):
+        deprecation("averages_by_user()", "averages_by_speaker()")
+        return {speaker: sum(scores.values()) / len(scores)
+                for speaker, scores in self.items()}
+
+
+    def averages_by_speaker(self) -> Dict[Union[Speaker, Hashable], float]:
         """Return a dictionary from speakers to the average of each speaker's
         marker scores."""
         return {speaker: sum(scores.values()) / len(scores)
@@ -47,7 +52,7 @@ class CoordinationScore(dict):
         """Return a dictionary mapping markers to the average coordination score
         on that marker.
 
-        :param strict_thresh: Whether to only include users with all 8 marker
+        :param strict_thresh: Whether to only include speakers with all 8 marker
             scores. This corresponds to Aggregate 1 in the Echoes paper (see
             top).
         """
@@ -60,14 +65,14 @@ class CoordinationScore(dict):
         :param method: Can be 1, 2 or 3, corresponding to which aggregate method
             to use:
 
-            - aggregate 1: average scores only over users with a score for each
+            - aggregate 1: average scores only over speakers with a score for each
               coordination marker.
-            - aggregate 2: fill in missing scores for a user by using the group
+            - aggregate 2: fill in missing scores for a speaker by using the group
               score for each missing marker. (assumes different people in a
               group coordinate the same way.)
-            - aggregate 3: fill in missing scores for a user by using the
+            - aggregate 3: fill in missing scores for a speaker by using the
               average score over the markers we can compute coordination for for
-              that user. (assumes a user coordinates the same way across
+              that speaker. (assumes a speaker coordinates the same way across
               different coordination markers.)
         """
         assert 1 <= method <= 3

@@ -11,7 +11,7 @@ class Classifier(Transformer):
 
     Runs on the Corpus's Users, Utterances, or Conversations (as specified by obj_type).
 
-    :param obj_type: type of Corpus object to classify: 'conversation', 'user', or 'utterance'
+    :param obj_type: type of Corpus object to classify: 'conversation', 'speaker', or 'utterance'
     :param pred_feats: list of metadata keys containing the features to be used in prediction. If the key corresponds to a dictionary, all the keys of the dictionary will be included in pred_feats.
     :param labeller: a (lambda) function that takes a Corpus object and returns True (y=1) or False (y=0) - i.e. labeller defines the y value of the object for fitting
     :param clf: optional sklearn classifier model, an SVM with linear kernel will be initialized by default
@@ -35,8 +35,8 @@ class Classifier(Transformer):
         Trains the Transformer's classifier model, with an optional selector that filters for objects to be fit on.
 
         :param corpus: target Corpus
-        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type in the Corpus.
-
+        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
+            By default, the selector includes all objects of the specified type in the Corpus.
         :return: the fitted Classifier Transformer
         """
         X, y = extract_feats_and_label(corpus, self.obj_type, self.pred_feats, self.labeller, selector)
@@ -50,7 +50,8 @@ class Classifier(Transformer):
         a metadata value of 'None' instead of the classifier prediction.
 
         :param corpus: target Corpus
-        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type in the Corpus.
+        :param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
+            By default, the selector includes all objects of the specified type in the Corpus.
 
         :return: annotated Corpus
         """
@@ -147,7 +148,7 @@ class Classifier(Transformer):
         :return: accuracy and confusion matrix
         """
         if ((corpus is None) and (objs is None)) or ((corpus is not None) and (objs is not None)):
-            raise ValueError("This function takes in either a Corpus or a list of users / utterances / conversations")
+            raise ValueError("This function takes in either a Corpus or a list of speakers / utterances / conversations")
 
         if corpus:
             print("Using corpus objects...")
@@ -181,13 +182,13 @@ class Classifier(Transformer):
         :param objs: target list of Corpus objects (do not pass in corpus if using this)
         :param cv: cross-validation model to use: KFold(n_splits=5) by default.
         :param selector: if running on a Corpus, this is a (lambda) function that takes a Corpus object and returns
-        True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type
-        in the Corpus.
+            True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type
+            in the Corpus.
 
         :return: cross-validated accuracy score
         """
         if ((corpus is None) and (objs is None)) or ((corpus is not None) and (objs is not None)):
-            raise ValueError("This function takes in either a Corpus or a list of users / utterances / conversations")
+            raise ValueError("This function takes in either a Corpus or a list of speakers / utterances / conversations")
 
         if corpus:
             print("Using corpus objects...")

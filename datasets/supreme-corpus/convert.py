@@ -4,7 +4,7 @@ import json
 MaxUtterances = -1
 
 KeyId = "id"
-KeyUser = "user"
+KeyUser = "speaker"
 KeyConvoRoot = "root"
 KeyReplyTo = "reply-to"
 KeyUserInfo = "meta"  # can store any extra data
@@ -41,13 +41,13 @@ with open("supreme.conversations.dat", "r", encoding="utf-8") as f:
                 case = fields[0].strip() 
                 is_justice = fields[4].strip() == "JUSTICE"
 
-                #user += "(case:" + fields[0].strip() + ")"
+                #speaker += "(case:" + fields[0].strip() + ")"
                 #is_justice = fields[4].strip() == "JUSTICE"
                 #if is_justice:
                 #    if fields[5].strip() == fields[6].strip(): # favorable justice
-                #        user += "{justice-fav}"
+                #        speaker += "{justice-fav}"
                 #    else:
-                #        user += "{justice-unfav}"
+                #        speaker += "{justice-unfav}"
 
                 is_reply = fields[2].strip() == "TRUE"
                 if not is_reply:
@@ -68,7 +68,7 @@ with open("supreme.conversations.dat", "r", encoding="utf-8") as f:
                     KeyText: fields[7],
                     KeyUserInfo: {
                         "case": case,
-                        #"gender": genders[user],
+                        #"gender": genders[speaker],
                         #"is-justice": is_justice,
                         "side": fields[6].lower(),
                     }
@@ -80,7 +80,7 @@ with open("supreme.conversations.dat", "r", encoding="utf-8") as f:
 
                 if is_reply:
                     d[KeyReplyTo] = last_utterance_id
-                    d[KeyConvoRoot] = root_id#convo_id#user # \
+                    d[KeyConvoRoot] = root_id#convo_id#speaker # \
                         #+ "->" + (
                         #"[justices]" if \
                         #u[last_utterance_id][KeyUser].endswith("fav}") else \
@@ -99,14 +99,14 @@ with open("supreme.conversations.dat", "r", encoding="utf-8") as f:
 #    if KeyReplyTo in ut:
 #        target = udict[ut[KeyReplyTo]][KeyUser]
 #        if target.endswith("{justice-fav}"):
-#            ut[KeyConvoRoot] = ut[KeyUser] + "->{justice-fav}"
+#            ut[KeyConvoId] = ut[KeyUser] + "->{justice-fav}"
 #        elif target.endswith("{justice-unfav}"):
-#            ut[KeyConvoRoot] = ut[KeyUser] + "->{justice-unfav}"  # target groups
-#        #ut[KeyConvoRoot] = target  # target groups -- experimental
-#        #ut[KeyConvoRoot] = ut[KeyUser]  # speaker groups
+#            ut[KeyConvoId] = ut[KeyUser] + "->{justice-unfav}"  # target groups
+#        #ut[KeyConvoId] = target  # target groups -- experimental
+#        #ut[KeyConvoId] = ut[KeyUser]  # speaker groups
 #        utterances[i] = ut
 #    else:
-#        del utterances[i][KeyConvoRoot]
+#        del utterances[i][KeyConvoId]
 
 if MaxUtterances > 0:
     #import random
@@ -115,7 +115,7 @@ if MaxUtterances > 0:
 json.dump(utterances, open("supreme.json", "w"), indent=2,
           sort_keys=True)
 
-with open("supreme-users.json", "w") as f:
+with open("supreme-speakers.json", "w") as f:
     json.dump(users_meta, f, indent=2)
 #print(len(usernames), len(usernames_cased))
 print("Done")

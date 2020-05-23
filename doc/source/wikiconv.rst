@@ -28,7 +28,7 @@ Utterance-level Information
 Each conversational turn on the talk page is viewed as an utterance. For each utterance, we provide:
 
 - id: A unique identifier assigned by the original WikiConv reconstruction pipeline
-- user: Wikipedia user name of the editor
+- speaker: Wikipedia user name of the editor
 - root: ID of the conversation root of the utterance
 - reply_to: ID of the utterance to which this utterance replies to (None if the utterance is not a reply)
 - timestamp: Time of the utterance
@@ -60,6 +60,32 @@ Metadata for each conversation include:
 - page_type: The type of the page (primarily talk vs user talk)
 - Example: "287020584.2938.0": {"page_id": "378580", "page_title": "Eric Harris and Dylan Klebold", "page_type": "talk"}
 
+
+Additional notes
+----------------
+A common use case for the WikiConv corpora might be to combine corpora from different years for further analysis. This is straightforward with the Corpus's merge functionality, which we demonstrate below.
+
+>>> from convokit import Corpus, download
+>>> wikiconv_2003 = Corpus(filename=download("wikiconv-2003"))
+>>> wikiconv_2003.print_summary_stats()
+Number of Speakers: 9168
+Number of Utterances: 140265
+Number of Conversations: 91787
+>>> wikiconv_2004 = Corpus(filename=download("wikiconv-2004"))
+>>> wikiconv_2004.print_summary_stats()
+Number of Speakers: 34235
+Number of Utterances: 613608
+Number of Conversations: 303494
+>>> merged_corpus = wikiconv_2003.merge(wikiconv_2004)
+WARNING: Multiple values found for Speaker([('name', 'TUF-KAT')]) for meta key: user_id. Taking the latest one found
+>>> merged_corpus.print_summary_stats()
+Number of Speakers: 41509
+Number of Utterances: 753873
+Number of Conversations: 392883
+
+Notice that the number of Utterances in the merged corpus is simply the sum of those in the constituent corpora. This is to be expected since the Utterances from these two corpora are from different years and are therefore distinct and non-overlapping.
+
+However, the number of Speakers and Conversations is not the sum of those of the constituent corpora -- undoubtedly because some Speakers have made Utterances in both years and because some Conversations took place over 2003 and 2004.
 
 Examples
 --------

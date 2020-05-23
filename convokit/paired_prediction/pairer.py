@@ -42,7 +42,7 @@ class Pairer(Transformer):
         :param pair_orientation_feat_name: metadata feature name to use in annotating object with pair orientation, default: "pair_orientation"
 
         """
-        assert obj_type in ["user", "utterance", "conversation"]
+        assert obj_type in ["speaker", "utterance", "conversation"]
         self.obj_type = obj_type
         self.pairing_func = pairing_func
         self.pos_label_func = pos_label_func

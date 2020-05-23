@@ -80,11 +80,11 @@ for subreddit in list(subs_dict.keys()):
                 d["text"] = child.pop("body")
                 d["timestamp"] = int(child.pop("created_utc"))
                 user_deleted = child["author"] == "[deleted]"
-                d["user"] = proc_author(child.pop("author"), d["root"])
-                d["user-info"] = make_user_info(child)
-                d["user-info"]["self-post-id"] = self_post["id"]
-                d["user-info"]["post-deleted"] = d["text"] == "[deleted]"
-                d["user-info"]["user-deleted"] = user_deleted
+                d["speaker"] = proc_author(child.pop("author"), d["root"])
+                d["speaker-info"] = make_user_info(child)
+                d["speaker-info"]["self-post-id"] = self_post["id"]
+                d["speaker-info"]["post-deleted"] = d["text"] == "[deleted]"
+                d["speaker-info"]["speaker-deleted"] = user_deleted
                 reddit_convos.append(d)
             d = {}
             del thread_root["name"], thread_root["subreddit_id"]
@@ -95,12 +95,12 @@ for subreddit in list(subs_dict.keys()):
             d["text"] = thread_root.pop("body")
             d["timestamp"] = int(thread_root.pop("created_utc"))
             user_deleted = thread_root["author"] == "[deleted]"
-            d["user"] = proc_author(thread_root.pop("author"), d["root"])
+            d["speaker"] = proc_author(thread_root.pop("author"), d["root"])
             thread_root.pop("children")
-            d["user-info"] = make_user_info(thread_root)
-            d["user-info"]["self-post-id"] = self_post["id"]
-            d["user-info"]["post-deleted"] = d["text"] == "[deleted]"
-            d["user-info"]["user-deleted"] = user_deleted
+            d["speaker-info"] = make_user_info(thread_root)
+            d["speaker-info"]["self-post-id"] = self_post["id"]
+            d["speaker-info"]["post-deleted"] = d["text"] == "[deleted]"
+            d["speaker-info"]["speaker-deleted"] = user_deleted
 
             reddit_convos.append(d)
         #for child in children(comment): #do some formatting
@@ -115,18 +115,18 @@ for subreddit in list(subs_dict.keys()):
         #    d['reply-to'] = child.pop('parent_id')
         #    d['text'] = child.pop('body')
         #    d['timestamp'] = int(child.pop('created_utc'))
-        #    d['user'] = child.pop('author')
-        #    d['user-info'] = child
+        #    d['speaker'] = child.pop('author')
+        #    d['speaker-info'] = child
         #    reddit_convos.append(d) #append to convokit
         #addcomment = {}#dict(comment)
         #addcomment['root'] = comment['id'] #cleanup comment
         #addcomment['id'] = comment.pop('id')
         #addcomment['text'] = comment.pop('selftext')
         #addcomment['timestamp'] = int(comment.pop('created_utc'))
-        #addcomment['user'] = comment.pop('author')
+        #addcomment['speaker'] = comment.pop('author')
         #comment.pop('children')
         #comment.pop('created')
-        #addcomment['user-info'] = comment
+        #addcomment['speaker-info'] = comment
         #reddit_convos.append(addcomment) #add the original comment
     del subs_dict[subreddit]
 

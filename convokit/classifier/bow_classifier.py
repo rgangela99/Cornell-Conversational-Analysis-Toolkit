@@ -19,7 +19,7 @@ class BoWClassifier(Classifier):
 
     Inherits from `Classifier` and has access to its methods.
 
-    :param obj_type: "user", "utterance", or "conversation"
+    :param obj_type: "speaker", "utterance", or "conversation"
     :param vector_name: the metadata key where the Corpus object text vector is stored
     :param labeller: a (lambda) function that takes a Corpus object and returns True (y=1) or False (y=0) - i.e. labeller defines the y value of the object for fitting
     :param clf: a sklearn Classifier. By default, clf is a Pipeline with StandardScaler and LogisticRegression

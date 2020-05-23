@@ -1,4 +1,4 @@
-from convokit.model import Corpus, Conversation, User, Utterance
+from convokit.model import Corpus
 from typing import List, Callable, Union
 from convokit import Transformer, CorpusObject
 import pandas as pd
@@ -7,7 +7,7 @@ class Ranker(Transformer):
     """
     Ranker sorts the objects in the Corpus by a given scoring function and annotates the objects with their rankings.
 
-    :param obj_type: type of Corpus object to rank: 'conversation', 'user', or 'utterance'
+    :param obj_type: type of Corpus object to rank: 'conversation', 'speaker', or 'utterance'
     :param score_func: function for computing the score of a given object
     :param score_feat_name: metadata feature name to use in annotation for score value, default: "score"
     :param rank_feat_name: metadata feature name to use in annotation for the rank value, default: "[score_feat_name]_rank"
@@ -29,7 +29,7 @@ class Ranker(Transformer):
         :return: annotated corpus
         """
         obj_iters = {"conversation": corpus.iter_conversations,
-                     "user": corpus.iter_users,
+                     "speaker": corpus.iter_speakers,
                      "utterance": corpus.iter_utterances}
         obj_scores = [(obj.id, self.score_func(obj)) for obj in obj_iters[self.obj_type](selector)]
         df = pd.DataFrame(obj_scores, columns=["id", self.score_feat_name]) \
@@ -70,7 +70,7 @@ class Ranker(Transformer):
         :return: a pandas DataFrame
         """
         obj_iters = {"conversation": corpus.iter_conversations,
-                     "user": corpus.iter_users,
+                     "speaker": corpus.iter_speakers,
                      "utterance": corpus.iter_utterances}
         obj_scores_ranks = [(obj.id, obj.meta[self.score_feat_name], obj.meta[self.rank_feat_name])
                       for obj in obj_iters[self.obj_type](selector)]

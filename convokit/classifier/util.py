@@ -1,9 +1,9 @@
-from convokit.model import Corpus, Conversation, Utterance, User, CorpusObject
+from convokit.model import Corpus, Conversation, Utterance, Speaker, CorpusObject
 from typing import List, Union, Callable
 import pandas as pd
 from scipy.sparse import csr_matrix
 import numpy as np
-from convokit.model import warn
+from convokit.util import warn
 from scipy.sparse import vstack
 
 
@@ -102,7 +102,7 @@ def extract_feats_and_label(corpus: Corpus, obj_type: str, pred_feats: List[str]
 def extract_feats_and_label_bow(corpus, objs, obj_type, vector_name,
                                 labeller, selector):
     if ((corpus is None) and (objs is None)) or ((corpus is not None) and (objs is not None)):
-        raise ValueError("This function takes in either a Corpus or a list of users / utterances / conversations")
+        raise ValueError("This function takes in either a Corpus or a list of speakers / utterances / conversations")
 
     if corpus:
         print("Using corpus objects...")

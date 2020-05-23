@@ -1,22 +1,23 @@
-from typing import Dict, List, Collection, Callable, Set, Generator, Tuple, Optional, ValuesView
-from .user import User
+from typing import Dict, Optional
+from convokit.util import deprecation
 from .corpusObject import CorpusObject
+from .speaker import Speaker
 
 
 class Utterance(CorpusObject):
     """Represents a single utterance in the dataset.
 
     :param id: the unique id of the utterance.
-    :param user: the user giving the utterance.
-    :param root: the id of the root utterance of the conversation.
+    :param speaker: the speaker giving the utterance.
+    :param conversation_id: the id of the root utterance of the conversation.
     :param reply_to: id of the utterance this was a reply to.
     :param timestamp: timestamp of the utterance. Can be any
         comparable type.
     :param text: text of the utterance.
 
     :ivar id: the unique id of the utterance.
-    :ivar user: the user giving the utterance.
-    :ivar root: the id of the root utterance of the conversation.
+    :ivar speaker: the speaker giving the utterance.
+    :ivar conversation_id: the id of the root utterance of the conversation.
     :ivar reply_to: id of the utterance this was a reply to.
     :ivar timestamp: timestamp of the utterance.
     :ivar text: text of the utterance.
@@ -24,23 +25,38 @@ class Utterance(CorpusObject):
         utterance-level metadata.
     """
 
-    def __init__(self, owner=None, id: Optional[str] = None, user: Optional[User] = None,
+    def __init__(self, owner=None, id: Optional[str] = None, speaker: Optional[Speaker] = None,
+                 user: Optional[Speaker] = None, conversation_id: Optional[str] = None,
                  root: Optional[str] = None, reply_to: Optional[str] = None,
                  timestamp: Optional[int] = None, text: Optional[str] = None,
                  meta: Optional[Dict] = None):
         super().__init__(obj_type="utterance", owner=owner, id=id, meta=meta)
-        self.user = user
-        self.root = root
+        speaker_ = speaker if speaker is not None else user
+        self.speaker = speaker_
+        self.user = speaker # for backwards compatbility
+        self.conversation_id = conversation_id if conversation_id is not None else root
+        self._root = self.conversation_id
         self.reply_to = reply_to
         self.timestamp = timestamp # int(timestamp) if timestamp is not None else timestamp
         self.text = text
+
+    def _get_root(self):
+        deprecation("utterance.root", "utterance.conversation_id")
+        return self.conversation_id
+
+    def _set_root(self, value: str):
+        deprecation("utterance.root", "utterance.conversation_id")
+        self.conversation_id = value
+        # self._update_uid()
+
+    root = property(_get_root, _set_root)
 
     def get_conversation(self):
         """
         Get the Conversation (identified by Utterance.root) this Utterance belongs to
         :return: Conversation
         """
-        return self.owner.get_conversation(self.root)
+        return self.owner.get_conversation(self.conversation_id)
 
     def __hash__(self):
         return super().__hash__()
@@ -49,17 +65,17 @@ class Utterance(CorpusObject):
         if not isinstance(other, Utterance):
             return False
         try:
-            return self.id == other.id and self.root == other.root and self.reply_to == other.reply_to and \
-                   self.user == other.user and self.timestamp == other.timestamp and self.text == other.text
+            return self.id == other.id and self.conversation_id == other.conversation_id and self.reply_to == other.reply_to and \
+                   self.speaker == other.speaker and self.timestamp == other.timestamp and self.text == other.text
         except AttributeError: # for backwards compatibility with wikiconv
             return self.__dict__ == other.__dict__
 
     def __str__(self):
-        return "Utterance('id': {}, 'root': {}, 'reply-to': {}, " \
-               "'user': {}, 'timestamp': {}, 'text': {}, 'meta': {})".format(repr(self.id),
-                                                                             self.root,
+        return "Utterance('id': {}, 'conversation_id': {}, 'reply-to': {}, " \
+               "'speaker': {}, 'timestamp': {}, 'text': {}, 'meta': {})".format(repr(self.id),
+                                                                             self.conversation_id,
                                                                              self.reply_to,
-                                                                             self.user,
+                                                                             self.speaker,
                                                                              self.timestamp,
                                                                              repr(self.text),
                                                                              self.meta)

@@ -2,7 +2,7 @@ from typing import List, Collection, Callable, Set, Generator, Tuple, Optional, 
 import numpy as np
 import pandas as pd
 from .corpusHelper import *
-from .corpusUtil import warn
+from convokit.util import deprecation, warn
 from .convoKitIndex import ConvoKitIndex
 import random
 from .convoKitMeta import ConvoKitMeta
@@ -10,28 +10,29 @@ from .convoKitMeta import ConvoKitMeta
 class Corpus:
 	"""Represents a dataset, which can be loaded from a folder or a
 	list of utterances.
+
+	:param filename: Path to a folder containing a Corpus or to an utterances.jsonl / utterances.json file to load
+	:param utterances: List of utterances to initialize Corpus from
+	:param utterance_start_index: if the corpus folder contains utterances.jsonl, specify the line number (zero-indexed)
+		to begin parsing utterances from
+	:param utterance_end_index: if the corpus folder contains utterances.jsonl, specify the line number (zero-indexed)
+		of the last utterance to be parsed.
+	:param merge_lines: whether to merge adjacent lines from same speaker if the two utterances belong to the
+		same conversation
+	:param exclude_utterance_meta: utterance metadata to be ignored
+	:param exclude_conversation_meta: conversation metadata to be ignored
+	:param exclude_speaker_meta: speaker metadata to be ignored
+	:param exclude_overall_meta: overall metadata to be ignored
+	:param version: version no. of corpus
 	"""
 
 	def __init__(self, filename: Optional[str] = None, utterances: Optional[List[Utterance]] = None,
 				 utterance_start_index: int = None, utterance_end_index: int = None, merge_lines: bool = False,
 				 exclude_utterance_meta: Optional[List[str]] = None,
 				 exclude_conversation_meta: Optional[List[str]] = None,
-				 exclude_user_meta: Optional[List[str]] = None,
+				 exclude_speaker_meta: Optional[List[str]] = None,
 				 exclude_overall_meta: Optional[List[str]] = None,
 				 version: Optional[int] = None):
-		"""
-
-		:param filename: Path to a folder containing a Corpus or to an utterances.jsonl / utterances.json file to load
-		:param utterances: List of utterances to initialize Corpus from
-		:param utterance_start_index: For utterances.jsonl, specify the line number (zero-indexed) to begin parsing utterances from
-		:param utterance_end_index: For utterances.jsonl, specify the line number (zero-indexed) of the last utterance to be parsed.
-		:param merge_lines: whether to merge adjacent lines from same user if the two utterances have same root
-		:param exclude_utterance_meta: utterance metadata to be ignored
-		:param exclude_conversation_meta: conversation metadata to be ignored
-		:param exclude_user_meta: user metadata to be ignored
-		:param exclude_overall_meta: overall metadata to be ignored
-		:param version: version no. of corpus
-		"""
 
 		if filename is None:
 			self.original_corpus_path = None
@@ -48,7 +49,7 @@ class Corpus:
 		convos_meta = defaultdict(dict)
 		if exclude_utterance_meta is None: exclude_utterance_meta = []
 		if exclude_conversation_meta is None: exclude_conversation_meta = []
-		if exclude_user_meta is None: exclude_user_meta = []
+		if exclude_speaker_meta is None: exclude_speaker_meta = []
 		if exclude_overall_meta is None: exclude_overall_meta = []
 
 		# Construct corpus from file or directory
@@ -57,7 +58,7 @@ class Corpus:
 				utterances = load_uttinfo_from_dir(filename, utterance_start_index,
 												   utterance_end_index, exclude_utterance_meta)
 
-				users_meta = load_users_meta_from_dir(filename, exclude_user_meta)
+				speakers_meta = load_speakers_meta_from_dir(filename, exclude_speaker_meta)
 				convos_meta = load_convos_meta_from_dir(filename, exclude_conversation_meta)
 				load_corpus_meta_from_dir(filename, self.meta, exclude_overall_meta)
 
@@ -81,9 +82,9 @@ class Corpus:
 				# unpack binary data for utterances
 				unpack_binary_data_for_utts(utterances, filename, self.meta_index.utterances_index,
 											exclude_utterance_meta, KeyMeta)
-				# unpack binary data for users
-				unpack_binary_data(filename, users_meta, self.meta_index.users_index, "user",
-								   exclude_user_meta)
+				# unpack binary data for speakers
+				unpack_binary_data(filename, speakers_meta, self.meta_index.speakers_index, "speaker",
+								   exclude_speaker_meta)
 
 				# unpack binary data for conversations
 				unpack_binary_data(filename, convos_meta, self.meta_index.conversations_index, "convo",
@@ -93,20 +94,20 @@ class Corpus:
 				unpack_binary_data(filename, self.meta, self.meta_index.overall_index, "overall", exclude_overall_meta)
 
 			else:
-				users_meta = defaultdict(dict)
+				speakers_meta = defaultdict(dict)
 				convos_meta = defaultdict(dict)
 				utterances = load_from_utterance_file(filename, utterance_start_index, utterance_end_index)
 
 			self.utterances = dict()
-			self.users = dict()
+			self.speakers = dict()
 
-			initialize_users_and_utterances_objects(self, self.utterances, utterances, self.users, users_meta)
+			initialize_speakers_and_utterances_objects(self, self.utterances, utterances, self.speakers, speakers_meta)
 
 		elif utterances is not None:  # Construct corpus from utterances list
-			self.users = {u.user.id: u.user for u in utterances}
+			self.speakers = {u.speaker.id: u.speaker for u in utterances}
 			self.utterances = {u.id: u for u in utterances}
-			for _, user in self.users.items():
-				user.owner = self
+			for _, speaker in self.speakers.items():
+				speaker.owner = self
 			for _, utt in self.utterances.items():
 				utt.owner = self
 
@@ -114,7 +115,7 @@ class Corpus:
 			self.utterances = merge_utterance_lines(self.utterances)
 
 		self.conversations = initialize_conversations(self, self.utterances, convos_meta)
-		self.update_users_data()
+		self.update_speakers_data()
 
 	@staticmethod
 	def dump_helper_bin(d: Dict, d_bin: Dict, object_idx: Dict, fields_to_skip=None) -> Dict:
@@ -153,7 +154,7 @@ class Corpus:
 		:param base_path: base directory to save corpus in (None to save to a default directory)
 		:param increment_version: whether to increment the Corpus version number when dumping
 		:param save_to_existing_path: if True, save to the path you loaded the corpus from (supersedes base_path)
-		:param fields_to_skip: a dictionary of {object type: list of attributes to omit when writing to disk}. object types can be one of "user", "utterance", "conversation", "corpus".
+		:param fields_to_skip: a dictionary of {object type: list of attributes to omit when writing to disk}. object types can be one of "speaker", "utterance", "conversation", "corpus".
 		"""
 		if fields_to_skip is None:
 			fields_to_skip = dict()
@@ -177,16 +178,16 @@ class Corpus:
 		if not os.path.exists(dir_name):
 			os.mkdir(dir_name)
 
-		utterances_idx, users_idx, convos_idx, overall_idx = {}, {}, {}, {}  # TODO get rid of this
+		utterances_idx, speakers_idx, convos_idx, overall_idx = {}, {}, {}, {}  # TODO get rid of this
 
-		dump_corpus_object(self, dir_name, "users.json", "user", "user", fields_to_skip)
+		dump_corpus_object(self, dir_name, "speakers.json", "speaker", "speaker", fields_to_skip)
 		dump_corpus_object(self, dir_name, "conversations.json", "conversation", "convo", fields_to_skip)
 		dump_utterances(self, dir_name, fields_to_skip)
 
 		with open(os.path.join(dir_name, "corpus.json"), "w") as f:
 			d_bin = defaultdict(list)
 			meta_up = Corpus.dump_helper_bin(self.meta, d_bin, overall_idx, fields_to_skip.get('corpus', []))
-			#            keys = ["utterances-index", "conversations-index", "users-index",
+			#            keys = ["utterances-index", "conversations-index", "speakers-index",
 			#                "overall-index"]
 			#            meta_minus = {k: v for k, v in overall_idx.items() if k not in keys}
 			#            meta_up["overall-index"] = meta_minus
@@ -219,26 +220,30 @@ class Corpus:
 		"""
 		return self.conversations[convo_id]
 
-	def get_user(self, user_id: str) -> User:
+	def get_speaker(self, speaker_id: str) -> Speaker:
 		"""
-		Gets User of the specified id from the corpus
+		Gets Speaker of the specified id from the corpus
 
-		:param user_id: id of User
-		:return: User
+		:param speaker_id: id of Speaker
+		:return: Speaker
 		"""
-		return self.users[user_id]
+		return self.speakers[speaker_id]
+
+	def get_user(self, user_id: str) -> Speaker:
+		deprecation("get_user()", "get_speaker()")
+		return self.get_speaker(user_id)
 
 	def get_object(self, obj_type: str, oid: str):
 		"""
-		General Corpus object getter. Gets User / Utterance / Conversation of specified id from the Corpus
+		General Corpus object getter. Gets Speaker / Utterance / Conversation of specified id from the Corpus
 
-		:param obj_type: "user", "utterance", or "conversation"
+		:param obj_type: "speaker", "utterance", or "conversation"
 		:param oid: object id
 		:return: Corpus object of specified object type with specified object id
 		"""
-		assert obj_type in ["user", "utterance", "conversation"]
-		if obj_type == "user":
-			return self.get_user(oid)
+		assert obj_type in ["speaker", "utterance", "conversation"]
+		if obj_type == "speaker":
+			return self.get_speaker(oid)
 		elif obj_type == "utterance":
 			return self.get_utterance(oid)
 		else:
@@ -262,14 +267,18 @@ class Corpus:
 		"""
 		return convo_id in self.conversations
 
-	def has_user(self, user_id: str) -> bool:
+	def has_speaker(self, speaker_id: str) -> bool:
 		"""
-		Checks if a User of the specified id exists in the Corpus
+		Checks if a Speaker of the specified id exists in the Corpus
 
-		:param user_id: id of User
-		:return: True if User of specified id is present, False otherwise
+		:param speaker_id: id of Speaker
+		:return: True if Speaker of specified id is present, False otherwise
 		"""
-		return user_id in self.users
+		return speaker_id in self.speakers
+
+	def has_user(self, speaker_id):
+		deprecation("has_user()", "has_speaker()")
+		return self.has_speaker(speaker_id)
 
 	def random_utterance(self) -> Utterance:
 		"""
@@ -287,21 +296,25 @@ class Corpus:
 		"""
 		return random.choice(list(self.conversations.values()))
 
-	def random_user(self) -> User:
+	def random_speaker(self) -> Speaker:
 		"""
-		Get a random User from the Corpus
+		Get a random Speaker from the Corpus
 
-		:return: a random User
+		:return: a random Speaker
 		"""
-		return random.choice(list(self.users.values()))
+		return random.choice(list(self.speakers.values()))
+
+	def random_user(self) -> Speaker:
+		deprecation("random_user()", "random_speaker()")
+		return self.random_speaker()
 
 	def iter_utterances(self, selector: Optional[Callable[[Utterance], bool]] = lambda utt: True) -> Generator[
 		Utterance, None, None]:
 		"""
-		Get utterances in the Corpus, with an optional selector that filters for Utterances that should be included
+		Get utterances in the Corpus, with an optional selector that filters for Utterances that should be included.
 
 		:param selector: a (lambda) function that takes an Utterance and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Utterances in the Corpus.
+			By default, the selector includes all Utterances in the Corpus.
 		:return: a generator of Utterances
 		"""
 		for v in self.utterances.values():
@@ -324,39 +337,43 @@ class Corpus:
 		Get conversations in the Corpus, with an optional selector that filters for Conversations that should be included
 
 		:param selector: a (lambda) function that takes a Conversation and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Conversations in the Corpus.
+			By default, the selector includes all Conversations in the Corpus.
 		:return: a generator of Conversations
 		"""
 		for v in self.conversations.values():
 			if selector(v):
 				yield v
 
-	def iter_users(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Generator[User, None, None]:
+	def iter_speakers(self, selector: Optional[Callable[[Speaker], bool]] = lambda speaker: True) -> Generator[Speaker, None, None]:
 		"""
-		Get Users in the Corpus, with an optional selector that filters for Conversations that should be included
+		Get Speakers in the Corpus, with an optional selector that filters for Conversations that should be included
 
-		:param selector: a (lambda) function that takes a User and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Users in the Corpus.
-		:return: a generator of Users
+		:param selector: a (lambda) function that takes a Speaker and returns True or False (i.e. include / exclude).
+			By default, the selector includes all Speakers in the Corpus.
+		:return: a generator of Speakers
 		"""
 
-		for user in self.users.values():
-			if selector(user):
-				yield user
+		for speaker in self.speakers.values():
+			if selector(speaker):
+				yield speaker
 
-	def iter_objs(self, obj_type: str, selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
+	def iter_users(self, selector=lambda speaker: True):
+		deprecation("iter_users()", "iter_speakers()")
+		return self.iter_speakers(selector)
+
+	def iter_objs(self, obj_type: str, selector: Callable[[Union[Speaker, Utterance, Conversation]], bool] = lambda obj: True):
 		"""
 		Get Corpus objects of specified type from the Corpus, with an optional selector that filters for Corpus object that should be included
 
-		:param obj_type: "user", "utterance", or "conversation"
+		:param obj_type: "speaker", "utterance", or "conversation"
 		:param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
-		By default, the selector includes all objects of the specified type in the Corpus.
-		:return: a generator of Users
+			By default, the selector includes all objects of the specified type in the Corpus.
+		:return: a generator of Speakers
 		"""
 
-		assert obj_type in ["user", "utterance", "conversation"]
+		assert obj_type in ["speaker", "utterance", "conversation"]
 		obj_iters = {"conversation": self.iter_conversations,
-					 "user": self.iter_users,
+					 "speaker": self.iter_speakers,
 					 "utterance": self.iter_utterances}
 
 		return obj_iters[obj_type](selector)
@@ -366,7 +383,7 @@ class Corpus:
 		Get a list of ids of Utterances in the Corpus, with an optional selector that filters for Utterances that should be included
 
 		:param selector: a (lambda) function that takes an Utterance and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Utterances in the Corpus.
+			By default, the selector includes all Utterances in the Corpus.
 		:return: list of Utterance ids
 		"""
 		return [utt.id for utt in self.iter_utterances(selector)]
@@ -377,51 +394,51 @@ class Corpus:
 		Get a list of ids of Conversations in the Corpus, with an optional selector that filters for Conversations that should be included
 
 		:param selector: a (lambda) function that takes a Conversation and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Conversations in the Corpus.
+			By default, the selector includes all Conversations in the Corpus.
 		:return: list of Conversation ids
 		"""
 		return [convo.id for convo in self.iter_conversations(selector)]
 
-	def get_user_ids(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> List[
+	def get_speaker_ids(self, selector: Optional[Callable[[Speaker], bool]] = lambda speaker: True) -> List[
 		str]:
 		"""
-		Get a list of ids of Users in the Corpus, with an optional selector that filters for Users that should be included
+		Get a list of ids of Speakers in the Corpus, with an optional selector that filters for Speakers that should be included
 
-		:param selector: a (lambda) function that takes a User and returns True or False (i.e. include / exclude).
-		By default, the selector includes all Users in the Corpus.
-		:return: list of User ids
+		:param selector: a (lambda) function that takes a Speaker and returns True or False (i.e. include / exclude).
+			By default, the selector includes all Speakers in the Corpus.
+		:return: list of Speaker ids
 		"""
-		return [user.id for user in self.iter_users(selector)]
+		return [speaker.id for speaker in self.iter_speakers(selector)]
 
 	def get_object_ids(self, obj_type: str,
-					   selector: Callable[[Union[User, Utterance, Conversation]], bool] = lambda obj: True):
+					   selector: Callable[[Union[Speaker, Utterance, Conversation]], bool] = lambda obj: True):
 		"""
 		Get a list of ids of Corpus objects of the specified type in the Corpus, with an optional selector that filters for objects that should be included
 
-		:param obj_type: "user", "utterance", or "conversation"
+		:param obj_type: "speaker", "utterance", or "conversation"
 		:param selector: a (lambda) function that takes a Corpus object and returns True or False (i.e. include / exclude).
-		By default, the selector includes all objects of the specified type in the Corpus.
+			By default, the selector includes all objects of the specified type in the Corpus.
 		:return: list of Corpus object ids
 		"""
-		assert obj_type in ["user", "utterance", "conversation"]
+		assert obj_type in ["speaker", "utterance", "conversation"]
 		return [obj.id for obj in self.iter_objs(obj_type, selector)]
 
-	def get_usernames(self, selector: Optional[Callable[[User], bool]] = lambda user: True) -> Set[str]:
-		"""Get names of users in the dataset.
+	def get_usernames(self, selector: Optional[Callable[[Speaker], bool]] = lambda user: True) -> Set[str]:
+		"""Get names of speakers in the dataset.
 
-		This function will be deprecated and replaced by get_user_ids()
+		This function will be deprecated and replaced by get_speaker_ids()
 
 		:param selector: optional function that takes in a
-			`User` and returns True to include the user's name in the
+			`Speaker` and returns True to include the speaker's name in the
 			resulting list, or False otherwise.
 
-		:return: Set containing all user names selected by the selector
-			function, or all user names in the dataset if no selector function
+		:return: Set containing all speaker names selected by the selector
+			function, or all speaker names in the dataset if no selector function
 			was used.
 
 		"""
-		warn("This function is deprecated. Use get_user_ids() instead.")
-		return set([u.id for u in self.iter_users(selector)])
+		deprecation("get_usernames()", "get_speaker_ids()")
+		return set([u.id for u in self.iter_speakers(selector)])
 
 	def filter_conversations_by(self, selector: Callable[[Conversation], bool]):
 		"""
@@ -434,22 +451,22 @@ class Corpus:
 		self.conversations = {convo_id: convo for convo_id, convo in self.conversations.items() if selector(convo)}
 		utt_ids = set([utt for convo in self.conversations.values() for utt in convo.get_utterance_ids()])
 		self.utterances = {utt.id: utt for utt in self.utterances.values() if utt.id in utt_ids}
-		usernames = set([utt.user.id for utt in self.utterances.values()])
-		self.users = {user.id: user for user in self.users.values() if user.id in usernames}
-		self.update_users_data()
+		speaker_ids = set([utt.speaker.id for utt in self.utterances.values()])
+		self.speakers = {speaker.id: speaker for speaker in self.speakers.values() if speaker.id in speaker_ids}
+		self.update_speakers_data()
 		self.reinitialize_index()
 
 	def reindex_conversations(self, new_convo_roots: List[str], preserve_corpus_meta: bool = True,
 							  preserve_convo_meta: bool = True, verbose = True) -> 'Corpus':
 		"""
-		Generates a new Corpus from current Corpus with specified list of utterance ids to use as conversation roots.
+		Generates a new Corpus from current Corpus with specified list of utterance ids to use as conversation ids.
 
 		The subtrees denoted by these utterance ids should be distinct and should not overlap, otherwise there may be unexpected behavior.
 
-		:param new_convo_roots: List of utterance ids to use as roots
+		:param new_convo_roots: List of utterance ids to use as conversation ids
 		:param preserve_corpus_meta: set as True to copy original Corpus metadata to new Corpus
 		:param preserve_convo_meta: set as True to copy original Conversation metadata to new Conversation metadata
-		(For each new convo root, use the metadata of the conversation that convo root belonged to.)
+			(For each new conversation, use the metadata of the conversation that the utterance belonged to.)
 		:param verbose: whether to print a warning when
 		:return: new Corpus with reindexed Conversations
 		"""""
@@ -465,7 +482,7 @@ class Corpus:
 		original_utt_to_convo_id = dict()
 
 		for utt_id in new_convo_roots:
-			orig_convo = self.get_conversation(self.get_utterance(utt_id).root)
+			orig_convo = self.get_conversation(self.get_utterance(utt_id).conversation_id)
 			original_utt_to_convo_id[utt_id] = orig_convo.id
 			try:
 				subtree = orig_convo.get_subtree(utt_id)
@@ -473,7 +490,7 @@ class Corpus:
 				new_root_utt.reply_to = None
 				subtree_utts = [node.utt for node in subtree.bfs_traversal()]
 				for utt in subtree_utts:
-					utt.root = utt_id
+					utt.conversation_id = utt_id
 				new_corpus_utts.extend(subtree_utts)
 			except ValueError:
 				continue
@@ -495,34 +512,6 @@ class Corpus:
 
 		return new_corpus
 
-	def utterance_threads(self, prefix_len: Optional[int] = None,
-						  suffix_len: int = 0,
-						  include_root: bool = True) -> Dict[str, Dict[str, Utterance]]:
-		"""
-		Returns dict of threads, where a thread is all utterances with the
-		same root.
-
-		:param prefix_len: if an integer n, only get the first n utterances
-			of each thread (sorted by ascending timestamp value)
-		:param suffix_len: if an integer n, only get the last n utterances
-			of each thread (sorted by descending timestamp value)
-		:param include_root: True if root utterance should be included in the utterance thread.
-			If False, thread begins from top level comment.
-
-		:return: Dictionary from thread root ids to threads, where a thread is
-			itself a dictionary from utterance ids to utterances.
-		"""
-		threads = defaultdict(list)
-		for ut in self.utterances.values():
-			if include_root:
-				threads[ut.root].append(ut)
-			else:
-				top_level_comment = ut.meta["top_level_comment"]
-				if top_level_comment is None: continue  # i.e. this is a post (root) utterance
-				threads[top_level_comment].append(ut)
-		return {root: {utt.id: utt for utt in list(sorted(l, key=lambda x: x.timestamp))[-suffix_len:prefix_len]}
-				for root, l in threads.items()}
-
 	def get_meta(self) -> Dict:
 		return self.meta
 
@@ -530,18 +519,17 @@ class Corpus:
 		self.meta[key] = value
 
 
-
-	def speaking_pairs(self, selector: Optional[Callable[[User, User], bool]] = lambda user1, user2: True,
-					   user_names_only: bool = False) -> Set[Tuple[str, str]]:
-		"""Get all directed speaking pairs (a, b) of users such that a replies
+	def speaking_pairs(self, selector: Optional[Callable[[Speaker, Speaker], bool]] = lambda speaker1, speaker2: True,
+					   speaker_ids_only: bool = False) -> Set[Tuple[str, str]]:
+		"""Get all directed speaking pairs (a, b) of speakers such that a replies
 			to b at least once in the dataset.
 
 		:param selector: optional function that takes in
-			a speaker user and a replied-to user and returns True to include
+			a Speaker and a replied-to Speaker and returns True to include
 			the pair in the result, or False otherwise.
-		:param user_names_only: if True, return just pairs of
-			user names rather than user objects.
-		:type user_names_only: bool
+		:param speaker_ids_only: if True, return just pairs of
+			speaker names rather than speaker objects.
+		:type speaker_ids_only: bool
 
 		:return: Set containing all speaking pairs selected by the selector
 			function, or all speaking pairs in the dataset if no selector
@@ -549,36 +537,36 @@ class Corpus:
 		"""
 		pairs = set()
 		for utt2 in self.iter_utterances():
-			if utt2.user is not None and utt2.reply_to is not None and utt2.reply_to in self.utterances:
+			if utt2.speaker is not None and utt2.reply_to is not None and utt2.reply_to in self.utterances:
 				utt1 = self.get_utterance(utt2.reply_to)
-				if utt1.user is not None:
-					if selector(utt2.user, utt1.user):
-						pairs.add((utt2.user.id, utt1.user.id) if
-								  user_names_only else (utt2.user, utt1.user))
+				if utt1.speaker is not None:
+					if selector(utt2.speaker, utt1.speaker):
+						pairs.add((utt2.speaker.id, utt1.speaker.id) if
+								  speaker_ids_only else (utt2.speaker, utt1.speaker))
 		return pairs
 
-	def pairwise_exchanges(self, selector: Optional[Callable[[User, User], bool]] = None,
-						   user_names_only: bool = False) -> Dict[Tuple, List[Utterance]]:
+	def pairwise_exchanges(self, selector: Optional[Callable[[Speaker, Speaker], bool]] = None,
+						   speaker_names_only: bool = False) -> Dict[Tuple, List[Utterance]]:
 		"""
 		Get all directed pairwise exchanges in the dataset.
 
 		:param selector: optional function that takes in a
-			speaker user and a replied-to user and returns True to include
+			speaker speaker and a replied-to speaker and returns True to include
 			the pair in the result, or False otherwise.
-		:param user_names_only: if True, index conversations
-			by user names rather than user objects.
-		:type user_names_only: bool
+		:param speaker_names_only: if True, index conversations
+			by speaker names rather than speaker objects.
+		:type speaker_names_only: bool
 
 		:return: Dictionary mapping (speaker, target) tuples to a list of
 			utterances given by the speaker in reply to the target.
 		"""
 		pairs = defaultdict(list)
 		for u2 in self.utterances.values():
-			if u2.user is not None and u2.reply_to is not None:
+			if u2.speaker is not None and u2.reply_to is not None:
 				u1 = self.utterances[u2.reply_to]
-				if u1.user is not None:
-					if selector is None or selector(u2.user, u1.user):
-						key = (u2.user.id, u1.user.id) if user_names_only else (u2.user, u1.user)
+				if u1.speaker is not None:
+					if selector is None or selector(u2.speaker, u1.speaker):
+						key = (u2.speaker.id, u1.speaker.id) if speaker_names_only else (u2.speaker, u1.speaker)
 						pairs[key].append(u2)
 		return pairs
 
@@ -662,63 +650,62 @@ class Corpus:
 		return seen_utts.values()
 
 	@staticmethod
-	def _collect_user_data(utt_sets: Collection[Collection[Utterance]]) -> Tuple[
+	def _collect_speaker_data(utt_sets: Collection[Collection[Utterance]]) -> Tuple[
 		Dict[str, Dict[str, str]], Dict[str, Dict[str, bool]]]:
 		"""
 		Helper function for merge().
 
-		Iterates through the input set of utterances, to collect User data and metadata.
+		Iterates through the input set of utterances, to collect Speaker data and metadata.
 
-		Collect User metadata in another Dictionary indexed by User ID
+		Collect Speaker metadata in another Dictionary indexed by Speaker ID
 
-		Track if conflicting user metadata is found in another dictionary
+		Track if conflicting speaker metadata is found in another dictionary
 
-		:param utt_sets: Collections of collections of Utterances to extract Users from
-		:return: user metadata and the corresponding tracker
+		:param utt_sets: Collections of collections of Utterances to extract Speakers from
+		:return: speaker metadata and the corresponding tracker
 		"""
-		# Collect USER data and metadata
-		# users_data = defaultdict(lambda: defaultdict(set))
-		users_meta = defaultdict(lambda: defaultdict(str))
-		users_meta_conflict = defaultdict(lambda: defaultdict(bool))
+		# Collect SPEAKER data and metadata
+		speakers_meta = defaultdict(lambda: defaultdict(str))
+		speakers_meta_conflict = defaultdict(lambda: defaultdict(bool))
 		for utt_set in utt_sets:
 			for utt in utt_set:
-				for meta_key, meta_val in utt.user.meta.items():
-					curr = users_meta[utt.user][meta_key]
+				for meta_key, meta_val in utt.speaker.meta.items():
+					curr = speakers_meta[utt.speaker][meta_key]
 					if curr != meta_val:
 						if curr != "":
-							users_meta_conflict[utt.user][meta_key] = True
-						users_meta[utt.user][meta_key] = meta_val
+							speakers_meta_conflict[utt.speaker][meta_key] = True
+						speakers_meta[utt.speaker][meta_key] = meta_val
 
-		return users_meta, users_meta_conflict
+		return speakers_meta, speakers_meta_conflict
 
 	@staticmethod
-	def _update_corpus_user_data(new_corpus, users_meta: Dict, users_meta_conflict: Dict, warnings: bool) -> None:
+	def _update_corpus_speaker_data(new_corpus, speakers_meta: Dict, speakers_meta_conflict: Dict, warnings: bool) -> None:
 		"""
 		Helper function for merge().
 
-		Update new_corpus's Users' data (utterance and conversation lists) and metadata
+		Update new_corpus's Speakers' data (utterance and conversation lists) and metadata
 
-		Prints a warning if multiple values are found for any user's metadata key; latest user metadata is used
+		Prints a warning if multiple values are found for any speaker's metadata key; latest speaker metadata is used
 
-		:param users_meta: Dictionary indexed by User ID, containing the collected User metadata
-		:param users_meta_conflict: Dictionary indexed by User ID, indicating if there were value conflicts for the associated meta keys
-		:return: None (mutates the new_corpus's Users)
+		:param speakers_meta: Dictionary indexed by Speaker ID, containing the collected Speaker metadata
+		:param speakers_meta_conflict: Dictionary indexed by Speaker ID, indicating if there were value conflicts for the associated meta keys
+		:return: None (mutates the new_corpus's Speakers)
 		"""
-		# Update USER data and metadata with merged versions
-		for user in new_corpus.iter_users():
-			for meta_key, meta_val in users_meta[user].items():
-				if users_meta_conflict[user][meta_key]:
+		# Update SPEAKER data and metadata with merged versions
+		for speaker in new_corpus.iter_speakers():
+			for meta_key, meta_val in speakers_meta[speaker].items():
+				if speakers_meta_conflict[speaker][meta_key]:
 					if warnings:
 						warn("Multiple values found for {} for metadata key: {}. "
-							 "Taking the latest one found".format(user, repr(meta_key)))
-				user.meta[meta_key] = meta_val
+							 "Taking the latest one found".format(speaker, repr(meta_key)))
+				speaker.meta[meta_key] = meta_val
 
 	def _reinitialize_index_helper(self, new_index, old_index, obj_type):
 		"""
 		Helper for reinitializing the index of the different Corpus object types
 		:param new_index: new ConvoKitIndex object
 		:param old_index: original ConvoKitIndex object
-		:param obj_type: utterance, user, or conversation
+		:param obj_type: utterance, speaker, or conversation
 		:return: None (mutates new_index)
 		"""
 		new_obj_index = new_index.indices[obj_type]
@@ -747,7 +734,7 @@ class Corpus:
 		new_index = ConvoKitIndex(self)
 
 		self._reinitialize_index_helper(new_index, old_index, "utterance")
-		self._reinitialize_index_helper(new_index, old_index, "user")
+		self._reinitialize_index_helper(new_index, old_index, "speaker")
 		self._reinitialize_index_helper(new_index, old_index, "conversation")
 
 		for key, value in self.meta.items():  # overall
@@ -779,11 +766,11 @@ class Corpus:
 		utts2 = list(other_corpus.iter_utterances())
 		combined_utts = self._merge_utterances(utts1, utts2, warnings=warnings)
 		new_corpus = Corpus(utterances=list(combined_utts))
-		# Note that we collect Users from the utt sets directly instead of the combined utts, otherwise
-		# differences in User meta will not be registered for duplicate Utterances (because utts would be discarded
+		# Note that we collect Speakers from the utt sets directly instead of the combined utts, otherwise
+		# differences in Speaker meta will not be registered for duplicate Utterances (because utts would be discarded
 		# during merging)
-		users_meta, users_meta_conflict = self._collect_user_data([utts1, utts2])
-		Corpus._update_corpus_user_data(new_corpus, users_meta, users_meta_conflict, warnings=warnings)
+		speakers_meta, speakers_meta_conflict = self._collect_speaker_data([utts1, utts2])
+		Corpus._update_corpus_speaker_data(new_corpus, speakers_meta, speakers_meta_conflict, warnings=warnings)
 
 		# Merge CORPUS metadata
 		new_corpus.meta = self.meta
@@ -810,7 +797,7 @@ class Corpus:
 							 "Overwriting with other corpus's Conversation metadata.".format(repr(convo.id), repr(key)))
 				curr_meta[key] = val
 
-		new_corpus.update_users_data()
+		new_corpus.update_speakers_data()
 		new_corpus.reinitialize_index()
 
 		return new_corpus
@@ -834,68 +821,68 @@ class Corpus:
 			helper_corpus = Corpus(utterances=utterances)
 			return self.merge(helper_corpus, warnings=warnings)
 		else:
-			new_users = {u.user.id: u.user for u in utterances}
+			new_speakers = {u.speaker.id: u.speaker for u in utterances}
 			new_utterances = {u.id: u for u in utterances}
-			for user in new_users.values():
-				user.owner = self
+			for speaker in new_speakers.values():
+				speaker.owner = self
 			for utt in new_utterances.values():
 				utt.owner = self
 
-			# update corpus users
-			for new_user_id, new_user in new_users.items():
-				if new_user_id not in self.users:
-					self.users[new_user_id] = new_user
+			# update corpus speakers
+			for new_speaker_id, new_speaker in new_speakers.items():
+				if new_speaker_id not in self.speakers:
+					self.speakers[new_speaker_id] = new_speaker
 
-			# update corpus utterances + (link user -> utt)
+			# update corpus utterances + (link speaker -> utt)
 			for new_utt_id, new_utt in new_utterances.items():
 				if new_utt_id not in self.utterances:
 					self.utterances[new_utt_id] = new_utt
-					self.users[new_utt.user.id]._add_utterance(new_utt)
+					self.speakers[new_utt.speaker.id]._add_utterance(new_utt)
 
 			# update corpus conversations + (link convo <-> utt)
 			new_convos = defaultdict(list)
 			for utt in new_utterances.values():
-				if utt.root in self.conversations:
-					self.conversations[utt.root]._add_utterance(utt)
+				if utt.conversation_id in self.conversations:
+					self.conversations[utt.conversation_id]._add_utterance(utt)
 				else:
-					new_convos[utt.root].append(utt.id)
+					new_convos[utt.conversation_id].append(utt.id)
 			for convo_id, convo_utts in new_convos.items():
 				new_convo = Conversation(owner=self, id=convo_id,
 										 utterances=convo_utts,
 										 meta=None)
 				self.conversations[convo_id] = new_convo
-				# (link user -> convo)
-				new_convo_user = self.users[new_convo.get_utterance(convo_id).user.id]
-				new_convo_user._add_conversation(new_convo)
+				# (link speaker -> convo)
+				new_convo_speaker = self.speakers[new_convo.get_utterance(convo_id).speaker.id]
+				new_convo_speaker._add_conversation(new_convo)
 		return self
 
-	def update_users_data(self) -> None:
+	def update_speakers_data(self) -> None:
 		"""
-		Updates the conversation and utterance lists of every User in the Corpus
+		Updates the conversation and utterance lists of every Speaker in the Corpus
 
 		:return: None
 		"""
-		users_utts = defaultdict(list)
-		users_convos = defaultdict(list)
+		speakers_utts = defaultdict(list)
+		speakers_convos = defaultdict(list)
 
 		for utt in self.iter_utterances():
-			users_utts[utt.user.id].append(utt)
+			speakers_utts[utt.speaker.id].append(utt)
 
 		for convo in self.iter_conversations():
 			for utt in convo.iter_utterances():
-				users_convos[utt.user.id].append(convo)
+				speakers_convos[utt.speaker.id].append(convo)
 
-		for user in self.iter_users():
-			user.utterances = {utt.id: utt for utt in users_utts[user.id]}
-			user.conversations = {convo.id: convo for convo in users_convos[user.id]}
+		for speaker in self.iter_speakers():
+			speaker.utterances = {utt.id: utt for utt in speakers_utts[speaker.id]}
+			speaker.conversations = {convo.id: convo for convo in speakers_convos[speaker.id]}
 
 	def print_summary_stats(self) -> None:
 		"""
-		Helper function for printing the number of Users, Utterances, and Conversations in this Corpus
+		Helper function for printing the number of Speakers, Utterances, and Conversations in this Corpus
 
 		:return: None
 		"""
-		print("Number of Users: {}".format(len(self.users)))
+		print("Number of Speakers: {}".format(len(self.speakers)))
 		print("Number of Utterances: {}".format(len(self.utterances)))
 		print("Number of Conversations: {}".format(len(self.conversations)))
 
@@ -967,7 +954,7 @@ class Corpus:
 
 		For each attribute with name <NAME>, will read from a file called info.<NAME>.jsonl, and load each attribute value into the respective object's .meta field.
 
-		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
+		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "speaker", "conversation".
 		:param fields: a list of names of attributes to load. if empty, will load all attributes stored in the specified directory dir_name.
 		:param dir_name: the directory to read attributes from. by default, or if set to None, will read from the directory that the Corpus was loaded from.
 		:return: None
@@ -1004,7 +991,7 @@ class Corpus:
 
 		For each attribute with name <NAME>, will write to a file called info.<NAME>.jsonl, where rows are json-serialized dictionaries structured as {"id": id of object, "value": value of attribute}.
 
-		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "user", "conversation".
+		:param obj_type: type of object the attribute is associated with. can be one of "utterance", "speaker", "conversation".
 		:param fields: a list of names of attributes to write to disk.
 		:param dir_name: the directory to write attributes to. by default, or if set to None, will read from the directory that the Corpus was loaded from.
 		:return: None
@@ -1069,7 +1056,7 @@ class Corpus:
 		"""
 		returns a dataframe, indexed by the IDs of objects of `obj_type`, containing attributes of these objects.
 
-		:param obj_type: the type of object to get attributes for. can be `'utterance'`, `'user'` or `'conversation'`.
+		:param obj_type: the type of object to get attributes for. can be `'utterance'`, `'speaker'` or `'conversation'`.
 		:param attrs: a list of names of attributes to get.
 		:return: a Pandas dataframe of attributes.
 		"""
@@ -1084,53 +1071,53 @@ class Corpus:
 			table_entries.append(entry)
 		return pd.DataFrame(table_entries).set_index('id')
 
-	def set_user_convo_info(self, user_id, convo_id, key, value):
+	def set_speaker_convo_info(self, speaker_id, convo_id, key, value):
 		"""
-		assigns user-conversation attribute `key` with `value` to user `user_id` in conversation `convo_id`.
+		assigns speaker-conversation attribute `key` with `value` to speaker `speaker_id` in conversation `convo_id`.
 
-		:param user_id: user
+		:param speaker_id: speaker
 		:param convo_id: conversation
 		:param key: name of attribute
 		:param value: value of attribute
 		:return: None
 		"""
 
-		user = self.get_user(user_id)
-		if 'conversations' not in user.meta:
-			user.meta['conversations'] = {}
-		if convo_id not in user.meta['conversations']:
-			user.meta['conversations'][convo_id] = {}
-		user.meta['conversations'][convo_id][key] = value
+		speaker = self.get_speaker(speaker_id)
+		if 'conversations' not in speaker.meta:
+			speaker.meta['conversations'] = {}
+		if convo_id not in speaker.meta['conversations']:
+			speaker.meta['conversations'][convo_id] = {}
+		speaker.meta['conversations'][convo_id][key] = value
 
-	def get_user_convo_info(self, user_id, convo_id, key=None):
+	def get_speaker_convo_info(self, speaker_id, convo_id, key=None):
 		"""
-		retreives user-conversation attribute `key` for `user_id` in conversation `convo_id`.
+		retreives speaker-conversation attribute `key` for `speaker_id` in conversation `convo_id`.
 
-		:param user_id: user
+		:param speaker_id: speaker
 		:param convo_id: conversation
-		:param key: name of attribute. if None, will return all attributes for that user-conversation.
+		:param key: name of attribute. if None, will return all attributes for that speaker-conversation.
 		:return: attribute value
 		"""
 
-		user = self.get_user(user_id)
-		if 'conversations' not in user.meta: return None
+		speaker = self.get_speaker(speaker_id)
+		if 'conversations' not in speaker.meta: return None
 		if key is None:
-			return user.meta['conversations'].get(convo_id, {})
-		return user.meta['conversations'].get(convo_id, {}).get(key)
+			return speaker.meta['conversations'].get(convo_id, {})
+		return speaker.meta['conversations'].get(convo_id, {}).get(key)
 
-	def organize_user_convo_history(self, utterance_filter=None):
+	def organize_speaker_convo_history(self, utterance_filter=None):
 		"""
-		For each user, pre-computes a list of all of their utterances, organized by the conversation they participated in. Annotates user with the following:
+		For each speaker, pre-computes a list of all of their utterances, organized by the conversation they participated in. Annotates speaker with the following:
 			* `n_convos`: number of conversations
 			* `start_time`: time of first utterance, across all conversations
 			* `conversations`: a dictionary keyed by conversation id, where entries consist of:
-				* `idx`: the index of the conversation, in terms of the time of the first utterance contributed by that particular user (i.e., `idx=0` means this is the first conversation the user ever participated in)
-				* `n_utterances`: the number of utterances the user contributed in the conversation
-				* `start_time`: the timestamp of the user's first utterance in the conversation
-				* `utterance_ids`: a list of ids of utterances contributed by the user, ordered by timestamp.
-		In case timestamps are not provided with utterances, the present behavior is to sort just by utterance id.
+				* `idx`: the index of the conversation, in terms of the time of the first utterance contributed by that particular speaker (i.e., `idx=0` means this is the first conversation the speaker ever participated in)
+				* `n_utterances`: the number of utterances the speaker contributed in the conversation
+				* `start_time`: the timestamp of the speaker's first utterance in the conversation
+				* `utterance_ids`: a list of ids of utterances contributed by the speaker, ordered by timestamp.
+			In case timestamps are not provided with utterances, the present behavior is to sort just by utterance id.
 
-		:param utterance_filter: function that returns True for an utterance that counts towards a user having participated in that conversation. (e.g., one could filter out conversations where the user contributed less than k words per utterance)
+		:param utterance_filter: function that returns True for an utterance that counts towards a speaker having participated in that conversation. (e.g., one could filter out conversations where the speaker contributed less than k words per utterance)
 		"""
 
 		if utterance_filter is None:
@@ -1138,44 +1125,44 @@ class Corpus:
 		else:
 			utterance_filter = utterance_filter
 
-		user_to_convo_utts = defaultdict(lambda: defaultdict(list))
+		speaker_to_convo_utts = defaultdict(lambda: defaultdict(list))
 		for utterance in self.iter_utterances():
 			if not utterance_filter(utterance): continue
 
-			user_to_convo_utts[utterance.user.id][utterance.root].append((utterance.id, utterance.timestamp))
-		for user, convo_utts in user_to_convo_utts.items():
+			speaker_to_convo_utts[utterance.speaker.id][utterance.conversation_id].append((utterance.id, utterance.timestamp))
+		for speaker, convo_utts in speaker_to_convo_utts.items():
 			for convo, utts in convo_utts.items():
 				sorted_utts = sorted(utts, key=lambda x: (x[1], x[0]))
-				self.set_user_convo_info(user, convo, 'utterance_ids', [x[0] for x in sorted_utts])
-				self.set_user_convo_info(user, convo, 'start_time', sorted_utts[0][1])
-				self.set_user_convo_info(user, convo, 'n_utterances', len(sorted_utts))
-		for user in self.iter_users():
+				self.set_speaker_convo_info(speaker, convo, 'utterance_ids', [x[0] for x in sorted_utts])
+				self.set_speaker_convo_info(speaker, convo, 'start_time', sorted_utts[0][1])
+				self.set_speaker_convo_info(speaker, convo, 'n_utterances', len(sorted_utts))
+		for speaker in self.iter_speakers():
 			try:
-				user.set_info('n_convos', len(user.get_info('conversations')))
+				speaker.set_info('n_convos', len(speaker.get_info('conversations')))
 			except:
 				continue
 
-			sorted_convos = sorted(user.get_info('conversations').items(),
+			sorted_convos = sorted(speaker.get_info('conversations').items(),
 								   key=lambda x: (x[1]['start_time'], x[1]['utterance_ids'][0]))
-			user.set_info('start_time', sorted_convos[0][1]['start_time'])
+			speaker.set_info('start_time', sorted_convos[0][1]['start_time'])
 			for idx, (convo_id, _) in enumerate(sorted_convos):
-				self.set_user_convo_info(user.id, convo_id, 'idx', idx)
+				self.set_speaker_convo_info(speaker.id, convo_id, 'idx', idx)
 
-	def get_user_convo_attribute_table(self, attrs):
+	def get_speaker_convo_attribute_table(self, attrs):
 		"""
-		returns a table where each row lists a (user, convo) level aggregate for each attribute in attrs.
+		returns a table where each row lists a (speaker, convo) level aggregate for each attribute in attrs.
 
-		:param attrs: list of (user, convo) attribute names
-		:return: dataframe containing all user,convo attributes.
+		:param attrs: list of (speaker, convo) attribute names
+		:return: dataframe containing all speaker,convo attributes.
 		"""
 
 		table_entries = []
-		for user in self.iter_users():
+		for speaker in self.iter_speakers():
 
-			if 'conversations' not in user.meta: continue
-			for convo_id, convo_dict in user.meta['conversations'].items():
-				entry = {'id': '%s__%s' % (user.id, convo_id),
-						 'user': user.id, 'convo_id': convo_id,
+			if 'conversations' not in speaker.meta: continue
+			for convo_id, convo_dict in speaker.meta['conversations'].items():
+				entry = {'id': '%s__%s' % (speaker.id, convo_id),
+						 'speaker': speaker.id, 'convo_id': convo_id,
 						 'convo_idx': convo_dict['idx']}
 
 				for attr in attrs:
@@ -1183,29 +1170,29 @@ class Corpus:
 				table_entries.append(entry)
 		return pd.DataFrame(table_entries).set_index('id')
 
-	def get_full_attribute_table(self, user_convo_attrs, user_attrs=None, convo_attrs=None, user_suffix='__user',
+	def get_full_attribute_table(self, speaker_convo_attrs, speaker_attrs=None, convo_attrs=None, speaker_suffix='__speaker',
 								 convo_suffix='__convo'):
 		"""
-		returns a table where each row lists a (user, convo) level aggregate for each attribute in attrs, along with user-level and conversation-level attributes; by default these attributes are suffixed with '__user' and '__convo' respectively.
+		returns a table where each row lists a (speaker, convo) level aggregate for each attribute in attrs, along with speaker-level and conversation-level attributes; by default these attributes are suffixed with '__speaker' and '__convo' respectively.
 
-		:param user_convo_attrs: list of (user, convo) attribute names
-		:param user_attrs: list of user attribute names
+		:param speaker_convo_attrs: list of (speaker, convo) attribute names
+		:param speaker_attrs: list of speaker attribute names
 		:param convo_attrs: list of conversation attribute names
-		:param user_suffix: suffix to append to names of user-level attributes
+		:param speaker_suffix: suffix to append to names of speaker-level attributes
 		:param convo_suffix: suffix to append to names of conversation-level attributes.
 		:return: dataframe containing all attributes.
 		"""
-		if user_attrs is None:
-			user_attrs = []
+		if speaker_attrs is None:
+			speaker_attrs = []
 		if convo_attrs is None:
 			convo_attrs = []
 
-		uc_df = self.get_user_convo_attribute_table(user_convo_attrs)
-		u_df = self.get_attribute_table('user', user_attrs)
-		u_df.columns = [x + user_suffix for x in u_df.columns]
+		uc_df = self.get_speaker_convo_attribute_table(speaker_convo_attrs)
+		u_df = self.get_attribute_table('speaker', speaker_attrs)
+		u_df.columns = [x + speaker_suffix for x in u_df.columns]
 		c_df = self.get_attribute_table('conversation', convo_attrs)
 		c_df.columns = [x + convo_suffix for x in c_df.columns]
-		return uc_df.join(u_df, on='user').join(c_df, on='convo_id')
+		return uc_df.join(u_df, on='speaker').join(c_df, on='convo_id')
 
 # def __repr__(self):
 # def __eq__(self, other):

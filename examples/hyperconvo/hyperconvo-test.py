@@ -15,10 +15,10 @@ def summarize_dist(name, l):
         name, min(l), np.mean(l), max(l)))
 
 # in- and outdegree distributions
-summarize_dist("user to user indegrees", G.indegrees(True, True))
-summarize_dist("user to user outdegrees", G.outdegrees(True, True))
-summarize_dist("user to comment indegrees", G.indegrees(True, False))
-summarize_dist("user to comment outdegrees", G.outdegrees(True, False))
+summarize_dist("speaker to speaker indegrees", G.indegrees(True, True))
+summarize_dist("speaker to speaker outdegrees", G.outdegrees(True, True))
+summarize_dist("speaker to comment indegrees", G.indegrees(True, False))
+summarize_dist("speaker to comment outdegrees", G.outdegrees(True, False))
 summarize_dist("comment to comment indegrees", G.indegrees(False, False))
 summarize_dist("comment to comment outdegrees", G.outdegrees(False, False))
 print()

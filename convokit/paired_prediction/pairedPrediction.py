@@ -30,7 +30,7 @@ class PairedPrediction(Transformer):
                  label_feat_name: str = "pair_obj_label",
                  pair_orientation_feat_name: str = "pair_orientation"):
 
-        assert obj_type in ["user", "utterance", "conversation"]
+        assert obj_type in ["speaker", "utterance", "conversation"]
         self.obj_type = obj_type
         self.clf = Pipeline([("standardScaler", StandardScaler(with_mean=False)),
                              ("logreg", LogisticRegression(solver='liblinear'))]) if clf is None else clf

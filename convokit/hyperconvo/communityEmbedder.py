@@ -70,7 +70,7 @@ class CommunityEmbedder(Transformer):
         else:
             X_embedded = X_mid
 
-        labels = [corpus.get_utterance(root).get("meta")[self.community_key]
+        labels = [corpus.get_utterance(root).meta[self.community_key]
                   for root in roots]
         # label_counts = Counter(labels)
         subs = defaultdict(list)

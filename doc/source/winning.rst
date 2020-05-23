@@ -3,7 +3,7 @@ Winning Arguments (ChangeMyView) Corpus
 
 A metadata-rich subset of conversations made in the r/ChangeMyView subreddit between 1 Jan 2013 - 7 May 2015, with information on the delta (success) of a user's utterance in convincing the poster.
 
-Each ConvoKit Conversation in this dataset is the corresponding full comment thread of an original post made to r/ChangeMyView. Within each full thread are comments made by Redditors (with the objective of the subreddit being to change the opinion of the original poster.) There are 34911 Users, 293297 Utterances, and 3051 Conversations.
+Each ConvoKit Conversation in this dataset is the corresponding full comment thread of an original post made to r/ChangeMyView. Within each full thread are comments made by Redditors (with the objective of the subreddit being to change the opinion of the original poster.) There are 34911 Speakers, 293297 Utterances, and 3051 Conversations.
 
 Original dataset was distributed together with:
 `Winning Arguments: Interaction Dynamics and Persuasion Strategies in Good-faith Online Discussions: A new Approach to Understanding Coordination of Linguistic Style in Dialogs <https://chenhaot.com/pages/changemyview.html>`_. Chenhao Tan, Vlad Niculae, Cristian Danescu-Niculescu-Mizil, Lillian Lee.
@@ -14,10 +14,10 @@ In the original "Winning Arguments" paper, this corpus was used in a paired pred
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are Redditors and are indexed by their Reddit username. There is no other metadata information.
+Speakers in this dataset are Redditors and are indexed by their Reddit username. There is no other metadata information.
 
 Utterance-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -63,7 +63,7 @@ To download directly with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 34911
+Number of Speakers: 34911
 Number of Utterances: 293297
 Number of Conversations: 3051
 
@@ -74,7 +74,7 @@ Additional notes
 - To see the original posts in each conversation, note that the 'root' metadata of an Utterance (i.e. Reddit comment) would be the same as the 'id' metadata (this only holds true for original posts).
 - The main indicator of interest in this data is whether an argument succeeded in changing the original poster's (OP's) view. To denote a successful argument: the "success" field of an utterance takes the value of 1 (these utterances were the comments in the original post that succeeded in changing OP's mind), or the "success" field takes the value of 0 (this collection of utterances were a comment thread that are similar in nature to a successful argument in the full thread(matched on pair_id), but this argument failed to change OP's mind -- See section 4 of the cited paper for selection criteria of successful/unsuccessful arguments. All other comments take a 'success' value of None.
 - Note for pair_ids: the successful-unsuccessful argument pairs originally compiled by the authors are not unique at the Conversation-level nor Utterance-level (i.e. the original posts to the ChangeMyView subreddit can have multiple successful-unsuccessful comment pairs in their full-comment threads and some comments can have multiple opposing pairs -- see the relevant metadata fields at Conversation-level and Utterance-level below).
-- Note on missing data: 530 'Reddit comments' were included from the original data which did not have text nor an author. These were included for completeness, each utterance has User(name='[missing]').
+- Note on missing data: 530 'Reddit comments' were included from the original data which did not have text nor an author. These were included for completeness, each utterance has Speaker(name='[missing]').
 
 
 The original dataset can be downloaded `here <https://chenhaot.com/pages/changemyview.html>`_. Refer to the original README for more explanations on dataset construction.

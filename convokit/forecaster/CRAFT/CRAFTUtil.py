@@ -35,7 +35,7 @@ class Voc:
 
     def __init__(self, name, word2index=None, index2word=None):
         self.name = name
-        self.trimmed = False if not word2index else True # if a precomputed vocab is specified assume the user wants to use it as-is
+        self.trimmed = False if not word2index else True # if a precomputed vocab is specified assume the speaker wants to use it as-is
         self.word2index = word2index if word2index else {"UNK": UNK_token}
         self.word2count = {}
         self.index2word = index2word if index2word else {PAD_token: "PAD", SOS_token: "SOS", EOS_token: "EOS", UNK_token: "UNK"}

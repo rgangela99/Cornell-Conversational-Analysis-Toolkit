@@ -6,24 +6,23 @@ At the heart of ConvoKit are two key concepts: *Corpora* and *Transformations*. 
 Corpus
 ------
 
-A Corpus is a collection of conversations, each of which is made up of one or more participants (henceforth referred to as *users*) who say things (henceforth referred to as *utterances*) to each other. This intuitive definition is represented in ConvoKit by the following class hierarchy: the :py:class:`~convokit.model.Corpus` class stores a list of :py:class:`~convokit.model.Utterance` objects, which may be grouped together into one or more instances of :py:class:`~convokit.model.Conversation`, and each :py:class:`~convokit.model.Utterance` has an associated :py:class:`~convokit.model.User`. These relationships are illustrated below:
+A Corpus is a collection of conversations, each of which is made up of one or more participants (henceforth referred to as *Speakers*) who say things (henceforth referred to as *utterances*) to each other. This intuitive definition is represented in ConvoKit by the following class hierarchy: the :py:class:`~convokit.model.Corpus` class stores a list of :py:class:`~convokit.model.Utterance` objects, which may be grouped together into one or more instances of :py:class:`~convokit.model.Conversation`, and each :py:class:`~convokit.model.Utterance` has an associated :py:class:`~convokit.model.Speaker`. These relationships are illustrated below:
 
 .. image:: img/convokit_classes.svg
 
-As we can see from this example, the Corpus contains Conversations, Utterances, and Users. Each Conversation points to one or more Utterances that make up the conversation, and each Utterance points to the User who authored it. We also observe the following properties:
+As we can see from this example, the Corpus contains Conversations, Utterances, and Speakers. Each Conversation points to one or more Utterances that make up the conversation, and each Utterance points to the Speaker who authored it. We also observe the following properties:
 
-* Conversations and Utterances are identified by IDs. An ID can be any arbitrary string, as long as there is a unique ID for each Conversation and Utterance.
-* Users are identified by a human-readable name. This is done to reflect the nature of most online conversation platforms (a primary domain that ConvoKit is designed for), where each user posts comments under a unique username.
-* A User can be part of multiple Conversations
+* Conversations, Utterances, and Speakers are identified by IDs. An ID can be any arbitrary string, as long as there is a unique ID for each Conversation and Utterance.
+* A Speaker can be part of multiple Conversations
 
 Each class in the hierarchy also stores useful information for analysis purposes. For instance, each Utterance object stores the text (what was said) and timestamp (when it was said) of the Utterance. A full listing of basic properties stored by each class can be found in the full documentation (see :doc:`model`). In practice, however, when you use ConvoKit for your own task, you will probably need to keep track of additional task-specific properties beyond the basic ones. ConvoKit provides a mechanism for doing this: *metadata*.
 
 Metadata
 ^^^^^^^^
 
-In everyday usage, "metadata" simply refers to information for identifying and organizing data; e.g., timestamps. However, in the context of ConvoKit, "metadata" has a slightly different meaning: it refers to any properties (beyond the basic ones provided by ConvoKit) of a Corpus, Conversation, Utterance, or User that you might want to keep track of when doing some task. For instance, if your task is to compare the sentiment of Reddit comments to the age of the users who wrote them, you would want to keep track of when each user first joined Reddit. The User class does not automatically store this, so you would add it as metadata.
+In everyday usage, "metadata" simply refers to information for identifying and organizing data; e.g., timestamps. However, in the context of ConvoKit, "metadata" has a slightly different meaning: it refers to any properties (beyond the basic ones provided by ConvoKit) of a Corpus, Conversation, Utterance, or Speaker that you might want to keep track of when doing some task. For instance, if your task is to compare the sentiment of Reddit comments to the age of the Speakers who wrote them, you would want to keep track of when each Speaker first joined Reddit. The Speaker class does not automatically store this, so you would add it as metadata.
 
-Each of the four classes in the hierarchy contains a ``.meta`` field, which is a dictionary that maps from metadata name to value. In the previous example, you would want a User-level metadata entry called something like "start-date". So, if ``usr`` is an instance of User representing a Reddit user who joined on April 1, 2008, ``usr.meta`` would be a dictionary looking like ``{"start-date": "04-01-2008"}``. While for simplicity we have represented the start date as a string, in practice there are no restrictions on what kinds of objects can be stored as metadata, so you could have chosen a fancier representation, like a Pandas timestamp.
+Each of the four classes in the hierarchy contains a ``.meta`` field, which is a dictionary that maps from metadata name to value. In the previous example, you would want a Speaker-level metadata entry called something like "start-date". So, if ``spk`` is an instance of Speaker representing a Reddit user who joined on April 1, 2008, ``spk.meta`` would be a dictionary looking like ``{"start-date": "04-01-2008"}``. While for simplicity we have represented the start date as a string, in practice there are no restrictions on what kinds of objects can be stored as metadata, so you could have chosen a fancier representation, like a Pandas timestamp.
 
 Note that all of the datasets that ship with ConvoKit have some metadata already present, usually related to the task that the dataset was originally designed for. To learn what metadata is present in a Corpus, you can use the :py:func:`~convokit.util.meta_index` function.
 

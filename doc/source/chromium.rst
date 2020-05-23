@@ -13,10 +13,10 @@ A full description of the dataset can be found `here <https://zenodo.org/record/
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-User names have been anonymized randomly to 'developer_#' where '#' is a number between 1 and 4842.
+Speaker names have been anonymized randomly to 'developer_#' where '#' is a number between 1 and 4842.
 
 Additional metadata includes:
 
@@ -71,7 +71,7 @@ To download directly with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 4842
+Number of Speakers: 4842
 Number of Utterances: 2853498
 Number of Conversations: 1484843
 

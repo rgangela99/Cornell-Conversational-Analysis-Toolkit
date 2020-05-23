@@ -9,10 +9,10 @@ Wang, Xuewei, Weiyan Shi, Richard Kim, Yoojung Oh, Sijia Yang, Jingwen Zhang, an
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are 1285 users in this dataset. Users are workers on Amazon Mechanical Turk. Each user has associated metadata from pre-task psychological surveys, as well as demographic information:
+There are 1285 users in this dataset. Speakers are workers on Amazon Mechanical Turk. Each user has associated metadata from pre-task psychological surveys, as well as demographic information:
 
 **Demographics**
 
@@ -120,7 +120,7 @@ To download directly with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 1285
+Number of Speakers: 1285
 Number of Utterances: 20932
 Number of Conversations: 1017
 

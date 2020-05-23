@@ -7,8 +7,8 @@ total = 0
 with open("reddit-convos.json", "r") as f:
     l = json.load(f)
     for p in l:
-        counts[p["user-info"]["subreddit"]] += 1
-        threads[p["user-info"]["subreddit"]].add(p["root"])
+        counts[p["speaker-info"]["subreddit"]] += 1
+        threads[p["speaker-info"]["subreddit"]].add(p["root"])
         total += 1
 
 print("subreddit, num comments, num threads")

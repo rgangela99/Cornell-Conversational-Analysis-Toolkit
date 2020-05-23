@@ -8,5 +8,5 @@ Miscellaneous utility functions for managing datasets
 
    Util <util.rst>
    Text Processing Utilities <text_processing.rst>
-   User Conversation Utilities <user_convo_helpers.rst>
+   Speaker Conversation Utilities <speaker_convo_helpers.rst>
    Pipeline <convokitPipeline.rst>

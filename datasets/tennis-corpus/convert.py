@@ -27,7 +27,7 @@ ID = "id" # equal to question_text_idx if current utterance is a question
 ROOT = "root" # this will always be equal to question_text_idx
 REPLY_TO = "reply-to" # non existant if this utterance is a question,
                     # equal to question_text_idx if this is an answer
-USER = "user" # equal to "REPORTER" if current utterance is a question
+USER = "speaker" # equal to "REPORTER" if current utterance is a question
             # equal to player if current utterance is an answer
 TEXT = "text" # equal to question_text if current utterance is a question
         # equal to answer_text if current utterance is an answer
@@ -43,9 +43,9 @@ STAGE = "stage"
 TOURNAMENT = "tournament"
 TOURNAMENT_TYPE = "tournament_type"
 
-USER_INFO = "user-info" # container for extra information
+USER_INFO = "speaker-info" # container for extra information
 
-# Keys within user-info
+# Keys within speaker-info
 GENDER = "gender"
 RANKING = "ranking"
 

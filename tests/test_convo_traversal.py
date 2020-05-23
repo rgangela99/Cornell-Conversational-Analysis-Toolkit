@@ -1,5 +1,5 @@
 import unittest
-from convokit.model import Utterance, User, Corpus
+from convokit.model import Utterance, Speaker, Corpus
 
 class CorpusTraversal(unittest.TestCase):
 
@@ -12,26 +12,26 @@ class CorpusTraversal(unittest.TestCase):
         10                11
         """
         self.corpus = Corpus(utterances = [
-            Utterance(id="0", reply_to=None, root="0", user=User(id="alice"), timestamp=0),
+            Utterance(id="0", reply_to=None, conversation_id="0", speaker=Speaker(id="alice"), timestamp=0),
 
-            Utterance(id="2", reply_to="0", root="0", user=User(id="alice"), timestamp=2),
-            Utterance(id="1", reply_to="0", root="0", user=User(id="alice"), timestamp=1),
-            Utterance(id="3", reply_to="0", root="0", user=User(id="alice"), timestamp=3),
+            Utterance(id="2", reply_to="0", conversation_id="0", speaker=Speaker(id="alice"), timestamp=2),
+            Utterance(id="1", reply_to="0", conversation_id="0", speaker=Speaker(id="alice"), timestamp=1),
+            Utterance(id="3", reply_to="0", conversation_id="0", speaker=Speaker(id="alice"), timestamp=3),
 
-            Utterance(id="4", reply_to="1", root="0", user=User(id="alice"), timestamp=4),
-            Utterance(id="5", reply_to="1", root="0", user=User(id="alice"), timestamp=5),
-            Utterance(id="6", reply_to="1", root="0", user=User(id="alice"), timestamp=6),
+            Utterance(id="4", reply_to="1", conversation_id="0", speaker=Speaker(id="alice"), timestamp=4),
+            Utterance(id="5", reply_to="1", conversation_id="0", speaker=Speaker(id="alice"), timestamp=5),
+            Utterance(id="6", reply_to="1", conversation_id="0", speaker=Speaker(id="alice"), timestamp=6),
 
-            Utterance(id="7", reply_to="2", root="0", user=User(id="alice"), timestamp=4),
-            Utterance(id="8", reply_to="2", root="0", user=User(id="alice"), timestamp=5),
+            Utterance(id="7", reply_to="2", conversation_id="0", speaker=Speaker(id="alice"), timestamp=4),
+            Utterance(id="8", reply_to="2", conversation_id="0", speaker=Speaker(id="alice"), timestamp=5),
 
-            Utterance(id="9", reply_to="3", root="0", user=User(id="alice"), timestamp=4),
+            Utterance(id="9", reply_to="3", conversation_id="0", speaker=Speaker(id="alice"), timestamp=4),
 
-            Utterance(id="10", reply_to="4", root="0", user=User(id="alice"), timestamp=5),
+            Utterance(id="10", reply_to="4", conversation_id="0", speaker=Speaker(id="alice"), timestamp=5),
 
-            Utterance(id="11", reply_to="9", root="0", user=User(id="alice"), timestamp=10),
+            Utterance(id="11", reply_to="9", conversation_id="0", speaker=Speaker(id="alice"), timestamp=10),
 
-            Utterance(id="other", reply_to=None, root="other", user=User(id="alice"), timestamp=99)
+            Utterance(id="other", reply_to=None, conversation_id="other", speaker=Speaker(id="alice"), timestamp=99)
         ])
         self.corpus.get_conversation("0").meta['hey'] = 'jude'
         self.corpus.meta['foo'] = 'bar'
@@ -42,20 +42,20 @@ class CorpusTraversal(unittest.TestCase):
         """
 
         corpus1 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", reply_to=None, user=User(id="alice"), timestamp=0),
-            Utterance(id="1", text="my name is bob", reply_to="0", user=User(id="bob"), timestamp=2),
-            Utterance(id="2", text="this is a test", reply_to="1", user=User(id="charlie"), timestamp=1),
-            Utterance(id="3", text="hello world 2", reply_to=None, user=User(id="alice2"), timestamp=0),
+            Utterance(id="0", text="hello world", reply_to=None, speaker=Speaker(id="alice"), timestamp=0),
+            Utterance(id="1", text="my name is bob", reply_to="0", speaker=Speaker(id="bob"), timestamp=2),
+            Utterance(id="2", text="this is a test", reply_to="1", speaker=Speaker(id="charlie"), timestamp=1),
+            Utterance(id="3", text="hello world 2", reply_to=None, speaker=Speaker(id="alice2"), timestamp=0),
         ])
 
         corpus2 = Corpus(utterances = [
-            Utterance(id="0", text="hello world", reply_to=None, user=User(id="alice"), timestamp=0),
-            Utterance(id="1", text="my name is bob", reply_to="0", user=User(id="bob"), timestamp=2),
-            Utterance(id="2", text="this is a test", reply_to="1", user=User(id="charlie"), timestamp=1),
-            Utterance(id="3", text="hello world 2", reply_to="9", user=User(id="alice2"), timestamp=0),
+            Utterance(id="0", text="hello world", reply_to=None, speaker=Speaker(id="alice"), timestamp=0),
+            Utterance(id="1", text="my name is bob", reply_to="0", speaker=Speaker(id="bob"), timestamp=2),
+            Utterance(id="2", text="this is a test", reply_to="1", speaker=Speaker(id="charlie"), timestamp=1),
+            Utterance(id="3", text="hello world 2", reply_to="9", speaker=Speaker(id="alice2"), timestamp=0),
         ])
 
-        # test broken convo where there are multiple roots
+        # test broken convo where there are multiple conversation_ids
         convo = corpus1.get_conversation(None)
         self.assertRaises(ValueError, lambda: list(convo.traverse("dfs", as_utterance=True)))
 
@@ -88,7 +88,7 @@ class CorpusTraversal(unittest.TestCase):
         node = convo.get_subtree("1")
         self.assertEqual([node.utt.id for node in node.bfs_traversal()], ['1', '4', '5', '6', '10'])
 
-    def test_root_to_leaf_paths(self):
+    def test_conversation_id_to_leaf_paths(self):
         convo = self.corpus.get_conversation("0")
         paths = convo.get_root_to_leaf_paths()
         path_tuples = [tuple(utt.id for utt in paths[i]) for i in range(6)]
@@ -107,8 +107,8 @@ class CorpusTraversal(unittest.TestCase):
         self.assertEqual([utt.id for utt in convo.traverse('preorder')], ["other"])
 
     def test_reindex_corpus(self):
-        new_convo_roots = ['1', '2', '3']
-        new_corpus = self.corpus.reindex_conversations(new_convo_roots)
+        new_convo_conversation_ids = ['1', '2', '3']
+        new_corpus = self.corpus.reindex_conversations(new_convo_conversation_ids)
         # checking for correct number of conversations and utterances
         self.assertEqual(len(list(new_corpus.iter_conversations())), 3)
         self.assertEqual(len(list(new_corpus.iter_utterances())), 11)
@@ -120,8 +120,8 @@ class CorpusTraversal(unittest.TestCase):
         self.assertEqual(self.corpus.meta, new_corpus.meta)
 
     def test_reindex_corpus2(self):
-        new_convo_roots = ['1', '2', '3']
-        new_corpus = self.corpus.reindex_conversations(new_convo_roots,
+        new_convo_conversation_ids = ['1', '2', '3']
+        new_corpus = self.corpus.reindex_conversations(new_convo_conversation_ids,
                                                        preserve_convo_meta=False,
                                                        preserve_corpus_meta=False)
         # checking for correct number of conversations and utterances

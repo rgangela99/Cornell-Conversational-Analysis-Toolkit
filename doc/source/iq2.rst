@@ -10,10 +10,10 @@ Date: October 19, 2019
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are the speakers during the debate. The most prominent speakers are those that are listed in the initial dataset as being either ‘for’ a position, ‘against’ it, or a ‘moderator.’ However, there are also other speakers that do not fit into these categories, such as a host or a panelist. The speaker type is annotated at the utterance level rather than the user level.
+Speakers in this dataset are the speakers during the debate. The most prominent speakers are those that are listed in the initial dataset as being either ‘for’ a position, ‘against’ it, or a ‘moderator.’ However, there are also other speakers that do not fit into these categories, such as a host or a panelist. The speaker type is annotated at the utterance level rather than the speaker level.
 
 We provide:
 
@@ -61,7 +61,7 @@ We provide:
     * pre: percentage of audience that voted 'for,' 'against,' or 'undecided' at the beginning of the debate. This results breakdown follows the same structure as the original dataset.
     * post: percentage of audience that voted 'for,' 'against,' or 'undecided' at the end of the debate.
 
-* speakers: the official speakers of the debate (note our users corpus is more expansive than this definition)
+* speakers: the official speakers of the debate (note our speakers corpus is more expansive than this definition)
 
 Usage
 -----
@@ -74,7 +74,7 @@ To download with ConvoKit:
 For some quick stats:
 
 >>> corpus.print_summary_stats()
-Number of Users: 471
+Number of Speakers: 471
 Number of Utterances: 26562
 Number of Conversations: 108
 

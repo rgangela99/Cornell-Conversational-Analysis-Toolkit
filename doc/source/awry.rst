@@ -14,10 +14,10 @@ Trouble on the Horizon: Forecasting the Derailment of Online Conversations as th
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this dataset are Wikipedia editors; their account names are taken as the user names. 
+speakers in this dataset are Wikipedia editors; their account names are taken as the speaker names.
 
 Utterance-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -25,7 +25,7 @@ Utterance-level information
 Each conversational turn on the talk page is viewed as an utterance. For each utterance, we provide:
 
 * id: index of the utterance
-* user: the user who author the utterance
+* speaker: the speaker who author the utterance
 * root: index of the conversation root of the utterance
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
@@ -64,13 +64,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-30021
->>> len(corpus.get_usernames())
-8069
->>> len(corpus.get_conversation_ids())
-4188
-
+>>> corpus.print_summary_stats()
+Number of Speakers: 8069
+Number of Utterances: 30021
+Number of Conversations: 4188
 
 Additional note
 ---------------

@@ -7,13 +7,13 @@ A sample of conversations from Reddit from 100 highly active subreddits. From ea
 Dataset details
 ---------------
 
-User-level information
-^^^^^^^^^^^^^^^^^^^^^^
+Speaker-level information
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users in this corpus are Reddit users, identified by their account names. The corpus includes the following activity statistics:
+speakers in this corpus are Reddit speakers, identified by their account names. The corpus includes the following activity statistics:
 
-* num_posts: number of posts from the user
-* num_comments: number of comments from the user
+* num_posts: number of posts from the speaker
+* num_comments: number of comments from the speaker
 
 
 Utterance-level information
@@ -22,7 +22,7 @@ Utterance-level information
 Each individual post or comment is viewed as an utterance. For each utterance, we provide:
 
 * id: index of the utterance
-* user: the user who author the utterance
+* speaker: the speaker who author the utterance
 * root: index of the conversation root of the utterance (i.e., the index of the post the utterance belongs to)
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
@@ -61,7 +61,7 @@ Corpus-level information
 * subreddit: the list of subreddits included in this corpus 
 * num_posts: total number of posts included in this corpus
 * num_comments: total number of comments in this corpus
-* num_user: number of unique users in this corpus
+* num_speaker: number of unique speakers in this corpus
 
 
 Usage
@@ -74,12 +74,10 @@ To download directly with ConvoKit:
 
 For some quick stats:
 
->>> len(corpus.get_utterance_ids()) 
-297132
->>> len(corpus.get_usernames())
-119889
->>> len(corpus.get_conversation_ids())
-8286
+>>> corpus.print_summary_stats()
+Number of Utterances: 297132
+Number of Speakers: 119889
+Number of Conversations: 8286
 
 Additional note
 ---------------

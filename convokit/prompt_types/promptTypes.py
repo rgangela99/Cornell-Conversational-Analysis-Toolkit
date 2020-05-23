@@ -11,49 +11,49 @@ from convokit.transformer import Transformer
 
 class PromptTypes(Transformer):
 	"""
-		Model that infers a vector representation of utterances in terms of the responses that similar utterances tend to prompt, as well as types of rhetorical intentions encapsulated by utterances in a corpus, in terms of their anticipated responses (operationalized as k-means clusters of vectors). 
+	Model that infers a vector representation of utterances in terms of the responses that similar utterances tend to prompt, as well as types of rhetorical intentions encapsulated by utterances in a corpus, in terms of their anticipated responses (operationalized as k-means clusters of vectors).
 
-		Under the surface, the model takes as input pairs of prompts and responses during the fit step. In this stage the following subcomponents are involved: 
-			1. a prompt embedding model that will learn the vector representations; 
-			2. a prompt type model that learns a clustering of these representations. 
+	Under the surface, the model takes as input pairs of prompts and responses during the fit step. In this stage the following subcomponents are involved:
+		1. a prompt embedding model that will learn the vector representations;
+		2. a prompt type model that learns a clustering of these representations.
 
-		The model can transform individual (unpaired) utterances in the transform step. While the focus is on representing properties of prompts, as a side-effect the model can also compute representations that encapsulate properties of responses and assign responses to prompt types (as "typical responses" to the prompts in that type).
+	The model can transform individual (unpaired) utterances in the transform step. While the focus is on representing properties of prompts, as a side-effect the model can also compute representations that encapsulate properties of responses and assign responses to prompt types (as "typical responses" to the prompts in that type).
 
-		Internally, the model contains the following elements:
-			* prompt_embedding_model: stores models that compute the vector representations. includes tf-idf models that convert the prompt and response input to term document matrices, an SVD model that produces a low-dimensional representation of responses and prompts, and vector representations of prompt and response terms
-			* type_models: stores kmeans models along with type assignments of prompt and response terms
-			* train_results: stores the vector representations of the corpus used to train the model in the fit step
-			* train_types: stores the type assignments of the corpus used in the fit step
+	Internally, the model contains the following elements:
+		* prompt_embedding_model: stores models that compute the vector representations. includes tf-idf models that convert the prompt and response input to term document matrices, an SVD model that produces a low-dimensional representation of responses and prompts, and vector representations of prompt and response terms
+		* type_models: stores kmeans models along with type assignments of prompt and response terms
+		* train_results: stores the vector representations of the corpus used to train the model in the fit step
+		* train_types: stores the type assignments of the corpus used in the fit step
 
-		The transformer will output several attributes of an utterance (names prefixed with <output_field>__). If the utterance is a prompt (in the default case, if it has a response), then the following will be outputted.
-			* prompt_repr: a vector representation of the utterance (stored as a corpus-wide matrix, or in the metadata of an individual utterance if `transform_utterance` is called)
-			* prompt_dists.<number of types>: a vector storing the distance between the utterance vector and the centroid of each k-means cluster (stored as a corpus-wide matrix, or in the metadata of an individual utterance if `transform_utterance` is called)
-			* prompt_type.<number of types>: the index of the type the utterance is assigned to
-			* prompt_type_dist.<number of types>: the distance from the vector representation to the centroid of the assigned type
-		If the utterance is a response to a previous utterance, then the utterance will also be annotated an analogous set of attributes denoting its response representation and type.  
-		For downstream tasks, a reasonable first step is to only look at the prompt-side representations.
+	The transformer will output several attributes of an utterance (names prefixed with <output_field>__). If the utterance is a prompt (in the default case, if it has a response), then the following will be outputted.
+		* prompt_repr: a vector representation of the utterance (stored as a corpus-wide matrix, or in the metadata of an individual utterance if `transform_utterance` is called)
+		* prompt_dists.<number of types>: a vector storing the distance between the utterance vector and the centroid of each k-means cluster (stored as a corpus-wide matrix, or in the metadata of an individual utterance if `transform_utterance` is called)
+		* prompt_type.<number of types>: the index of the type the utterance is assigned to
+		* prompt_type_dist.<number of types>: the distance from the vector representation to the centroid of the assigned type
+	If the utterance is a response to a previous utterance, then the utterance will also be annotated an analogous set of attributes denoting its response representation and type.
+	For downstream tasks, a reasonable first step is to only look at the prompt-side representations.
 
-		For an end-to-end implementation that runs several default values of the parameters, see the `PromptTypeWrapper` module.
+	For an end-to-end implementation that runs several default values of the parameters, see the `PromptTypeWrapper` module.
 
-		:param prompt_field: the name of the attribute of prompts to use as input to fit.
-		:param ref_field: the name of the attribute of responses to use as input to fit. a reasonable choice is to set to the same value as prompt_field.
-		:param output_field: the name of the attribute to write to in the transform step. the transformer outputs several fields, as listed above.
-		:param n_types: the number of types to infer. defaults to 8.
-		:param prompt_transform_field: the name of the attribute of prompts to use as input to transform; defaults to the same attribute as in fit.
-		:param ref_transform_field: the name of the attribute of responses to use as input to transform; defaults to the same attribute as in fit.
-		:param prompt_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as prompts in the fit step. defaults to using all utterances which have a response.
-		:param ref_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as responses in the fit step. defaults to using all utterances which are responses to a prompt.
-		:param prompt_transform_filter: filter that determines which utterances will be considered as prompts in the transform step. defaults to prompt_filter, the same as is used in fit.
-		:param ref_transform_filter: filter that determines which utterances will be considered as responses in the transform step. defaults to ref_filter, the same as is used in fit.
-		:param prompt__tfidf_min_df: the minimum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
-		:param prompt__tfidf_max_df: the maximum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1. Setting higher is more permissive, but may result in many stopword-like terms adding noise to the model.
-		:param ref__tfidf_min_df: the minimum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
-		:param ref__tfidf_max_df: the maximum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1. 
-		:param snip_first_dim: whether or not to remove the first SVD dimension (which may add noise to the model; typically this reflects frequency rather than any semantic interpretation). defaults to `True`.
-		:param svd__n_components: the number of SVD dimensions to use, defaults to 25. higher values result in richer vector representations, perhaps at the cost of the model learning overly-specific types.
-		:param max_dist: the maximum distance between a vector representation of an utterance and the cluster centroid; a cluster whose distance to all centroids is above this cutoff will get assigned to a null type, denoted by -1. defaults to 0.9.
-		:param random_state: the random seed to use.
-		:param verbosity: frequency of status messages.
+	:param prompt_field: the name of the attribute of prompts to use as input to fit.
+	:param ref_field: the name of the attribute of responses to use as input to fit. a reasonable choice is to set to the same value as prompt_field.
+	:param output_field: the name of the attribute to write to in the transform step. the transformer outputs several fields, as listed above.
+	:param n_types: the number of types to infer. defaults to 8.
+	:param prompt_transform_field: the name of the attribute of prompts to use as input to transform; defaults to the same attribute as in fit.
+	:param ref_transform_field: the name of the attribute of responses to use as input to transform; defaults to the same attribute as in fit.
+	:param prompt_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as prompts in the fit step. defaults to using all utterances which have a response.
+	:param ref_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as responses in the fit step. defaults to using all utterances which are responses to a prompt.
+	:param prompt_transform_filter: filter that determines which utterances will be considered as prompts in the transform step. defaults to prompt_filter, the same as is used in fit.
+	:param ref_transform_filter: filter that determines which utterances will be considered as responses in the transform step. defaults to ref_filter, the same as is used in fit.
+	:param prompt__tfidf_min_df: the minimum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
+	:param prompt__tfidf_max_df: the maximum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1. Setting higher is more permissive, but may result in many stopword-like terms adding noise to the model.
+	:param ref__tfidf_min_df: the minimum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
+	:param ref__tfidf_max_df: the maximum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1.
+	:param snip_first_dim: whether or not to remove the first SVD dimension (which may add noise to the model; typically this reflects frequency rather than any semantic interpretation). defaults to `True`.
+	:param svd__n_components: the number of SVD dimensions to use, defaults to 25. higher values result in richer vector representations, perhaps at the cost of the model learning overly-specific types.
+	:param max_dist: the maximum distance between a vector representation of an utterance and the cluster centroid; a cluster whose distance to all centroids is above this cutoff will get assigned to a null type, denoted by -1. defaults to 0.9.
+	:param random_state: the random seed to use.
+	:param verbosity: frequency of status messages.
 	"""
 	
 	def __init__(self, prompt_field, ref_field, output_field, n_types=8,
@@ -96,10 +96,10 @@ class PromptTypes(Transformer):
 	
 	def fit(self, corpus, y=None):
 		"""
-			Fits a PromptTypes model for a corpus -- that is, learns latent representations of prompt and response terms, as well as prompt types.
+		Fits a PromptTypes model for a corpus -- that is, learns latent representations of prompt and response terms, as well as prompt types.
 
-			:param corpus: Corpus
-			:return: None
+		:param corpus: Corpus
+		:return: None
 		"""
 		_, prompt_input, _, ref_input = self._get_pair_input(corpus, self.prompt_field, self.ref_field,
 									self.prompt_filter, self.ref_filter)
@@ -114,10 +114,10 @@ class PromptTypes(Transformer):
 		
 	def transform(self, corpus):
 		"""
-			Computes vector representations and prompt type assignments for utterances in a corpus.
+		Computes vector representations and prompt type assignments for utterances in a corpus.
 
-			:param corpus: Corpus
-			:return: the corpus, with per-utterance representations and type assignments.
+		:param corpus: Corpus
+		:return: the corpus, with per-utterance representations and type assignments.
 		"""
 
 		prompt_ids, prompt_vects, ref_ids, ref_vects = self._get_embeddings(corpus)
@@ -143,10 +143,10 @@ class PromptTypes(Transformer):
 
 	def transform_utterance(self, utterance):
 		"""
-			Computes vector representations and prompt type assignments for a single utterance.
+		Computes vector representations and prompt type assignments for a single utterance.
 
-			:param utterance: the utterance.
-			:return: the utterance, annotated with representations and type assignments.
+		:param utterance: the utterance.
+		:return: the utterance, annotated with representations and type assignments.
 		"""
 
 		if self.prompt_transform_filter(utterance, {}):
@@ -179,12 +179,12 @@ class PromptTypes(Transformer):
 		
 	def refit_types(self, n_types, random_state=None, name=None):
 		"""
-			using the latent representations of prompt terms learned during the initial `fit` call, infers `n_types` prompt types. permits retraining the clustering model that determines the number of types, on top of the initial model. calling this *and* updating the `default_n_types` field of the model will result in future `transform` calls assigning utterances to one of `n_types` prompt types.
+		Using the latent representations of prompt terms learned during the initial `fit` call, infers `n_types` prompt types. permits retraining the clustering model that determines the number of types, on top of the initial model. calling this *and* updating the `default_n_types` field of the model will result in future `transform` calls assigning utterances to one of `n_types` prompt types.
 
-			:param n_types: number of types to learn
-			:param random_state: random seed
-			:param name: the name of the new type model. defaults to n_types.
-			:return: None
+		:param n_types: number of types to learn
+		:param random_state: random seed
+		:param name: the name of the new type model. defaults to n_types.
+		:return: None
 		"""
 
 		if name is None:
@@ -225,14 +225,13 @@ class PromptTypes(Transformer):
 		
 	def display_type(self, type_id, corpus=None, type_key=None, k=10):
 		"""
-			for a particular prompt type, displays the representative prompt and response terms. can also display representative prompt and response utterances.
+		For a particular prompt type, displays the representative prompt and response terms. can also display representative prompt and response utterances.
 
-			:param type_id: ID of the prompt type to display.
-			:param corpus: pass in the training corpus to also display representative utterances.
-			:param type_key: the name of the prompt type clustering model to use. defaults to `n_types` that the model was initialized with, but if `refit_types` is called with different number of types, can be modified to display this updated model as well.
-			:param k: the number of sample terms (or utteranceS) to display.
-			:return: None
-
+		:param type_id: ID of the prompt type to display.
+		:param corpus: pass in the training corpus to also display representative utterances.
+		:param type_key: the name of the prompt type clustering model to use. defaults to `n_types` that the model was initialized with, but if `refit_types` is called with different number of types, can be modified to display this updated model as well.
+		:param k: the number of sample terms (or utteranceS) to display.
+		:return: None
 		"""
 
 		if type_key is None:
@@ -265,12 +264,12 @@ class PromptTypes(Transformer):
 	
 	def dump_model(self, model_dir, type_keys='default', dump_train_corpus=True):
 		"""
-			Dumps the model to disk.
+		Dumps the model to disk.
 
-			:param model_dir: directory to write model to
-			:param type_keys: if 'default', will only write the type clustering model corresponding to the `n_types` the model was initialized with. if 'all', will write all clustering models that have been trained via calls to `refit_types`. can also take a list of clustering models.
-			:param dump_train_corpus: whether to also write the representations and type assignments of the training corpus. defaults to True.
-			:return: None
+		:param model_dir: directory to write model to
+		:param type_keys: if 'default', will only write the type clustering model corresponding to the `n_types` the model was initialized with. if 'all', will write all clustering models that have been trained via calls to `refit_types`. can also take a list of clustering models.
+		:param dump_train_corpus: whether to also write the representations and type assignments of the training corpus. defaults to True.
+		:return: None
 		"""
 
 		if self.verbosity > 0:
@@ -313,12 +312,12 @@ class PromptTypes(Transformer):
 	
 	def load_model(self, model_dir, type_keys='default', load_train_corpus=True):
 		"""
-			Loads the model from disk.
+		Loads the model from disk.
 
-			:param model_dir: directory to read model to
-			:param type_keys: if 'default', will only read the type clustering model corresponding to the `n_types` the model was initialized with. if 'all', will read all clustering models that are available in directory. can also take a list of clustering models.
-			:param load_train_corpus: whether to also read the representations and type assignments of the training corpus. defaults to True.
-			:return: None
+		:param model_dir: directory to read model to
+		:param type_keys: if 'default', will only read the type clustering model corresponding to the `n_types` the model was initialized with. if 'all', will read all clustering models that are available in directory. can also take a list of clustering models.
+		:param load_train_corpus: whether to also read the representations and type assignments of the training corpus. defaults to True.
+		:return: None
 		"""
 		if self.verbosity > 0:
 			print('loading embedding model')
@@ -420,11 +419,11 @@ def fit_prompt_embedding_model(prompt_input, ref_input, snip_first_dim=True,
 			ref__tfidf_min_df=100, ref__tfidf_max_df=.1,
 			svd__n_components=25, random_state=None, verbosity=0):
 	""" 
-		Standalone function that fits an embedding model given paired prompt and response inputs. See docstring of the `PromptTypes` class for details.
-			
-		:param prompt_input: list of prompts (represented as space-separated strings of terms)
-		:param ref_input: list of responses (represented as space-separated strings of terms). note that each entry of ref_input should be a response to the corresponding entry in prompt_input.
-		:return: prompt embedding model
+	Standalone function that fits an embedding model given paired prompt and response inputs. See docstring of the `PromptTypes` class for details.
+
+	:param prompt_input: list of prompts (represented as space-separated strings of terms)
+	:param ref_input: list of responses (represented as space-separated strings of terms). note that each entry of ref_input should be a response to the corresponding entry in prompt_input.
+	:return: prompt embedding model
 	"""
 
 	if verbosity > 0:
@@ -468,14 +467,14 @@ def fit_prompt_embedding_model(prompt_input, ref_input, snip_first_dim=True,
 
 def transform_embeddings(model, ids, input, side='prompt', filter_empty=True):
 	""" 
-		Standalone function that returns vector representations of input text given a trained PromptTypes prompt_embedding_model. See docstring of `PromptTypes` class for details.
-			
-		:param model: prompt embedding model
-		:param ids: ids of input text
-		:param input: a list where each entry has corresponding id in the ids argument, and is a string of terms corresponding to an utterance.
-		:param side: whether to return prompt or response embeddings ("prompt" and "ref" respectively); defaults to "prompt"
-		:param filter_empty: if `True`, will not return embeddings for prompts with no terms.
-		:return: input IDs `ids`, and corresponding vector representations of input `vect`
+	Standalone function that returns vector representations of input text given a trained PromptTypes prompt_embedding_model. See docstring of `PromptTypes` class for details.
+
+	:param model: prompt embedding model
+	:param ids: ids of input text
+	:param input: a list where each entry has corresponding id in the ids argument, and is a string of terms corresponding to an utterance.
+	:param side: whether to return prompt or response embeddings ("prompt" and "ref" respectively); defaults to "prompt"
+	:param filter_empty: if `True`, will not return embeddings for prompts with no terms.
+	:return: input IDs `ids`, and corresponding vector representations of input `vect`
 	"""
 
 	tfidf_vects = normalize(model['%s_tfidf_model' % side].transform(input), norm='l1')
@@ -488,11 +487,11 @@ def transform_embeddings(model, ids, input, side='prompt', filter_empty=True):
 
 def fit_prompt_type_model(model, n_types, random_state=None, max_dist=0.9, verbosity=0):
 	""" 
-		Standalone function that fits a prompt type model given paired prompt and response inputs. See docstring of the `PromptTypes` class for details.
-			
-		:param model: prompt embedding model (from `fit_prompt_embedding_model()`)
-		:param n_types: number of prompt types to infer
-		:return: prompt type model
+	Standalone function that fits a prompt type model given paired prompt and response inputs. See docstring of the `PromptTypes` class for details.
+
+	:param model: prompt embedding model (from `fit_prompt_embedding_model()`)
+	:param n_types: number of prompt types to infer
+	:return: prompt type model
 	"""
 
 	if verbosity > 0:
@@ -517,12 +516,12 @@ def fit_prompt_type_model(model, n_types, random_state=None, max_dist=0.9, verbo
 
 def assign_prompt_types(model, ids, vects, max_dist=0.9):
 	""" 
-		Standalone function that returns type assignments of input vectors given a trained PromptTypes type model. See docstring of `PromptTypes` class for details.
-			
-		:param model: prompt type model
-		:param ids: ids of input vectors
-		:param vects: input vectors
-		:return: a dataframe storing cluster centroid distances and the assigned type.
+	Standalone function that returns type assignments of input vectors given a trained PromptTypes type model. See docstring of `PromptTypes` class for details.
+
+	:param model: prompt type model
+	:param ids: ids of input vectors
+	:param vects: input vectors
+	:return: a dataframe storing cluster centroid distances and the assigned type.
 	"""
 
 	dists = model['km_model'].transform(vects)
