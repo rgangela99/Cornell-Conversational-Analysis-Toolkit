@@ -195,7 +195,10 @@ class TensorDecomposer(Transformer):
                                 graph_filepath=os.path.join(output_dir, "graphs"))
             )
 
-    def transform(self, corpus: Corpus, **kwargs) -> Corpus:
+    def transform(self, corpus: Corpus, selector: Optional[Callable[[CorpusObject], bool]] = lambda obj: True) -> Corpus:
+        obj_factor = self.factors[1]
+        for idx, obj in enumerate(corpus.iter_objs(self.obj_type, selector)):
+            obj.meta['tensor_factor'] = obj_factor[idx]
         return corpus
 
     def summarize(self, corpus: Corpus, axis_names: List[str], output_dir: str = '.',
