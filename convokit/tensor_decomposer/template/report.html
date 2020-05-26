@@ -8,9 +8,9 @@
     {% for d in component_to_details %}
     <br>
     <h3>Factor: {{d+1   }}</h3>
-    <img src='{{graph_filepath}}/component_plot_{{d+1}}.png' />
-    <p><b>Positive subreddits: </b>{{", ".join(component_to_details[d]['pos_subreddits'])}}</p>
-    <p><b>Negative subreddits: </b>{{", ".join(component_to_details[d]['neg_subreddits'])}}</p>
+    <img src='./graphs/component_plot_{{d+1}}.png' />
+    <p><b>Positive groups: </b>{{", ".join(component_to_details[d]['pos_groups'])}}</p>
+    <p><b>Negative groups: </b>{{", ".join(component_to_details[d]['neg_groups'])}}</p>
 
     <p><b>Positive features: </b></p><br />
     <div class="image_grid">

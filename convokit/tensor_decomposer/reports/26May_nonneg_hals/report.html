@@ -1,0 +1,141 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>26 May (non-negative, HALS)</h1>
+    
+    <br>
+    <h3>Factor: 1</h3>
+    <img src='./graphs/component_plot_1.png' />
+    <p><b>Positive groups: </b>2.expansionary->focused</p>
+    <p><b>Negative groups: </b>2.expansionary->focused</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['2.expansionary->focused'], 'neg_groups': ['2.expansionary->focused'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hTon_outdegree.png', False): ['2nd-argmax'], ('hToh_indegree.png', False): ['max'], ('external_reciprocity.png', False): ['count'], ('incoming.png', False): ['count'], ('outgoing.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+    <br>
+    <h3>Factor: 2</h3>
+    <img src='./graphs/component_plot_2.png' />
+    <p><b>Positive groups: </b></p>
+    <p><b>Negative groups: </b></p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>max, 2nd-largest, mean, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>max, 2nd-largest, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': [], 'neg_groups': [], 'pos_features': defaultdict(<class 'list'>, {('hTon_outdegree.png', False): ['max', '2nd-largest', 'mean', 'mean-nonzero'], ('reciprocity.png', False): ['count'], ('hTon_outdegree.png', True): ['max', '2nd-largest', 'mean-nonzero'], ('reciprocity.png', True): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+    <br>
+    <h3>Factor: 3</h3>
+    <img src='./graphs/component_plot_3.png' />
+    <p><b>Positive groups: </b>1.focused->expansionary</p>
+    <p><b>Negative groups: </b>1.focused->expansionary</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['1.focused->expansionary'], 'neg_groups': ['1.focused->expansionary'], 'pos_features': defaultdict(<class 'list'>, {('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+</body>
+
+</html>

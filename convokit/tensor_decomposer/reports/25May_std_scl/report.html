@@ -1,0 +1,265 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>25 May (std scale)</h1>
+    
+    <br>
+    <h3>Factor: 1</h3>
+    <img src='./graphs/component_plot_1.png' />
+    <p><b>Positive groups: </b>3.dyadic_chain, 1.focused->expansionary</p>
+    <p><b>Negative groups: </b>1.focused->expansionary, 3.dyadic_chain</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>norm.max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_outdegree.png' width="200px" />
+            
+            <figcaption>norm.max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>norm.2nd-largest, prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>is-present</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['3.dyadic_chain', '1.focused->expansionary'], 'neg_groups': ['1.focused->expansionary', '3.dyadic_chain'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['prop-nonzero', '2nd-largest / max'], ('hTon_outdegree.png', False): ['norm.max'], ('hTon_indegree.png', False): ['prop-nonzero', '2nd-largest / max'], ('hToh_outdegree.png', False): ['norm.max'], ('hToh_indegree.png', False): ['norm.2nd-largest', 'prop-nonzero', '2nd-largest / max']}), 'neg_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['mean-nonzero'], ('hTon_indegree.png', False): ['mean-nonzero'], ('hToh_indegree.png', False): ['mean-nonzero'], ('incoming.png', False): ['is-present']})}</p>-->
+    
+    <br>
+    <h3>Factor: 2</h3>
+    <img src='./graphs/component_plot_2.png' />
+    <p><b>Positive groups: </b>1.focused->expansionary, 2.expansionary->focused</p>
+    <p><b>Negative groups: </b>1.focused->expansionary, 2.expansionary->focused</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>norm.2nd-largest, prop-nonzero, 2nd-largest / max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean, prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>norm.max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_outdegree.png' width="200px" />
+            
+            <figcaption>argmax, norm.max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['1.focused->expansionary', '2.expansionary->focused'], 'neg_groups': ['1.focused->expansionary', '2.expansionary->focused'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['prop-nonzero', '2nd-largest / max'], ('hTon_indegree.png', False): ['prop-nonzero', '2nd-largest / max'], ('hToh_indegree.png', False): ['norm.2nd-largest', 'prop-nonzero', '2nd-largest / max'], ('nTon_indegree.png', True): ['mean', 'prop-nonzero'], ('hTon_indegree.png', True): ['mean']}), 'neg_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['norm.max', 'mean-nonzero'], ('hTon_outdegree.png', False): ['norm.max'], ('hTon_indegree.png', False): ['norm.max', 'mean-nonzero'], ('hToh_outdegree.png', False): ['argmax', 'norm.max'], ('hToh_indegree.png', False): ['norm.max', 'mean-nonzero']})}</p>-->
+    
+    <br>
+    <h3>Factor: 3</h3>
+    <img src='./graphs/component_plot_3.png' />
+    <p><b>Positive groups: </b></p>
+    <p><b>Negative groups: </b>1.focused->expansionary</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean, prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean, prop-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero, prop-multiple</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero, prop-multiple</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>norm.max, mean-nonzero, prop-multiple</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>is-present</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': [], 'neg_groups': ['1.focused->expansionary'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['prop-nonzero'], ('hTon_indegree.png', False): ['prop-nonzero'], ('hToh_indegree.png', False): ['prop-nonzero'], ('nTon_indegree.png', True): ['mean', 'prop-nonzero'], ('hTon_outdegree.png', True): ['mean'], ('hTon_indegree.png', True): ['mean', 'prop-nonzero'], ('hToh_outdegree.png', True): ['mean'], ('hToh_indegree.png', True): ['mean']}), 'neg_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['norm.max', 'mean-nonzero', 'prop-multiple'], ('hTon_indegree.png', False): ['norm.max', 'mean-nonzero', 'prop-multiple'], ('hToh_indegree.png', False): ['norm.max', 'mean-nonzero', 'prop-multiple'], ('incoming.png', False): ['is-present']})}</p>-->
+    
+</body>
+
+</html>

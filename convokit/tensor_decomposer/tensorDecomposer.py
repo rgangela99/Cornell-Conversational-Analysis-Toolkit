@@ -11,6 +11,11 @@ from sklearn.preprocessing import StandardScaler
 from collections import defaultdict, Counter
 from jinja2 import Environment, FileSystemLoader
 import shutil
+from sklearn import metrics
+from sklearn.cluster import KMeans
+from statistics import mode
+import tensortools as tt
+
 
 class TensorDecomposer(Transformer):
     """
@@ -23,15 +28,17 @@ class TensorDecomposer(Transformer):
     :ivar features: features used in constructing the tensor
     """
 
-    def __init__(self, feature_set: List[str], obj_type: str = "conversation", rank: int = 9, normalize: bool = False,
+    def __init__(self, feature_set: List[str], obj_type: str = "conversation", rank: int = 9,
+                 normalize_func=lambda tensor: tensor, tensor_func="tensorly",
                  anomaly_threshold = 1.5, impute_na: float = -1, group_func = lambda obj: obj.id):
         self.obj_type = obj_type
         self.feature_set = feature_set
         self.rank = rank
-        self.normalize = normalize
+        self.normalize_func = normalize_func
         self.anomaly_threshold = anomaly_threshold
         self.impute_na = impute_na
         self.group_func = group_func
+        self.tensor_func = tensor_func
 
         self.tensor = None
         self.features = None
@@ -94,23 +101,29 @@ class TensorDecomposer(Transformer):
         print("Constructing tensor...", end="")
         tensor = self._construct_tensor(corpus, selector)
         print("Done.")
-        if self.normalize:
-            tensor = self._normalize(tensor)
+        tensor = self.normalize_func(tensor)
         self.tensor = tensor
 
         # decompose tensor
         print("Decomposing tensor...", end="")
-        self.factors = parafac(tensor, rank=self.rank)[1]
+        if self.tensor_func == 'tensorly':
+            self.factors = parafac(tensor, rank=self.rank)[1]
+        elif self.tensor_func == 'tensortools-ncp-hals':
+            self.factors = tt.ncp_hals(self.tensor, 3, random_state=2020).factors.factors
+        elif self.tensor_func == 'tensortools-ncp-bcd':
+            self.factors = tt.ncp_bcd(self.tensor, 3, random_state=2020).factors.factors
+        else:
+            raise ValueError("Invalid tensor function.")
         print("Done.")
 
         return self
 
-    @staticmethod
-    def _generate_plots(factors, axis_names, output_dir, d=3):
+    def _generate_plots(self, factors, axis_names, output_dir, d=3):
+        os.makedirs(os.path.join(output_dir, 'graphs'), exist_ok=True)
         a, b, c = factors
         rank = a.shape[1]
         for component_idx in range(rank):
-            fig, ax = plt.subplots(1, d, figsize=(8, int(1.2+1)))
+            fig, ax = plt.subplots(1, d, figsize=(12, 0.3+int(self.rank * 1.2)))
             ax[0].set_ylabel("Component " + str(component_idx+1))
             factors_name = axis_names if d==3 else ["Time", "Features"]
 
@@ -187,8 +200,36 @@ class TensorDecomposer(Transformer):
 
     def summarize(self, corpus: Corpus, axis_names: List[str], output_dir: str = '.',
                   report_title="Report"):
-        self._generate_plots(self.factors, axis_names, output_dir)
-        shutil.copytree("./static", output_dir)
-        shutil.copytree("./images", output_dir)
-        self._generate_html(report_title, output_dir)
 
+        os.makedirs(output_dir, exist_ok=True)
+        self._generate_plots(self.factors, axis_names, output_dir)
+        root = os.path.dirname(os.path.abspath(__file__))
+        try:
+            shutil.copytree(os.path.join(root, 'static'), os.path.join(output_dir, 'static'))
+            shutil.copytree(os.path.join(root, 'images'), os.path.join(output_dir, 'images'))
+        except FileExistsError:
+            print("Directory already exists. Exiting summarize()")
+            return
+        self._generate_html(report_title, output_dir)
+        print("Report generated at {}".format(os.path.join(output_dir, "report.html")))
+
+    @staticmethod
+    def _purity_score(y_true, y_pred):
+        contingency_matrix = metrics.cluster.contingency_matrix(y_true, y_pred)
+        return np.sum(np.amax(contingency_matrix, axis=0)) / np.sum(contingency_matrix)
+
+    def purity(self, n_clusters):
+        assert self.factors is not None
+        time_factor, thread_factor, feature_factor = self.factors
+        kmeans = KMeans(n_clusters=n_clusters, random_state=2020).fit(thread_factor)
+        y_pred = kmeans.predict(thread_factor)
+        y_true = np.array([0]*333 + [1]*333 + [2]*333)
+
+        y_pred_cluster0 = y_true[y_pred == 0]
+        y_pred_cluster1 = y_true[y_pred == 1]
+        y_pred_cluster2 = y_true[y_pred == 2]
+
+        correct = np.sum(y_pred_cluster0 == mode(y_pred_cluster0)) + \
+                  np.sum(y_pred_cluster1 == mode(y_pred_cluster1)) + \
+                  np.sum(y_pred_cluster2 == mode(y_pred_cluster2))
+        return correct / len(y_pred)

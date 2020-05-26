@@ -1,0 +1,173 @@
+<html>
+<head>
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+<body>
+    <h1>25 May (normal)</h1>
+    
+    <br>
+    <h3>Factor: 1</h3>
+    <img src='./graphs/component_plot_1.png' />
+    <p><b>Positive groups: </b></p>
+    <p><b>Negative groups: </b>1.focused->expansionary</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': [], 'neg_groups': ['1.focused->expansionary'], 'pos_features': defaultdict(<class 'list'>, {('incoming.png', False): ['count']}), 'neg_features': defaultdict(<class 'list'>, {})}</p>-->
+    
+    <br>
+    <h3>Factor: 2</h3>
+    <img src='./graphs/component_plot_2.png' />
+    <p><b>Positive groups: </b>3.dyadic_chain</p>
+    <p><b>Negative groups: </b>3.dyadic_chain</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>max, 2nd-largest, mean, mean-nonzero</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>max, 2nd-largest, mean</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['3.dyadic_chain'], 'neg_groups': ['3.dyadic_chain'], 'pos_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['2nd-argmax'], ('hTon_outdegree.png', False): ['max', '2nd-largest', 'mean', 'mean-nonzero'], ('hTon_indegree.png', False): ['2nd-argmax'], ('reciprocity.png', False): ['count'], ('hTon_outdegree.png', True): ['max', '2nd-largest', 'mean']}), 'neg_features': defaultdict(<class 'list'>, {('incoming.png', False): ['count']})}</p>-->
+    
+    <br>
+    <h3>Factor: 3</h3>
+    <img src='./graphs/component_plot_3.png' />
+    <p><b>Positive groups: </b>3.dyadic_chain</p>
+    <p><b>Negative groups: </b>2.expansionary->focused, 1.focused->expansionary, 3.dyadic_chain</p>
+
+    <p><b>Positive features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>mean</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/reciprocity.png' width="200px" />
+            
+                <b><figcaption>Midthread</figcaption></b>
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+
+    <p><b>Negative features: </b></p><br />
+    <div class="image_grid">
+        
+        <figure>
+            <img src='images/nTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hTon_outdegree.png' width="200px" />
+            
+            <figcaption>argmax, 2nd-argmax</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/hToh_indegree.png' width="200px" />
+            
+            <figcaption>max</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/external_reciprocity.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/incoming.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+        <figure>
+            <img src='images/outgoing.png' width="200px" />
+            
+            <figcaption>count</figcaption>
+        </figure>
+        
+    </div>
+    <hr>
+<!--    <p>{'pos_groups': ['3.dyadic_chain'], 'neg_groups': ['2.expansionary->focused', '1.focused->expansionary', '3.dyadic_chain'], 'pos_features': defaultdict(<class 'list'>, {('reciprocity.png', False): ['count'], ('hTon_outdegree.png', True): ['mean'], ('reciprocity.png', True): ['count']}), 'neg_features': defaultdict(<class 'list'>, {('nTon_indegree.png', False): ['max'], ('hTon_indegree.png', False): ['max'], ('hTon_outdegree.png', False): ['argmax', '2nd-argmax'], ('hToh_indegree.png', False): ['max'], ('external_reciprocity.png', False): ['count'], ('incoming.png', False): ['count'], ('outgoing.png', False): ['count']})}</p>-->
+    
+</body>
+
+</html>
