@@ -6,12 +6,14 @@ from random import shuffle
 
 class Pairer(Transformer):
     """
-    The Pairer Transformer annotates the Corpus with the pairing information that is needed to run some paired prediction analysis (e.g. see the PairedPrediction and Paired BoW modules.)
+    The Pairer Transformer annotates the Corpus with the pairing information that is needed to run some paired
+    prediction analysis (e.g. see the PairedPrediction and Paired BoW modules.)
 
     Pairer sets this pairing up. For this example:
 
     - the obj_type is 'utterance' (since we compare utterances)
-    - the pairing_func is supposed to extract the identifier that would identify the object as part of the pair. In this case, that would be the Utterance's conversation id since we want utterances from the same conversation.
+    - the pairing_func is supposed to extract the identifier that would identify the object as part of the pair.
+    In this case, that would be the Utterance's conversation id since we want utterances from the same conversation.
     - we need to distinguish between utterances where Rachel speaks to Monica vs. Chandler. the pos_label_func and neg_label_func is how we can specify this (e.g. lambda utt: utt.meta['target']), where positive instances might be arbitrarily refer to targetting Monica, and negative for targetting Chandler.
     - pair_mode denotes how many pairs to use per context. For example, a Conversation will likely have Rachel address Monica and Chandler each multiple times. This means that there are multiple positive and negative instances that can be used to form pairs. We could randomly pick one pair of instances ('random'), or the first pair of instances ('first') or the maximum pairs of instances ('maximize').
 
@@ -75,7 +77,7 @@ class Pairer(Transformer):
         :param pos_objects: list of positively labelled objects
         :param neg_objects: list of negatively labelled objects
         :return: dictionary indexed by the paired feature instance value,
-                 with the value being a tuple (pos_obj, neg_obj)
+            with the value being a tuple (pos_obj, neg_obj)
         """
         pair_feat_to_pos_objs = defaultdict(list)
         pair_feat_to_neg_objs = defaultdict(list)

@@ -4,7 +4,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 import numpy as np
 from convokit.util import warn
-from scipy.sparse import vstack
+from numpy import vstack
 
 
 def extract_feats_from_obj(obj: CorpusObject, pred_feats: List[str]):

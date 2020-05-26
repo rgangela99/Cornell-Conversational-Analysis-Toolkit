@@ -58,7 +58,8 @@ class HyperConvo(Transformer):
     :param invalid_val: value to use for invalid hyperconvo features, default is np.nan
     """
 
-    def __init__(self, prefix_len: int = 10, min_thread_len: int = 10, feat_name: str = "hyperconvo", invalid_val: float = np.nan):
+    def __init__(self, prefix_len: int = 10, min_thread_len: int = 10, feat_name: str = "hyperconvo",
+                 invalid_val: float = np.nan):
         self.prefix_len = prefix_len
         self.min_thread_len = min_thread_len
         self.feat_name = feat_name
