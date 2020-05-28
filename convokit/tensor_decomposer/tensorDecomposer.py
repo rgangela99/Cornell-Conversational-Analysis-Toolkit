@@ -221,18 +221,17 @@ class TensorDecomposer(Transformer):
         contingency_matrix = metrics.cluster.contingency_matrix(y_true, y_pred)
         return np.sum(np.amax(contingency_matrix, axis=0)) / np.sum(contingency_matrix)
 
-    def purity(self, n_clusters):
+    def purity(self, n_clusters, actual_num_clusters=3, group_size=333):
         assert self.factors is not None
         time_factor, thread_factor, feature_factor = self.factors
         kmeans = KMeans(n_clusters=n_clusters, random_state=2020).fit(thread_factor)
         y_pred = kmeans.predict(thread_factor)
-        y_true = np.array([0]*333 + [1]*333 + [2]*333)
+        y_true = np.zeros(actual_num_clusters * group_size)
+        for i in range(actual_num_clusters):
+            y_true[i*group_size:(i+1)*group_size] = i
 
-        y_pred_cluster0 = y_true[y_pred == 0]
-        y_pred_cluster1 = y_true[y_pred == 1]
-        y_pred_cluster2 = y_true[y_pred == 2]
+        correct = sum(np.sum(y_true[y_pred==i] == mode(y_true[y_pred==i])) for i in range(n_clusters))
 
-        correct = np.sum(y_pred_cluster0 == mode(y_pred_cluster0)) + \
-                  np.sum(y_pred_cluster1 == mode(y_pred_cluster1)) + \
-                  np.sum(y_pred_cluster2 == mode(y_pred_cluster2))
         return correct / len(y_pred)
+
+

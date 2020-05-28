@@ -15,17 +15,16 @@ class Clusterer(Transformer):
 
 
     @staticmethod
-    def purity(matrix, y_true, n_clusters=3):
+    def purity(matrix, n_clusters, actual_num_clusters=3, group_size=333):
         kmeans = KMeans(n_clusters=n_clusters, random_state=2020).fit(matrix)
         y_pred = kmeans.predict(matrix)
 
-        y_pred_cluster0 = y_true[y_pred == 0]
-        y_pred_cluster1 = y_true[y_pred == 1]
-        y_pred_cluster2 = y_true[y_pred == 2]
+        y_true = np.zeros(actual_num_clusters * group_size)
+        for i in range(actual_num_clusters):
+            y_true[i*group_size:(i+1)*group_size] = i
 
-        correct = np.sum(y_pred_cluster0 == mode(y_pred_cluster0)) + \
-                  np.sum(y_pred_cluster1 == mode(y_pred_cluster1)) + \
-                  np.sum(y_pred_cluster2 == mode(y_pred_cluster2))
+        correct = sum(np.sum(y_true[y_pred==i] == mode(y_true[y_pred==i])) for i in range(n_clusters))
+
         return correct / len(y_pred)
 
     def summarize(self, corpus: Corpus, **kwargs):
