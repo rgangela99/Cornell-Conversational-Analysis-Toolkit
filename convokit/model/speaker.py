@@ -21,7 +21,7 @@ class Speaker(CorpusObject):
         speaker-level metadata.
     """
 
-    def __init__(self, owner=None, id: str = None, name: str = None, utts=None, convos = None, meta: Optional[Dict] = None):
+    def __init__(self, owner=None, id: str = None, name: str = None, utts=None, convos=None, meta: Optional[Dict] = None):
         name_var = id if id is not None else name # to be deprecated
         super().__init__(obj_type="speaker", owner=owner, id=name_var, meta=meta)
         self.utterances = utts if utts is not None else dict()
