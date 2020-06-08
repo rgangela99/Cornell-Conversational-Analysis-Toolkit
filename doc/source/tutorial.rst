@@ -274,7 +274,7 @@ Other transformers can be applied in the same way, and even chained in sequence,
 Additional notes
 ----------------
 
-1. Some corpora are particularly large and may not be initializable in their entirety without significant computational resources. However, it is possible to `partially load utterances from a dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/tests/test_corpus_partial_load.ipynb>`_ to carry out processing of large corpora sequentially.
+1. Some corpora are particularly large and may not be initializable in their entirety without significant computational resources. However, it is possible to `partially load utterances from a dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/tests/notebook_testers/test_corpus_partial_load.ipynb>`_ to carry out processing of large corpora sequentially.
 
 2. It is possible to `merge two different Corpora (even when there are overlaps or conflicts in Corpus data) <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/merging/corpus_merge_demo.ipynb>`_
 

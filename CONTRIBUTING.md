@@ -61,7 +61,7 @@ Please ensure that your contributions adhere to the existing coding style used t
 Please ensure that all contributions have been tested for integration with existing ConvoKit code. This is particularly pertinent for contributions that make changes to existing functions or modules. Unit tests will run automatically on Github when a pull request is opened, and may be run locally with
 
 ```
-cd tests/ && python run_all_tests.py
+cd convokit/tests/ && python run_all_tests.py
 ```
 
 after installing `pip install -r requirements.txt` and `pip install .` from the project directory.

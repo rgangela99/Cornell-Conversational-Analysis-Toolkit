@@ -1,5 +1,5 @@
 # Cornell Conversational Analysis Toolkit ([ConvoKit](http://convokit.cornell.edu/))
-This toolkit contains tools to extract conversational features and analyze social phenomena in conversations, using a [single unified interface](https://convokit.cornell.edu/documentation/architecture.html) inspired by (and compatible with) scikit-learn.  Several large [conversational datasets](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets) are included together with scripts exemplifying the use of the toolkit on these datasets. The latest version is [2.3.1](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/releases/tag/v2.3) (released 11 May 2020); follow the [project on GitHub](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to keep track of updates.
+This toolkit contains tools to extract conversational features and analyze social phenomena in conversations, using a [single unified interface](https://convokit.cornell.edu/documentation/architecture.html) inspired by (and compatible with) scikit-learn.  Several large [conversational datasets](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets) are included together with scripts exemplifying the use of the toolkit on these datasets. The latest version is [2.3.2](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/releases/tag/v2.3.2) (released 03 Jun 2020); follow the [project on GitHub](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to keep track of updates.
 
 Read the documentation [here](https://convokit.cornell.edu/documentation).
 
@@ -136,6 +136,7 @@ Two collections of requests (from Wikipedia and Stack Exchange respectively) wit
 
 Conversational dataset with intended and perceived deception labels. Over 17,000 messages annotated by the sender for their intended truthfulness and by the receiver for their perceived truthfulness.
 
+Name for download: `diplomacy-corpus`
 
 ### ...And your own corpus!
 

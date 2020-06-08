@@ -74,8 +74,8 @@ For some quick stats:
 
 >>> corpus.print_summary_stats()
 Number of Speakers: 83
-Number of Utterances: 17288
-Number of Conversations: 245
+Number of Utterances: 17289
+Number of Conversations: 246
 
 To work only with the Training fold:
 
@@ -83,8 +83,9 @@ To work only with the Training fold:
 >>> corpus_train.filter_conversations_by(lambda convo: convo.meta.get('acl2020_fold')=='Train')
 >>> corpus_train.print_summary_stats()
 Number of Speakers: 62
-Number of Utterances: 13131
-Number of Conversations: 183
+Number of Utterances: 13132
+Number of Conversations: 184
+
 
 
 Additional note

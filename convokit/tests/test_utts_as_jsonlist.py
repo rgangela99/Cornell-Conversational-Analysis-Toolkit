@@ -1,9 +1,7 @@
 import unittest
 
 import os
-os.chdir("..")
 from convokit import Utterance, Corpus, Speaker
-os.chdir("./tests")
 
 class CorpusMerge(unittest.TestCase):
     def test_dump_and_load_with_binary(self):

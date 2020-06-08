@@ -1,7 +1,7 @@
 from random import choice, shuffle
 from pandas import DataFrame
 import numpy as np
-from scipy.sparse import csr_matrix, vstack
+from scipy.sparse import csr_matrix, vstack, issparse
 from convokit.classifier.util import extract_feats_from_obj
 
 
@@ -36,7 +36,12 @@ def generate_bow_paired_X_y(pair_orientation_feat_name, pair_id_to_objs, vector_
 
         X.append(diff)
 
-    return vstack(X), np.array(y)
+    if issparse(X[0]): # for csr_matrix
+        X = vstack(X)
+    else: # for non-compressed numpy arrays
+        X = np.vstack(X)
+
+    return X, np.array(y)
 
 
 def generate_paired_X_y(pred_feats, pair_orientation_feat_name, pair_id_to_objs):

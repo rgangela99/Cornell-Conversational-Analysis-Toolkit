@@ -14,7 +14,7 @@ Conversational data loading and processing with ConvoKit
 --------------------------------------------------------
 - `Converting custom data to a ConvoKit Corpus <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/converting_movie_corpus.ipynb>`_
 - `Merging two different Corpora (even when there are overlaps or conflicts in Corpus data) <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/merging/corpus_merge_demo.ipynb>`_
-- `Partially loading utterances from an included dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/tests/notebook_testers/test_corpus_partial_load.ipynb>`_
+- `Partially loading utterances from an included dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/tests/notebook_testers/test_corpus_partial_load.ipynb>`_
 - `Pre-processing text, e.g. computing dependency parses <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/text-processing/text_preprocessing_demo.ipynb>`_
 
 Coordination

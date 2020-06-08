@@ -6,6 +6,7 @@ from convokit.model import Corpus, Conversation
 from .hypergraph import Hypergraph
 
 def degree_stat_funcs(nan_val):
+    # int wrapping is to convert from np.int64 to int, since np.int64 is not JSON-serializable
     return {
     "max": lambda l: int(np.max(l)),
     "argmax": lambda l: int(np.argmax(l)),

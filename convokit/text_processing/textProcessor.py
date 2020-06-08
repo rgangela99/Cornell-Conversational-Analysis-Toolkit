@@ -66,11 +66,11 @@ class TextProcessor(Transformer):
     
     def transform_utterance(self, utt, override_input_filter=False):
         """
-            Computes per-utterance attributes of an individual utterance or string. For utterances which do not contain all of the `input_field` attributes as specified in the constructor, or for utterances which return `False` on `input_filter`, this call will not annotate the utterance. For strings, will convert the string to an utterance and return the utterance, annotating it if `input_field` is not set to `None` at initialization.
+        Computes per-utterance attributes of an individual utterance or string. For utterances which do not contain all of the `input_field` attributes as specified in the constructor, or for utterances which return `False` on `input_filter`, this call will not annotate the utterance. For strings, will convert the string to an utterance and return the utterance, annotating it if `input_field` is not set to `None` at initialization.
 
-            :param utt: utterance or a string
-            :param override_input_filter: ignore `input_filter` and compute attribute for all utterances
-            :return: the utterance
+        :param utt: utterance or a string
+        :param override_input_filter: ignore `input_filter` and compute attribute for all utterances
+        :return: the utterance
         """
 
         if isinstance(utt, str):

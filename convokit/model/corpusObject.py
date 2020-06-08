@@ -1,5 +1,5 @@
 from .convoKitMeta import ConvoKitMeta
-from convokit.util import warn
+from convokit.util import warn, deprecation
 
 class CorpusObject:
 
@@ -73,7 +73,7 @@ class CorpusObject:
         :param key: name of attribute
         :return: attribute <key>
         """
-
+        deprecation("get_info()", "retrieve_meta()")
         return self.meta.get(key, None)
 
     def set_info(self, key, value):
@@ -84,7 +84,7 @@ class CorpusObject:
         :param value: value to set
         :return: None
         """
-
+        deprecation("set_info()", "add_meta()")
         self.meta[key] = value
 
     def del_info(self, key):
