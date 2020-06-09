@@ -9,3 +9,4 @@ dill>=0.2.9
 torch>=0.12
 clean-text>=0.1.1
 joblib>=0.13.2
+seaborn>=0.9.0
