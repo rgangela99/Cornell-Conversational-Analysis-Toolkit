@@ -11,4 +11,3 @@ clean-text>=0.1.1
 joblib>=0.13.2
 seaborn>=0.9.0
 tensorly>=0.4.5
-tensortools==0.3

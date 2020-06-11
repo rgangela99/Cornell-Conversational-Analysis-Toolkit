@@ -169,7 +169,7 @@ class Classifier(Transformer):
 
     def evaluate_with_cv(self, corpus: Corpus = None,
                          objs: List[CorpusObject] = None,
-                         cv=KFold(n_splits=5),
+                         cv=KFold(n_splits=5, shuffle=True),
                          selector: Callable[[CorpusObject], bool] = lambda x: True
                          ):
         """

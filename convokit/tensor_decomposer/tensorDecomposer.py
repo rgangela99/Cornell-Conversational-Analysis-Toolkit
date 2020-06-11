@@ -123,7 +123,7 @@ class TensorDecomposer(Transformer):
         a, b, c = factors
         rank = a.shape[1]
         for component_idx in range(rank):
-            fig, ax = plt.subplots(1, d, figsize=(12, 0.3+int(self.rank * 1.2)))
+            fig, ax = plt.subplots(1, d, figsize=(12, 6))
             ax[0].set_ylabel("Component " + str(component_idx+1))
             factors_name = axis_names if d==3 else ["Time", "Features"]
 
