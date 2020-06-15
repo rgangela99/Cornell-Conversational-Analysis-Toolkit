@@ -237,8 +237,7 @@ class Coordination(Transformer):
                 # slightly different from regex: won't match word after an
                 #   apostrophe unless the apostrophe starts the word
                 #   -- avoids false positives
-                if last not in word_chars and c in word_chars and (last != "'"
-                    or not cur):
+                if last not in word_chars and c in word_chars and (last != "'" or not cur):
                     cur = self.liwc_trie
                 if cur:
                     if c in cur and c != "#" and c != "$":
