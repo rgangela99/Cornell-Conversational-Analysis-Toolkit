@@ -109,9 +109,9 @@ class TensorDecomposer(Transformer):
         if self.tensor_func == 'tensorly':
             self.factors = parafac(tensor, rank=self.rank)[1]
         elif self.tensor_func == 'tensortools-ncp-hals':
-            self.factors = tt.ncp_hals(self.tensor, 3, random_state=2020).factors.factors
+            self.factors = tt.ncp_hals(self.tensor, self.rank, random_state=2020).factors.factors
         elif self.tensor_func == 'tensortools-ncp-bcd':
-            self.factors = tt.ncp_bcd(self.tensor, 3, random_state=2020).factors.factors
+            self.factors = tt.ncp_bcd(self.tensor, self.rank, random_state=2020).factors.factors
         else:
             raise ValueError("Invalid tensor function.")
         print("Done.")
@@ -123,7 +123,7 @@ class TensorDecomposer(Transformer):
         a, b, c = factors
         rank = a.shape[1]
         for component_idx in range(rank):
-            fig, ax = plt.subplots(1, d, figsize=(12, 6))
+            fig, ax = plt.subplots(1, d, figsize=(12, 4.5))
             ax[0].set_ylabel("Component " + str(component_idx+1))
             factors_name = axis_names if d==3 else ["Time", "Features"]
 
@@ -205,7 +205,7 @@ class TensorDecomposer(Transformer):
                   report_title="Report"):
 
         os.makedirs(output_dir, exist_ok=True)
-        self._generate_plots(self.factors, axis_names, output_dir)
+        self._generate_plots(self.factors, axis_names, output_dir, self.rank)
         root = os.path.dirname(os.path.abspath(__file__))
         try:
             shutil.copytree(os.path.join(root, 'static'), os.path.join(output_dir, 'static'))
