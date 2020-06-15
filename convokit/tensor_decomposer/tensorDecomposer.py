@@ -205,7 +205,7 @@ class TensorDecomposer(Transformer):
                   report_title="Report"):
 
         os.makedirs(output_dir, exist_ok=True)
-        self._generate_plots(self.factors, axis_names, output_dir, self.rank)
+        self._generate_plots(self.factors, axis_names, output_dir)
         root = os.path.dirname(os.path.abspath(__file__))
         try:
             shutil.copytree(os.path.join(root, 'static'), os.path.join(output_dir, 'static'))
