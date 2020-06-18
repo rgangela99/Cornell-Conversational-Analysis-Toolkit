@@ -7,7 +7,7 @@
     <h1>{{title}}</h1>
     {% for d in component_to_details %}
     <br>
-    <h3>Factor: {{d+1   }}</h3>
+    <h3>Component: {{d+1   }}</h3>
     <img src='./graphs/component_plot_{{d+1}}.png' />
     <p><b>Positive groups: </b>{{", ".join(component_to_details[d]['pos_groups'])}}</p>
     <p><b>Negative groups: </b>{{", ".join(component_to_details[d]['neg_groups'])}}</p>

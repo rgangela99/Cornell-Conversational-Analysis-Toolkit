@@ -5,24 +5,24 @@
 </head>
 <body>
     <h1>{{title}}</h1>
-    {% for d in factor_to_details %}
+    {% for d in component_to_details %}
     <br>
-    <h3>Factor: {{d+1   }}</h3>
-    <img src='{{graph_filepath}}/factorplot_{{d+1}}.png' />
-    <p><b>Positive subreddits: </b>{{", ".join(factor_to_details[d]['pos_subreddits'])}}</p>
-    <p><b>Negative subreddits: </b>{{", ".join(factor_to_details[d]['neg_subreddits'])}}</p>
+    <h3>Component: {{d+1   }}</h3>
+    <img src='./graphs/component_plot_{{d+1}}.png' />
+    <p><b>Positive subreddits: </b>{{", ".join(component_to_details[d]['pos_subreddits'])}}</p>
+    <p><b>Negative subreddits: </b>{{", ".join(component_to_details[d]['neg_subreddits'])}}</p>
 
     <p><b>Positive features: </b></p><br />
     <div class="image_grid">
-        {{factor_to_details[d]['pos_features']}}
+        {{component_to_details[d]['pos_features']}}
     </div>
 
     <p><b>Negative features: </b></p><br />
     <div class="image_grid">
-        {{factor_to_details[d]['neg_features']}}
+        {{component_to_details[d]['neg_features']}}
     </div>
     <hr>
-<!--    <p>{{factor_to_details[d]}}</p>-->
+<!--    <p>{{component_to_details[d]}}</p>-->
     {% endfor %}
 </body>
 

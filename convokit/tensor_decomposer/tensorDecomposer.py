@@ -108,10 +108,12 @@ class TensorDecomposer(Transformer):
         print("Decomposing tensor...", end="")
         if self.tensor_func == 'tensorly':
             self.factors = parafac(tensor, rank=self.rank)[1]
+        elif self.tensor_func == 'tensortools-cp-als':
+            self.factors = tt.cp_als(self.tensor, self.rank).factors.factors
         elif self.tensor_func == 'tensortools-ncp-hals':
-            self.factors = tt.ncp_hals(self.tensor, self.rank, random_state=2020).factors.factors
+            self.factors = tt.ncp_hals(self.tensor, self.rank).factors.factors
         elif self.tensor_func == 'tensortools-ncp-bcd':
-            self.factors = tt.ncp_bcd(self.tensor, self.rank, random_state=2020).factors.factors
+            self.factors = tt.ncp_bcd(self.tensor, self.rank).factors.factors
         else:
             raise ValueError("Invalid tensor function.")
         print("Done.")
@@ -143,7 +145,7 @@ class TensorDecomposer(Transformer):
         neg_pts = np.argwhere(scaled.reshape(factor.shape[0]) < -self.anomaly_threshold).flatten()
         return pos_pts, neg_pts
 
-    def _generate_high_level_summary(self):
+    def _generate_high_level_summary(self, liwc=False):
         # generate_plots()
 
         factor1, factor2, factor3 = self.factors # time, thread, feature
@@ -177,8 +179,9 @@ class TensorDecomposer(Transformer):
                                     key=lambda x: x[1], reverse=True)
             component_to_details[idx]['neg_groups'] = [k for k, v in neg_groups[:5]]
 
-            component_to_details[idx]['pos_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['pos_features'][:10])
-            component_to_details[idx]['neg_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['neg_features'][:10])
+            if not liwc:
+                component_to_details[idx]['pos_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['pos_features'][:10])
+                component_to_details[idx]['neg_features'] = get_graphic_dict(idx_to_distinctive_features[idx]['neg_features'][:10])
 
         return component_to_details
 
@@ -195,6 +198,19 @@ class TensorDecomposer(Transformer):
                                 graph_filepath=os.path.join(output_dir, "graphs"))
             )
 
+    def _generate_html_liwc(self, title, output_dir):
+        root = os.path.dirname(os.path.abspath(__file__))
+        component_to_details = self._generate_high_level_summary(liwc=True)
+        env = Environment(loader=FileSystemLoader(os.path.join(root, 'template')))
+        template = env.get_template('liwc_report.html')
+        filename = os.path.join(output_dir, "liwc_report.html")
+        with open(filename, 'w') as fh:
+            fh.write(
+                template.render(title=title, component_to_details=component_to_details,
+                                graph_filepath=os.path.join(output_dir, "graphs"))
+            )
+
+
     def transform(self, corpus: Corpus, selector: Optional[Callable[[CorpusObject], bool]] = lambda obj: True) -> Corpus:
         obj_factor = self.factors[1]
         for idx, obj in enumerate(corpus.iter_objs(self.obj_type, selector)):
@@ -202,7 +218,7 @@ class TensorDecomposer(Transformer):
         return corpus
 
     def summarize(self, corpus: Corpus, axis_names: List[str], output_dir: str = '.',
-                  report_title="Report"):
+                  report_title="Report", liwc=False):
 
         os.makedirs(output_dir, exist_ok=True)
         self._generate_plots(self.factors, axis_names, output_dir)
@@ -213,7 +229,10 @@ class TensorDecomposer(Transformer):
         except FileExistsError:
             print("Directory already exists. Exiting summarize()")
             return
-        self._generate_html(report_title, output_dir)
+        if liwc:
+            self._generate_html_liwc(report_title, output_dir)
+        else:
+            self._generate_html(report_title, output_dir)
         print("Report generated at {}".format(os.path.join(output_dir, "report.html")))
 
     @staticmethod
