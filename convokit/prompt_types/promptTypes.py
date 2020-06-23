@@ -11,13 +11,18 @@ from convokit.transformer import Transformer
 
 class PromptTypes(Transformer):
 	"""
-	Model that infers a vector representation of utterances in terms of the responses that similar utterances tend to prompt, as well as types of rhetorical intentions encapsulated by utterances in a corpus, in terms of their anticipated responses (operationalized as k-means clusters of vectors).
+	Model that infers a vector representation of utterances in terms of the responses that similar utterances tend to
+	prompt, as well as types of rhetorical intentions encapsulated by utterances in a corpus, in terms of their
+	anticipated responses (operationalized as k-means clusters of vectors).
 
-	Under the surface, the model takes as input pairs of prompts and responses during the fit step. In this stage the following subcomponents are involved:
+	Under the surface, the model takes as input pairs of prompts and responses during the fit step. In this stage the
+	following subcomponents are involved:
 		1. a prompt embedding model that will learn the vector representations;
 		2. a prompt type model that learns a clustering of these representations.
 
-	The model can transform individual (unpaired) utterances in the transform step. While the focus is on representing properties of prompts, as a side-effect the model can also compute representations that encapsulate properties of responses and assign responses to prompt types (as "typical responses" to the prompts in that type).
+	The model can transform individual (unpaired) utterances in the transform step. While the focus is on representing
+	properties of prompts, as a side-effect the model can also compute representations that encapsulate properties of
+	responses and assign responses to prompt types (as "typical responses" to the prompts in that type).
 
 	Internally, the model contains the following elements:
 		* prompt_embedding_model: stores models that compute the vector representations. includes tf-idf models that convert the prompt and response input to term document matrices, an SVD model that produces a low-dimensional representation of responses and prompts, and vector representations of prompt and response terms
@@ -36,22 +41,40 @@ class PromptTypes(Transformer):
 	For an end-to-end implementation that runs several default values of the parameters, see the `PromptTypeWrapper` module.
 
 	:param prompt_field: the name of the attribute of prompts to use as input to fit.
-	:param ref_field: the name of the attribute of responses to use as input to fit. a reasonable choice is to set to the same value as prompt_field.
-	:param output_field: the name of the attribute to write to in the transform step. the transformer outputs several fields, as listed above.
+	:param ref_field: the name of the attribute of responses to use as input to fit. a reasonable choice is to set to
+		the same value as prompt_field.
+	:param output_field: the name of the attribute to write to in the transform step. the transformer outputs several
+		fields, as listed above.
 	:param n_types: the number of types to infer. defaults to 8.
-	:param prompt_transform_field: the name of the attribute of prompts to use as input to transform; defaults to the same attribute as in fit.
-	:param ref_transform_field: the name of the attribute of responses to use as input to transform; defaults to the same attribute as in fit.
-	:param prompt_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as prompts in the fit step. defaults to using all utterances which have a response.
-	:param ref_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances will be considered as responses in the fit step. defaults to using all utterances which are responses to a prompt.
-	:param prompt_transform_filter: filter that determines which utterances will be considered as prompts in the transform step. defaults to prompt_filter, the same as is used in fit.
-	:param ref_transform_filter: filter that determines which utterances will be considered as responses in the transform step. defaults to ref_filter, the same as is used in fit.
-	:param prompt__tfidf_min_df: the minimum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
-	:param prompt__tfidf_max_df: the maximum frequency of prompt terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1. Setting higher is more permissive, but may result in many stopword-like terms adding noise to the model.
-	:param ref__tfidf_min_df: the minimum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 100.
-	:param ref__tfidf_max_df: the maximum frequency of response terms to use. can be specified as a fraction or as an absolute count, defaults to 0.1.
-	:param snip_first_dim: whether or not to remove the first SVD dimension (which may add noise to the model; typically this reflects frequency rather than any semantic interpretation). defaults to `True`.
-	:param svd__n_components: the number of SVD dimensions to use, defaults to 25. higher values result in richer vector representations, perhaps at the cost of the model learning overly-specific types.
-	:param max_dist: the maximum distance between a vector representation of an utterance and the cluster centroid; a cluster whose distance to all centroids is above this cutoff will get assigned to a null type, denoted by -1. defaults to 0.9.
+	:param prompt_transform_field: the name of the attribute of prompts to use as input to transform; defaults to the
+		same attribute as in fit.
+	:param ref_transform_field: the name of the attribute of responses to use as input to transform; defaults to the
+		same attribute as in fit.
+	:param prompt_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which
+		utterances will be considered as prompts in the fit step. defaults to using all utterances which have a response.
+	:param ref_filter: a boolean function of signature `filter(utterance, aux_input)` that determines which utterances
+		will be considered as responses in the fit step. defaults to using all utterances which are responses to a
+		prompt.
+	:param prompt_transform_filter: filter that determines which utterances will be considered as prompts in the
+		transform step. defaults to prompt_filter, the same as is used in fit.
+	:param ref_transform_filter: filter that determines which utterances will be considered as responses in the
+		transform step. defaults to ref_filter, the same as is used in fit.
+	:param prompt__tfidf_min_df: the minimum frequency of prompt terms to use. can be specified as a fraction or as an
+		absolute count, defaults to 100.
+	:param prompt__tfidf_max_df: the maximum frequency of prompt terms to use. can be specified as a fraction or as an
+		absolute count, defaults to 0.1. Setting higher is more permissive, but may result in many stopword-like terms
+		adding noise to the model.
+	:param ref__tfidf_min_df: the minimum frequency of response terms to use. can be specified as a fraction or as an
+		absolute count, defaults to 100.
+	:param ref__tfidf_max_df: the maximum frequency of response terms to use. can be specified as a fraction or as an
+		absolute count, defaults to 0.1.
+	:param snip_first_dim: whether or not to remove the first SVD dimension (which may add noise to the model; typically
+	 	this reflects frequency rather than any semantic interpretation). defaults to `True`.
+	:param svd__n_components: the number of SVD dimensions to use, defaults to 25. higher values result in richer
+		vector representations, perhaps at the cost of the model learning overly-specific types.
+	:param max_dist: the maximum distance between a vector representation of an utterance and the cluster centroid; a
+		cluster whose distance to all centroids is above this cutoff will get assigned to a null type, denoted by -1.
+		Defaults to 0.9.
 	:param random_state: the random seed to use.
 	:param verbosity: frequency of status messages.
 	"""

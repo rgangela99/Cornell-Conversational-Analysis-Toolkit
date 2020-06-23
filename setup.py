@@ -6,7 +6,7 @@ setup(
     author_email="cristian@cs.cornell.edu",
     url="https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit",
     description="Cornell Conversational Analysis Toolkit",
-    version="2.3.2",
+    version="2.3.2.3",
     packages=["convokit",
                 "convokit.bag_of_words",
                 "convokit.classifier",
@@ -43,5 +43,11 @@ setup(
     ],
     extras_require={
         'craft': ["torch>=0.12"],
-    }
+    },
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ]
 )

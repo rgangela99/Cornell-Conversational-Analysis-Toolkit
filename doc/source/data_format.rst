@@ -6,7 +6,7 @@ ConvoKit expects and saves each corpus with the following basic structure, which
 ::
 
  corpus_directory
-       |-- utterances.json
+       |-- utterances.jsonl
        |-- speakers.json
        |-- conversations.json
        |-- corpus.json

@@ -53,10 +53,20 @@ class Utterance(CorpusObject):
 
     def get_conversation(self):
         """
-        Get the Conversation (identified by Utterance.root) this Utterance belongs to
-        :return: Conversation
+        Get the Conversation (identified by Utterance.conversation_id) this Utterance belongs to
+
+        :return: a Conversation object
         """
         return self.owner.get_conversation(self.conversation_id)
+
+    def get_speaker(self):
+        """
+        Get the Speaker that made this Utterance.
+
+        :return: a Speaker object
+        """
+
+        return self.speaker
 
     def __hash__(self):
         return super().__hash__()

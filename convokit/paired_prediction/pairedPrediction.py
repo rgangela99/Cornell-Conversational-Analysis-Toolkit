@@ -1,7 +1,7 @@
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.model_selection import cross_val_score, KFold
 from typing import List, Callable
 from convokit import Transformer, CorpusObject, Corpus
 from .util import *
@@ -72,13 +72,14 @@ class PairedPrediction(Transformer):
             raise ValueError("Some metadata features required for paired prediction are missing: {}. "
                              "You may need to run Pairer.transform() first.".format(required_keys))
 
-    def summarize(self, corpus: Corpus, selector: Callable[[CorpusObject], bool] = lambda x: True, cv=LeaveOneOut()):
+    def summarize(self, corpus: Corpus, selector: Callable[[CorpusObject], bool] = lambda x: True,
+                  cv=KFold(n_splits=5, shuffle=True)):
         """
         Run PairedPrediction on the corpus with cross-validation and returns the mean cross-validation score.
 
         :param corpus: target Corpus (must be annotated with pair information using PairedPrediction.transform())
         :param selector: a (lambda) function that takes a Corpus object and returns a bool: True if the object is to be included in summary. By default, includes all objects.
-        :param cv: optional CV model: default is LOOCV
+        :param cv: optional CV model: default is KFold(n_splits=5, shuffle=True)
         :return: cross-validation accuracy score
         """
         pair_id_to_objs = generate_pair_id_to_objs(corpus, self.obj_type, selector, self.pair_orientation_feat_name,

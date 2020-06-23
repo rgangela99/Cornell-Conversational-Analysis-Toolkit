@@ -180,7 +180,7 @@ class Classifier(Transformer):
 
         :param corpus: target Corpus (do not pass in objs if using this)
         :param objs: target list of Corpus objects (do not pass in corpus if using this)
-        :param cv: cross-validation model to use: KFold(n_splits=5) by default.
+        :param cv: cross-validation model to use: KFold(n_splits=5, shuffle=True) by default.
         :param selector: if running on a Corpus, this is a (lambda) function that takes a Corpus object and returns
             True or False (i.e. include / exclude). By default, the selector includes all objects of the specified type
             in the Corpus.

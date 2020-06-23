@@ -1,3 +1,7 @@
+"""
+Contains functions that help with the construction / dumping of a Corpus
+"""
+
 import os
 import json
 from collections import defaultdict
@@ -164,14 +168,19 @@ def merge_utterance_lines(utt_dict):
     For merging adjacent utterances by the same speaker
     """
     new_utterances = {}
+    merged_with = {}
     for uid, utt in utt_dict.items():
         merged = False
         if utt.reply_to is not None and utt.speaker is not None:
             u0 = utt_dict[utt.reply_to]
             if u0.conversation_id == utt.conversation_id and u0.speaker == utt.speaker:
-                new_utterances[u0.id].text += " " + utt.text
+                merge_target = merged_with[u0.id] if u0.id in merged_with else u0.id
+                new_utterances[merge_target].text += " " + utt.text
+                merged_with[utt.id] = merge_target
                 merged = True
         if not merged:
+            if utt.reply_to in merged_with:
+                utt.reply_to = merged_with[utt.reply_to]
             new_utterances[utt.id] = utt
     return new_utterances
 

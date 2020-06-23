@@ -50,3 +50,6 @@ class ConvoKitIndex:
 
     def __str__(self):
         return str(self.to_dict(increment_version=False))
+
+    def __repr__(self):
+        return str(self)

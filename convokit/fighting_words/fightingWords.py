@@ -167,15 +167,18 @@ class FightingWords(Transformer):
         print("ngram zscores computed.")
         return self
 
-    def get_ngram_zscores(self):
+    def get_ngram_zscores(self, class1_name='class1', class2_name='class2'):
         """
+        Get a DataFrame of ngrams and their corresponding zscores and class labels.
+
+        :param class1_name:
         :return: a DataFrame of ngrams with zscores and classes, indexed by the ngrams
         """
 
         if self.ngram_zscores is None:
             raise ValueError("fit() must be run on a corpus first.")
         df = pd.DataFrame(list(self.ngram_zscores.items()), columns=['ngram', 'z-score']).set_index('ngram')
-        df['class'] = (df['z-score'] >= 0).apply(lambda x: ["class2", "class1"][int(x)])
+        df['class'] = (df['z-score'] >= 0).apply(lambda x: [class2_name, class1_name][int(x)])
         return df
 
     def get_top_k_ngrams(self, top_k=None) -> Tuple[List[str], List[str]]:
@@ -220,7 +223,7 @@ class FightingWords(Transformer):
         Annotates the corpus utterances with the lists of fighting words that the utterance contains.
 
         The relevant fighting words to use are specified by FightingWords.top_k or FightingWords.threshold,
-            with FightingWords.annot_method indicating which criterion to use.
+        with FightingWords.annot_method indicating which criterion to use.
 
         Lists are stored under metadata keys 'fighting_words_class1', 'fighting_words_class2'
 
@@ -271,20 +274,22 @@ class FightingWords(Transformer):
         else:
             return "class2"
 
-    def summarize(self, corpus: Corpus, plot: bool = False):
+    def summarize(self, corpus: Corpus, plot: bool = False, class1_name='class1', class2_name='class2'):
         """
         Returns a DataFrame of ngram with zscores and classes, and optionally plots the fighting words distribution.
         FightingWords Transformer must be fitted prior to running this.
 
         :param corpus: corpus to learn fighting words from if not already fitted
         :param plot: if True, generates a plot for the fighting words distribution
+        :param class1_name: descriptive name for class1 utterances
+        :param class2_name: descriptive name for class2 utterances
         :return: DataFrame of ngrams with zscores and classes, indexed by the ngrams (plot is optionally generated)
         """
         if plot:
-            self.plot_fighting_words()
-        return self.get_ngram_zscores()
+            self.plot_fighting_words(class1_name=class1_name, class2_name=class2_name)
+        return self.get_ngram_zscores(class1_name=class1_name, class2_name=class2_name)
 
-    def plot_fighting_words(self, max_label_size=15):
+    def plot_fighting_words(self, max_label_size=15, class1_name='class1', class2_name='class2'):
         """
         Plots the distribution of fighting words.
 
@@ -293,10 +298,12 @@ class FightingWords(Transformer):
         Specifically, the weighted log-odds ratio is plotted against frequency of word within topic.
 
         Only the most significant ngrams will have text labels. The most significant ngrams are specified by
-            FightingWords.annot_method and (FightingWords.top_k or FightingWords.threshold)
+        FightingWords.annot_method and (FightingWords.top_k or FightingWords.threshold)
 
         :param max_label_size: For the text labels, set the largest possible size for any text label
             (the rest will be scaled accordingly)
+        :param class1_name: descriptive name for class1 utterances
+        :param class2_name: descriptive name for class2 utterances
         :return: None (plot is generated)
         """
         if self.ngram_zscores is None:
@@ -339,8 +346,8 @@ class FightingWords(Transformer):
 
         fig, ax = plt.subplots(figsize=(9, 6), dpi=200)
 
-        ax.scatter(class1['x'], class1['y'], c=pos_color, s=class1['size'], label='class1')
-        ax.scatter(class2['x'], class2['y'], c=neg_color, s=class2['size'], label='class2')
+        ax.scatter(class1['x'], class1['y'], c=pos_color, s=class1['size'], label=class1_name)
+        ax.scatter(class2['x'], class2['y'], c=neg_color, s=class2['size'], label=class2_name)
         ax.scatter(class_insig['x'], class_insig['y'], c=insig_color, s=class_insig['size'])
 
         for i, annot in enumerate(annots):
@@ -349,7 +356,7 @@ class FightingWords(Transformer):
 
         ax.legend()
         ax.set_xscale('log')
-        ax.set_title("Weighted log-odds ratio against Frequency of word within topic")
+        ax.set_title("Weighted log-odds ratio vs. Frequency of word within class")
         plt.show()
 
     def get_model(self):

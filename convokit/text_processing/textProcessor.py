@@ -44,10 +44,10 @@ class TextProcessor(Transformer):
             if self.input_field is None:
                 text_entry = utterance.text
             elif isinstance(self.input_field, str):
-                text_entry = utterance.get_info(self.input_field)
+                text_entry = utterance.retrieve_meta(self.input_field)
 
             elif isinstance(self.input_field, list):
-                text_entry = {field: utterance.get_info(field) for field in self.input_field}
+                text_entry = {field: utterance.retrieve_meta(field) for field in self.input_field}
                 if sum(x is None for x in text_entry.values()) > 0:
                     text_entry = None
             if text_entry is None:
@@ -58,9 +58,9 @@ class TextProcessor(Transformer):
                 result = self.proc_fn(text_entry, self.aux_input)
             if self.multi_outputs:
                 for res, out in zip(result, self.output_field):
-                    utterance.set_info(out, res)
+                    utterance.add_meta(out, res)
             else:
-                utterance.set_info(self.output_field, result)
+                utterance.add_meta(self.output_field, result)
         if self.verbosity > 0: print('%03d/%03d utterances processed' % (total_utts, total_utts))
         return corpus
     
@@ -82,9 +82,9 @@ class TextProcessor(Transformer):
                 if not self.input_filter(utt, self.aux_input): 
                     return utt 
             if isinstance(self.input_field, str):
-                text_entry = utt.get_info(self.input_field)
+                text_entry = utt.retrieve_meta(self.input_field)
             elif isinstance(self.input_field, list):
-                text_entry = {field: utt.get_info(field) for field in self.input_field}
+                text_entry = {field: utt.retrieve_meta(field) for field in self.input_field}
                 if sum(x is None for x in text_entry.values()) > 0:
                     return utt
         if text_entry is None:
@@ -95,8 +95,8 @@ class TextProcessor(Transformer):
             result = self.proc_fn(text_entry, self.aux_input)
         if self.multi_outputs:
             for res, out in zip(result, self.output_field):
-                utt.set_info(out, res)
+                utt.add_meta(out, res)
         else:
-            utt.set_info(self.output_field, result)
+            utt.add_meta(self.output_field, result)
         return utt
 
