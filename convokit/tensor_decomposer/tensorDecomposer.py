@@ -15,6 +15,7 @@ from sklearn import metrics
 from sklearn.cluster import KMeans
 from statistics import mode
 import tensortools as tt
+import random
 
 
 class TensorDecomposer(Transformer):
@@ -30,12 +31,14 @@ class TensorDecomposer(Transformer):
 
     def __init__(self, feature_set: List[str], obj_type: str = "conversation", rank: int = 9,
                  normalize_func=lambda tensor: tensor, tensor_func="tensorly",
-                 anomaly_threshold = 1.5, impute_na: float = -1, group_func = lambda obj: obj.id):
+                 thread_anomaly_threshold=3, feat_anomaly_threshold=1.5,
+                 impute_na: float = -1, group_func = lambda obj: obj.id):
         self.obj_type = obj_type
         self.feature_set = feature_set
         self.rank = rank
         self.normalize_func = normalize_func
-        self.anomaly_threshold = anomaly_threshold
+        self.thread_anomaly_threshold = thread_anomaly_threshold
+        self.feat_anomaly_threshold = feat_anomaly_threshold
         self.impute_na = impute_na
         self.group_func = group_func
         self.tensor_func = tensor_func
@@ -131,18 +134,19 @@ class TensorDecomposer(Transformer):
 
             for col_idx in range(d):
                 sns.despine(top=True, ax=ax[col_idx])
+                sns.set_style('whitegrid')
                 ax[col_idx].plot(factors[col_idx].T[component_idx])
                 ax[col_idx].set_xlabel(factors_name[col_idx])
             plt.savefig(os.path.join(output_dir, 'graphs', 'component_plot_{}.png'.format(component_idx+1)))
 
 
-    def _get_anomalous_points(self, factor_full, idx):
+    def _get_anomalous_points(self, factor_full, idx, anomaly_threshold):
         scaler = StandardScaler()
         factor = factor_full[:, idx]
         reshaped = factor.reshape((factor.shape[0], 1))
         scaled = scaler.fit_transform(reshaped)
-        pos_pts = np.argwhere(scaled.reshape(factor.shape[0]) > self.anomaly_threshold).flatten()
-        neg_pts = np.argwhere(scaled.reshape(factor.shape[0]) < -self.anomaly_threshold).flatten()
+        pos_pts = np.argwhere(scaled.reshape(factor.shape[0]) > anomaly_threshold).flatten()
+        neg_pts = np.argwhere(scaled.reshape(factor.shape[0]) < -anomaly_threshold).flatten()
         return pos_pts, neg_pts
 
     def _generate_high_level_summary(self, liwc=False):
@@ -156,7 +160,7 @@ class TensorDecomposer(Transformer):
         # normalizing
         group_totals = Counter(self.groups)
         for idx in range(self.rank):
-            pos_thread_pts, neg_thread_pts = self._get_anomalous_points(factor2, idx)
+            pos_thread_pts, neg_thread_pts = self._get_anomalous_points(factor2, idx, self.thread_anomaly_threshold)
             idx_to_distinctive_threads[idx]['pos_threads'] = Counter([self.groups[i] for i in pos_thread_pts])
             idx_to_distinctive_threads[idx]['neg_threads'] = Counter([self.groups[i] for i in neg_thread_pts])
 
@@ -165,7 +169,7 @@ class TensorDecomposer(Transformer):
                 idx_to_distinctive_threads[idx]['pos_threads'][group] /= group_totals[group]
                 idx_to_distinctive_threads[idx]['neg_threads'][group] /= group_totals[group]
 
-            pos_features, neg_features = self._get_anomalous_points(factor3, idx)
+            pos_features, neg_features = self._get_anomalous_points(factor3, idx, self.feat_anomaly_threshold)
             idx_to_distinctive_features[idx]['pos_features'] = [self.features[i] for i in pos_features]
             idx_to_distinctive_features[idx]['neg_features'] = [self.features[i] for i in neg_features]
 
@@ -253,4 +257,20 @@ class TensorDecomposer(Transformer):
 
         return correct / len(y_pred)
 
+    def get_components(self, corpus, selector=lambda obj: True):
+        factor1, thread_factor, feature_factor = self.factors
+        objs = list(corpus.iter_objs(self.obj_type, selector=selector))
+        retval = dict()
+        for idx in range(self.rank):
+            pos_threads, neg_threads = self._get_anomalous_points(thread_factor, idx, self.thread_anomaly_threshold)
+            pos_feats, neg_feats = self._get_anomalous_points(feature_factor, idx, self.feat_anomaly_threshold)
+            retval[idx] = {'pos_threads': [objs[i] for i in pos_threads],
+                           'neg_threads': [objs[i] for i in neg_threads],
+                           'pos_feats': [self.features[i] for i in pos_feats],
+                           'neg_feats': [self.features[i] for i in neg_feats]}
+        return retval
 
+    def get_component_example(self, component_idx_to_distinctive, component_no):
+        d = component_idx_to_distinctive[component_no - 1]
+        convo = random.choice(d['pos_threads'])
+        return convo.get_utterances_dataframe()[['text', 'speaker'] + ['meta.' + f for f in d['pos_feats']]]
