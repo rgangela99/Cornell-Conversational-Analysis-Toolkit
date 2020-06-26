@@ -270,7 +270,8 @@ class TensorDecomposer(Transformer):
                            'neg_feats': [self.features[i] for i in neg_feats]}
         return retval
 
-    def get_component_example(self, component_idx_to_distinctive, component_no):
+    def get_component_example(self, component_idx_to_distinctive, component_no, text_field=None):
+        if text_field is None: text_field = 'text'
         d = component_idx_to_distinctive[component_no - 1]
         convo = random.choice(d['pos_threads'])
-        return convo.get_utterances_dataframe()[['text', 'speaker'] + ['meta.' + f for f in d['pos_feats']]]
+        return convo.get_utterances_dataframe()[[text_field, 'speaker'] + ['meta.' + f for f in d['pos_feats']]].iloc[:len(self.feature_set)]
