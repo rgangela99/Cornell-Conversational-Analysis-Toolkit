@@ -5,7 +5,7 @@ from itertools import chain
 
 class UtteranceNode:
     """
-    Wrapper class around Utterances to facilitiate tree traversal operations
+    Wrapper class around Utterances to facilitate tree traversal operations
 
     :ivar utt: the Utterance that this Node corresponds to
     :ivar children: a List of Utterance nodes that correspond to Utterances that respond to this node's Utterance
