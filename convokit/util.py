@@ -88,6 +88,10 @@ def download(name: str, verbose: bool = True, data_dir: str = None, use_newest_v
         wikiconv_year = name.split("-")[1]
         cur_version[name] = cur_version['wikiconv']
         DatasetURLs[name] = _get_wikiconv_year_info(wikiconv_year)
+    elif name.startswith("oyez_"):
+        oyez_year = name.split('_')[1]
+        cur_version[name] = cur_version['oyez']
+        DatasetURLs[name] = _get_oyez_info(oyez_year)
     else:
         name = name.lower()
 
@@ -294,6 +298,10 @@ def _get_wikiconv_year_info(year: str) -> str:
 
     return data_dir + year + "/full.corpus.zip"
 
+def _get_oyez_info(year: str) -> str:
+
+    oyez_base = "http://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/"
+    return oyez_base + 'oyez_' + year + '.zip'
 
 def meta_index(corpus=None, filename: str = None) -> Dict:
     keys = ["utterances-index", "conversations-index", "speakers-index",

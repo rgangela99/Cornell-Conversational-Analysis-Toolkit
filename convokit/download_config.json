@@ -23,7 +23,8 @@
     "wikiconv": 0,
     "wikiconv-corpus": 1,
     "wikipedia-politeness-corpus": 1,
-    "winning-args-corpus": 1
+    "winning-args-corpus": 1,
+    "oyez": 1
   },
     "DatasetURLs": {
     "chromium-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/chromium-corpus/chromium-corpus.zip",
