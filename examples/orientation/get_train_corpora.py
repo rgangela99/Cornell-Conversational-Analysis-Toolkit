@@ -11,33 +11,23 @@ warnings.filterwarnings('ignore')
 
 from multiprocessing import Pool
 
-# DATA_DIR = '/kitchen/experimental_justine/scotus/demo_data'
-# replace with the directory you will write corpora to.
-DATA_DIR = '<YOUR DIRECTORY>'
-# False if you don't want to download the corpus but are instead reading from an existing directory.
+DATA_DIR = '/kitchen/experimental_justine/scotus/oyez_demo'
 TO_DOWNLOAD = True
 
-# the years spanned by the Oyez corpus. decrease this range if you're only interested in a subset.
 MIN_YEAR = 1955
 MAX_YEAR = 2019
 
-# the number of processes to run in parallel.
 N_JOBS = 16
 
-# names of fields containing text representations of the phrasings in utterances
 TEXT_COLS = ['arcs','tokens']
-
-# min and max length of source and target utterances.
 MIN_WC_SOURCE = 10
 MAX_WC_SOURCE = 50
 MIN_WC_TARGET = 10
 MAX_WC_TARGET = 75
-
-# modify to select different source and target utterances.
 SOURCE_FILTER = lambda utt: (utt.retrieve_meta('speaker_type') == 'J') and (utt.retrieve_meta('arcs') != '')
 TARGET_FILTER = lambda utt: (utt.retrieve_meta('speaker_type') == 'A') and (utt.retrieve_meta('arcs') != '')
 
-# note that __main__ could be modified to accomodate other corpora.
+
 
 def get_context_id_df(corpus):
 	prev_df = pd.DataFrame([{'id': utt.id, 'prev_id': utt.reply_to} for utt in corpus.iter_utterances()])
@@ -58,7 +48,7 @@ def text_prep_pipe():
 def get_train_subset(corpus, 
 		min_wc_source, max_wc_source,
 		min_wc_target, max_wc_target,
-		source_filter, target_filter, text_cols):
+		source_filter, target_filter):
 
 	context_id_df = get_context_id_df(corpus)
 
@@ -80,12 +70,9 @@ def get_train_subset(corpus,
 
 	source_df = source_df[source_df.prev_id.isin(target_df.index)
          & source_df.next_id.isin(target_df.index)]
-
-	text_df = corpus.get_attribute_table('utterance',text_cols)	 
-
-	source_df = source_df[['prev_id','next_id']].join(text_df)
-	target_df = target_df[[]].join(text_df)
-	return source_df, target_df
+	utt_ids = source_df.index.union(target_df.index)
+	utt_subset = [corpus.get_utterance(id) for id in utt_ids]
+	return Corpus(utterances=utt_subset)
 
 def process_corpus(corpus_name, to_download=TO_DOWNLOAD,
 		min_wc_source=MIN_WC_SOURCE, max_wc_source=MAX_WC_SOURCE,
@@ -104,15 +91,21 @@ def process_corpus(corpus_name, to_download=TO_DOWNLOAD,
 	corpus.load_info('utterance',['parsed'])
 
 	corpus = text_prep_pipe().transform(corpus)
-
-	source_df, target_df = get_train_subset(corpus, 
+	print('subset', corpus.get_meta()['name'])
+	train_corpus = get_train_subset(corpus, 
 		min_wc_source, max_wc_source,
 		min_wc_target, max_wc_target,
-		source_filter, target_filter, text_cols)
-	source_df.to_csv(os.path.join(data_dir, corpus_name + '.source.tsv'), sep='\t')
-	target_df.to_csv(os.path.join(data_dir, corpus_name + '.target.tsv'), sep='\t')
+		source_filter, target_filter)
+	
+
+	corpus_outdir = os.path.join(data_dir, corpus_name + '_subset')
+	train_corpus.meta['name'] = corpus.get_meta()['name']
+	train_corpus.print_summary_stats()
+	train_corpus.dump(os.path.basename(corpus_outdir), base_path=os.path.dirname(corpus_outdir),
+		fields_to_skip={'utterance': ['parsed','arcs_per_sent']})
 
 if __name__ == '__main__':
 	corpus_names = ['oyez_%s' % year for year in range(MIN_YEAR, MAX_YEAR + 1)]
 	pool = Pool(N_JOBS)
 	pool.map(process_corpus, corpus_names)
+	# process_corpus('oyez_2019')
