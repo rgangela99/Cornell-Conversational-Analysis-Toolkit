@@ -35,3 +35,5 @@ venv-triadmotif/
 *.DS_Store
 .DS_Store
 *.xlsx
+*.tsv
+*.csv

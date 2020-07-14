@@ -79,7 +79,10 @@ class BoWClassifier(Classifier):
             else:
                 obj.add_meta(self.clf_feat_name, None)
                 obj.add_meta(self.clf_prob_feat_name, None)
-        X = vstack(X)
+        if issparse(X[0]): # for csr_matrix
+            X = vstack(X)
+        else: # for non-compressed numpy arrays
+            X = np.vstack(X)
         clfs, clfs_probs = self.clf.predict(X), self.clf.predict_proba(X)[:, 1]
 
         for idx, (clf, clf_prob) in enumerate(list(zip(clfs, clfs_probs))):
@@ -176,7 +179,7 @@ class BoWClassifier(Classifier):
 
     def evaluate_with_cv(self, corpus: Corpus = None,
                          objs: List[CorpusObject] = None,
-                         cv=KFold(n_splits=5),
+                         cv=KFold(n_splits=5, shuffle=True),
                          selector: Callable[[CorpusObject], bool] = lambda x: True
                          ):
         """
