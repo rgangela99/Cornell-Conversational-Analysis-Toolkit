@@ -33,8 +33,7 @@ def get_utterances_dataframe(obj, selector = lambda utt: True,
     df = df.drop(['_id', '_owner', 'obj_type', 'user', '_root'], axis=1)
     df['speaker'] = df['speaker'].map(lambda spkr: spkr.id)
     meta_columns = [k for k in df.columns if k.startswith('meta.')]
-    return df[['timestamp', 'text', 'speaker', 'reply_to', 'conversation_id'] +
-              meta_columns].astype({'timestamp': 'uint64'})
+    return df[['timestamp', 'text', 'speaker', 'reply_to', 'conversation_id'] + meta_columns]
 
 
 def get_conversations_dataframe(obj, selector = lambda convo: True,
