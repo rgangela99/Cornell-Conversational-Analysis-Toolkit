@@ -1,11 +1,11 @@
 Oyez Supreme Court Cases Dataset
 ==============================
 
-A collection of cases from the U.S. Supreme Court, along with transcripts of oral arguments. Extends a `smaller dataset`<https://convokit.cornell.edu/documentation/supreme.html> of oral arguments previously released. 
+A collection of cases from the U.S. Supreme Court, along with transcripts of oral arguments. The data was scraped from the `Oyez <https://www.oyez.org/>`_ website. Extends a `smaller dataset <https://convokit.cornell.edu/documentation/supreme.html>`_ of oral arguments previously released. Contains approximately 1,700,000 utterances over 8,000 oral arguments transcripts from 7,700 cases.
 
-The corpus is split up into different years spanning 1955 to 2019, each named "oyez_(year)". Additional metadata corresponding to cases, and identities of justices, are also included: `cases`<https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/cases.jsonl> and `justices`<https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/justices.tsv>.
+The corpus is split up into different years spanning 1955 to 2019, each named "oyez_(year)". Additional metadata corresponding to cases, and identities of justices, are also included: `cases <https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/cases.jsonl>`_ and `justices <https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/justices.tsv>`_.
 
-An example of how this corpus is used can be found `here`<https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/tree/master/examples/orientation>.
+An example of how this corpus is used can be found `here <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/tree/master/examples/orientation>`_.
 
 Note that this corpus is currently in development. The oral arguments should be fairly well-formed and complete, but we are missing information about metadata related to cases: in particular, the decisions of each case and how the justices voted. We note other uncertainties below as well.
 
@@ -22,7 +22,7 @@ To download a particular year:
 Dataset details
 ---------------
 
-The data was scraped from the `Oyez`<https://www.oyez.org/> website. Code to scrape and process cases and oral arguments transcripts will be released shortly.
+Code to scrape and process cases and oral arguments transcripts will be released shortly.
 
 
 Speaker-level information
@@ -80,12 +80,12 @@ Note that at present, each sentence of a parse contains an extra space at the en
 Justice information
 ^^^^^^^^^^^^^^^^^^^^^
 
-`This file`<https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/justices.tsv> is a tab-separated table listing the IDs of justices and their names in the transcripts.
+`This file <https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/justices.tsv>`_ is a tab-separated table listing the IDs of justices and their names in the transcripts.
 
 Case information
 ^^^^^^^^^^^^^^^^^^^^^
 
-`This file`<https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/case.jsonl> is a list of json objects containing some information about each case, pulled from Oyez. Note that at present, we don't have information about the decisions made in each case, or the votes of each justice, since such information seems to be inconsistently provided in Oyez. 
+`This file <https://zissou.infosci.cornell.edu/convokit/datasets/oyez-corpus/case.jsonl>`_ is a list of json objects containing some information about each case, pulled from Oyez. Note that at present, we don't have information about the decisions made in each case, or the votes of each justice, since such information seems to be inconsistently provided in Oyez. 
 
 * id: generally formatted as <year of case>_<docket no>
 * year
