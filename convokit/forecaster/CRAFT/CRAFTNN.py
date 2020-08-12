@@ -86,12 +86,12 @@ class SingleTargetClf(nn.Module):
         lengths = lengths.expand((1, -1, encoder_outputs.size(2)))
 
         # take only the last state of the encoder for each batch
-        last_outputs = torch.gather(encoder_outputs, 0, lengths-1).squeeze()
+        last_outputs = torch.gather(encoder_outputs, 0, lengths-1).squeeze(dim=0)
         # forward pass through hidden layers
         layer1_out = self.layer1_act(self.layer1(self.dropout(last_outputs)))
         layer2_out = self.layer2_act(self.layer2(self.dropout(layer1_out)))
         # compute and return logits
-        logits = self.clf(self.dropout(layer2_out)).squeeze()
+        logits = self.clf(self.dropout(layer2_out)).squeeze(dim=1)
         return logits
 
 

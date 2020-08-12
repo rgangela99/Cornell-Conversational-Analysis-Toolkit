@@ -1,10 +1,9 @@
-====================
-Quick-start tutorial
-====================
+=====================
+Introductory tutorial
+=====================
 
 Setup
 =====
-Read the `introduction to Convokit <https://convokit.cornell.edu>`_ and the description of its :doc:`architecture </architecture>`.
 
 This toolkit requires Python >=3.6.
 
@@ -18,261 +17,522 @@ If you haven't already,
 
 **If you encounter difficulties with installation**, check out our `Troubleshooting Guide <https://convokit.cornell.edu/documentation/troubleshooting.html>`_ for a list of solutions to common issues.
 
-Interactive tutorial
-====================
+A brief note
+============
+
+This is a practical hands-on introduction ConvoKit. Read our description of ConvoKit's :doc:`architecture </architecture>` for an understanding of the higher-level design decisions for this package.
+
+We **recommend** following our `interactive Colab notebook <https://colab.research.google.com/github/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/Introduction_to_ConvoKit.ipynb>`_, which contains the same steps as this tutorial, but allows for the full range of outputs (e.g. graphs, tables) to be displayed.
+
+Tutorial
+========
+
+This tutorial introduces ConvoKit: a conversational analysis toolkit that offers:
+
+1. A unified representation for conversational data
+
+2. A language for describing manipulations of such data
+
+In this notebook, we cover the key ideas behind ConvoKit, as well as some of its most commonly used methods and functions. Read our documentation for an exhaustive coverage of ConvoKit's classes and functions.
+
 Let us start an interactive session (e.g. with ``python`` or ``ipython``) and import Convokit.
 
 >>> import convokit
 
-Now we load an existing corpus, specifically: `reddit-corpus-small`.
+A Corpus represents a conversational dataset. We typically begin our analysis by loading a Corpus. A list of existing datasets already in ConvoKit format can be found `here <https://convokit.cornell.edu/documentation/datasets.html>`_.
 
-By design, it includes 100 comment threads (each consisting of at least 10 Utterances) from 100 popular subreddits from September 2018.
+A growing list of many other conversational datasets covering a variety of conversational settings are available in ConvoKit, such as face-to-face (e.g. the `Intelligence Squared Debates corpus <https://convokit.cornell.edu/documentation/iq2.html>`_), institutional (e.g. the `Supreme Court Oral Arguments corpus <https://convokit.cornell.edu/documentation/supreme.html>`_), fictional (e.g. the `Cornell Movie Dialog Corpus <https://convokit.cornell.edu/documentation/movie.html>`_), or online  (e.g. all talkpage conversations on `Wikipedia Talk Pages <https://convokit.cornell.edu/documentation/wiki.html>`_ and a full dump of `Reddit <https://convokit.cornell.edu/documentation/subreddit.html>`_).
+
+For this tutorial, we will primarily be using the *r/Cornell* subreddit corpus to demo various ConvoKit functionality, and occasionally the `Switchboard Dialog Act Corpus <https://convokit.cornell.edu/documentation/switchboard.html>`_ (a collection of anonymized five-minute telephone conversations) as a contrasting dataset.
 
 >>> from convokit import Corpus, download
->>> corpus = Corpus(filename=download("reddit-corpus-small"))
+>>> corpus = Corpus(download('subreddit-Cornell'))
+>>> switchboard_corpus = Corpus(download('switchboard-corpus'))
 
-Alternatively, if you would like to use a custom corpus, refer to our explanation of the Corpus :doc:`data format </data_format>`.
+Corpus components: Conversations, Utterances, Speakers
+------------------------------------------------------
 
-Exploring the corpus
---------------------
+Every Corpus has three main components: `Conversations <https://convokit.cornell.edu/documentation/conversation.html>`_, `Utterances <https://convokit.cornell.edu/documentation/utterance.html>`_, and `Speakers <https://convokit.cornell.edu/documentation/speaker.html>`_. Just as in real life, in ConvoKit, Conversations are some sequence of Utterances, where each Utterance is made by some Speaker.
 
-We can examine the corpus metadata:
+>>> corpus.print_summary_stats()
+Number of Speakers: 7568
+Number of Utterances: 74467
+Number of Conversations: 10744
 
->>> corpus.meta
-{'num_comments': 288846,
- 'num_posts': 8286,
- 'num_speaker': 119889,
- 'subreddit': 'reddit-corpus-small'}
+Each component has a consistent data format, consisting of a set of *primary data fields* and *metadata attributes*.
 
-So the corpus includes 288846 comments and 8286 posts. This is a total of 297132 Utterances. (An Utterance is either a post or a comment in a reddit corpus.)
+**Primary data fields** are for information that is central to every Conversation, Utterance, and Speaker object. This includes IDs for the objects, and for Utterances specifically, there are other fields such as: text, timestamp, reply_to (the ID of the Utterance being responded to).
 
-These 297132 Utterances were made by 119889 different Speakers.
+>>> # Let's see this in a random utterance from the r/Cornell Corpus
+>>> utt = corpus.random_utterance()
+>>> print(utt)
+Utterance('id': 'ctj0ssa', 'conversation_id': 3etgwd, 'reply-to': 3etgwd, 'speaker': Speaker('id': KCSunshine111, 'meta': {'num_posts': 1, 'num_comments': 18}), 'timestamp': 1438095153, 'text': "My good experiences with CAPS were with the PsyD (I think?) student residents. While they are only there on a yearly rotation program, I've found them to have the highest degree of professionalism, understanding, and empathy for students either mental illness.  \n\nMy bad experiences were with anyone else. Especially the MSWs and similar. I felt condescended, treated like a child. One man actually thought giving me handouts in comic sans font would help me.  \n\nPersonally, I think it's worth finding one of the resident doctors and having an initial session with them. Feel them out. You are under no obligation to tell them everything and it is even okay to express that you aren't comfortable with that idea yet. How they respond is the important part. If you feel pressured or if they do not seem willing to listen to you as a separate individual (versus you being just one of many who have X diagnosis), stop seeing them. But I think you might be able to find someone at CAPS who is worth talking to. \n\nEdit: sorry, advice goes for your friend, not you! ", 'meta': {'score': 1, 'top_level_comment': 'ctj0ssa', 'retrieved_on': 1440134909, 'gilded': 0, 'gildings': None, 'subreddit': 'Cornell', 'stickied': False, 'permalink': '', 'author_flair_text': ''})
 
-We can get iterators of Utterances, Speakers, and Conversations, and confirm their sizes match the metadata.
+>>> # primary data fields
+>>> print("ID:", utt.id, "\n")
+ID: ctj0ssa
+>>> print("Reply_to:", utt.reply_to, "\n")
+Reply_to: 3etgwd
+>>> print("Timestamp:", utt.timestamp, "\n")
+Timestamp: 1438095153
+>>> print("Text:", utt.text, "\n")
+Text: My good experiences with CAPS were with the PsyD (I think?) student residents. While they are only there on a yearly rotation program, I've found them to have the highest degree of professionalism, understanding, and empathy for students either mental illness.
+My bad experiences were with anyone else. Especially the MSWs and similar. I felt condescended, treated like a child. One man actually thought giving me handouts in comic sans font would help me.
+Personally, I think it's worth finding one of the resident doctors and having an initial session with them. Feel them out. You are under no obligation to tell them everything and it is even okay to express that you aren't comfortable with that idea yet. How they respond is the important part. If you feel pressured or if they do not seem willing to listen to you as a separate individual (versus you being just one of many who have X diagnosis), stop seeing them. But I think you might be able to find someone at CAPS who is worth talking to.
+Edit: sorry, advice goes for your friend, not you!
+>>> print("Conversation ID:", utt.conversation_id, "\n")
+Conversation ID: 3etgwd
+>>> print("Speaker ID:", utt.speaker.id)
+Speaker ID: KCSunshine111
 
->>> len(list(corpus.iter_speakers()))
-119889
->>> len(list(corpus.iter_utterances()))
-297132
->>> len(list(corpus.iter_conversations()))
-8286
+**Metadata attributes** are for additional features/labels for these component objects that might not generalize across corpora.
+Every component object (i.e. Speaker, Conversation, Utterance) has its own metadata. These can be accessed through the `.meta` field of these objects.
 
-The iterator functions are the **preferred** way of iterating through Speakers, Utterances, or Conversations in the Corpus.
-
-We can also get a list of Utterance ids.
-
->>> utter_ids = corpus.get_utterance_ids()
-
-Let's confirm that there are 297132 Utterances as expected.
-
->>> len(utter_ids)
-297132
-
-Let's take the first Utterance id and examine the Utterance it corresponds to:
-
->>> utter_ids[0]
-'9c716m'
->>> corpus.get_utterance(utter_ids[0])
-Utterance({'id': '9c716m', 'speaker': Speaker([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
-
-We could also access the first Utterance by using `iter_utterances()`.
-
->>> next(corpus.iter_utterances())
-Utterance({'id': '9c716m', 'speaker': Speaker([('name', 'AutoModerator')]), 'root': '9c716m', 'reply_to': None, 'timestamp': 1535839576, 'text': 'Talk about your day. Anything goes, but subreddit rules still apply. Please be polite to each other! \n', 'meta': {'score': 13, 'top_level_comment': None, 'retrieved_on': 1540061887, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'singapore', 'stickied': False, 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/', 'author_flair_text': ''}})
-
-Alternatively, we could access a random Utterance:
-
->>> corpus.random_utterance()
-Utterance({'obj_type': 'utterance', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'score': 1, 'top_level_comment': 'e5yoyg6', 'retrieved_on': 1539048055, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'tifu', 'stickied': False, 'permalink': '/r/tifu/comments/9frsfi/tifu_big_time_i_slept_with_someone_last_night_and/e5yrxtk/', 'author_flair_text': ''}, '_id': 'e5yrxtk', 'speaker': Speaker({'obj_type': 'speaker', '_owner': <convokit.model.corpus.Corpus object at 0x13adaa410>, 'meta': {'num_posts': 0, 'num_comments': 2}, '_id': 'condoriano27', '_name': 'condoriano27'}), 'root': '9frsfi', 'reply_to': 'e5ypcii', 'timestamp': 1536933792, 'text': "America's Least Wanted "})
-
-Let's explore the Utterance object further.
-
->>> utt = next(corpus.iter_utterances())
->>> utt.meta # Utterance-level metadata
-{'score': 13,
- 'top_level_comment': None,
- 'retrieved_on': 1540061887,
+>>> utt.meta
+{'score': 1,
+ 'top_level_comment': 'ctj0ssa',
+ 'retrieved_on': 1440134909,
  'gilded': 0,
- 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0},
- 'subreddit': 'singapore',
+ 'gildings': None,
+ 'subreddit': 'Cornell',
  'stickied': False,
- 'permalink': '/r/singapore/comments/9c716m/rsingapore_random_discussion_and_small_questions/',
+ 'permalink': '',
  'author_flair_text': ''}
->>> utt.id # the identifier for the utterance
-'9c716m'
->>> utt.timestamp # the unix timestamp for when the utterance was posted
-1535839576
->>> utt.speaker # the Speaker who posted the Utterance
-Speaker([('name', 'AutoModerator')])
->>> utt.speaker.meta # Speaker-level metadata
-{'num_posts': 200, 'num_comments': 27}
 
-Applying a transformer
-----------------------
+For example, we see that Reddit Utterances have Reddit-specific metadata, such as comment score (from upvotes / downvotes) and subreddit this Utterance belongs to.
 
-We initialize a Fighting Words transformer, which captures words that capture key differences in speech by two different groups.
+Conversations and Utterances have a similar format:
 
-For FightingWords specifically, these features are saved to their corresponding Utterance's metadata. Other transformers may update Speaker, Utterance, or Corpus metadata instead.
+>>> convo = corpus.random_conversation()
+>>> print(convo)
+Conversation('id': '32valu', 'utterances': ['32valu'], 'meta': {'title': 'bedroom available in downtown apartment, Cornell grad students preferred. Sublet or full lease', 'num_comments': 0, 'domain': 'self.Cornell', 'timestamp': 1429230425, 'subreddit': 'Cornell', 'gilded': 0, 'gildings': None, 'stickied': False, 'author_flair_text': ''})
+>>> convo.meta
+{'title': 'bedroom available in downtown apartment, Cornell grad students preferred. Sublet or full lease',
+ 'num_comments': 0,
+ 'domain': 'self.Cornell',
+ 'timestamp': 1429230425,
+ 'subreddit': 'Cornell',
+ 'gilded': 0,
+ 'gildings': None,
+ 'stickied': False,
+ 'author_flair_text': ''}
+
+>>> # We use Switchboard's speakers as they have more interesting metadata
+>>> speaker = switchboard_corpus.random_speaker()
+>>> print(speaker)
+Speaker('id': 1657, 'meta': {'sex': 'FEMALE', 'education': 2, 'birth_year': 1947, 'dialect_area': 'NORTH MIDLAND'})
+>>> speaker.meta
+{'sex': 'FEMALE',
+ 'education': 2,
+ 'birth_year': 1947,
+ 'dialect_area': 'NORTH MIDLAND'}
+
+**Vectors in ConvoKit**:
+Vector data is also easy to use in ConvoKit and we provide first-class support for integrating vector data with Corpus components.
+Read our `introduction to vectors in ConvoKit <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/vectors/vector_demo.ipynb>`_ for more details.
+
+What else can we do with the Corpus object?
+-------------------------------------------
+
+**Fetching components by ID**
+
+>>> # We can fetch individual objects by ID
+>>> # corpus.get_conversation('7bir0w')
+>>> # corpus.get_utterance('dsyd46r')
+>>> corpus.get_speaker('ulysses2014')
+Speaker({'obj_type': 'speaker', '_owner': <convokit.model.corpus.Corpus object at 0x14e7ca150>, 'meta': {}, '_id': 'ulysses2014'})
+
+>>> # We can check if the Corpus contains an object with a specified ID
+>>> # corpus.has_conversation('7bir0w')
+>>> # corpus.has_utterance('dsyd46r')
+>>> corpus.has_speaker('ulysses2014')
+True
+
+**Iterating through Corpus components**
+
+We can iterate through any of these components, though we exit the for-loop early here to avoid excessive output:
+
+>>> for utt in corpus.iter_utterances():
+>>>     print(utt.text)
+>>>     break
+I was just reading about the Princeton Mic-Check and it's getting [national press](http://www.bloomberg.com/news/2011-12-29/princeton-brews-trouble-for-us-1-percenters-commentary-by-michael-lewis.html).
+I want to get a sense of what people felt like around campus. Anything interesting happen? Anything interesting coming up?
+
+>>> for convo in corpus.iter_conversations():
+>>>     print(convo.meta['num_comments'])
+>>>     break
+1
+
+>>> for speaker in corpus.iter_speakers():
+>>>     print(speaker.id)
+>>>     break
+reddmau5
+
+**Generating component DataFrames**
+
+>>> # We can even generate dataframes of each component
+>>> # corpus.get_utterances_dataframe()
+>>> # corpus.get_conversations_dataframe()
+>>> switchboard_corpus.get_speakers_dataframe().head()
+
+.. image:: img/speakers_dataframe.png
+
+Component functionality
+-----------------------
+
+Each component object comes with its own set of methods and functions to enable data exploration and higher-level analyses.
+
+**Inter-operability between components**
+
+Each Conversation, Utterance, Speaker belongs to a single Corpus object. In addition, ConvoKit has been purposefully designed such that it is straightforward to navigate between these different components.
+
+>>> # Consider this sequence of operations that highlight how to navigate between components
+>>> utt = corpus.random_utterance()
+>>> convo = utt.get_conversation() # get the Conversation the Utterance belongs to
+>>> spkr = utt.speaker # get the Speaker who made the Utterance
+
+>>> spkr_convos = list(spkr.iter_conversations())
+>>> spkr_utts = list(spkr.iter_utterances())
+
+>>> convo_spkrs = list(convo.iter_utterances())
+>>> convo_utts = list(convo.iter_speakers())
+
+To spell it out:
+
+#. You can navigate from each Utterance to the Conversation it belongs to or the Speaker that made it.
+#. You can navigate from each Speaker to the Utterances that they have made or the Conversations they have participated in.
+#. You can navigate from each Conversation to the Utterances that compose it or the Speakers that participated in it.
+
+This enables more sophisticated analyses such as tracking a Speaker's behavior across the Conversations they have participated in or characterizing a Conversation by the Utterances that form it.
+
+**DataFrame representations from each component object**
+
+In addition, because Conversations can be conceived of as collections of Utterances and Speakers, and Speakers collections of Utterances and Conversations, Conversations/Speakers have their own set of iterators (as shown above) and even support DataFrame generation:
+
+>>> # spkr.get_conversations_dataframe()
+>>> # convo.get_utterances_dataframe()
+>>> # convo.get_speakers_dataframe()
+>>> spkr.get_utterances_dataframe().head()
+
+.. image:: img/utterances_dataframe.png
+
+Conversation
+------------
+
+In particular, we want to highlight some of the functionality related to Conversation structure. The structure of a Conversation (i.e. who replies to whom) may not be straightforward to recreate from conversational data in most setups. In ConvoKit however, using the Utterance reply_to attribute, Conversations are automatically encoded with conversation structure.
+
+>>> convo = corpus.get_conversation('7yy032')
+>>> print(convo)
+Conversation('id': '7yy032', 'utterances': ['7yy032', 'duk1rlx', 'duk1rrw', 'duk2cue', 'duk99zc', 'dukhv8f', 'dulmtzw', 'dum5ufw', 'dum629f', 'dum7epw', 'dupzllr', 'duqb609'], 'meta': {'title': 'CS minor advice?', 'num_comments': 11, 'domain': 'self.Cornell', 'timestamp': 1519150001, 'subreddit': 'Cornell', 'gilded': 0, 'gildings': None, 'stickied': False, 'author_flair_text': ''})
+
+In this example, we can visualize the conversation's structure as follows:
+
+>>> convo.print_conversation_structure()
+smoothcarrot
+    alated
+        Darnit_Bot
+        smoothcarrot
+            RadCentrism
+            alated
+        l33tnerd
+            alated
+                l33tnerd
+                    smoothcarrot
+                        l33tnerd
+    gandalf-the-gray
+
+This corresponds exactly to how this post thread would look like in Reddit (smoothcarrot makes the post, while alated and gandalf-the-gray make top-level comments.) For each Utterance, just the Speaker's name is printed, for easy visualization of the thread structure, but we can configure this to print whatever we'd like for each Utterance.
+
+(As a quick contrast, we print the structure of a Conversation from the Switchboard corpus, which reflects the structure of most offline conversations.)
+
+>>> # Instead of printing the Speaker ID, we print the Utterance ID
+>>> switchboard_corpus.get_conversation('4771-0').print_conversation_structure(lambda utt: utt.id)
+4771-0
+    4771-1
+        4771-2
+            4771-3
+                4771-4
+                    4771-5
+                        4771-6
+                            4771-7
+                                4771-8
+                                    4771-9
+                                        4771-10
+                                            4771-11
+                                                4771-12
+                                                    4771-13
+                                                        4771-14
+                                                            4771-15
+                                                                4771-16
+                                                                    4771-17
+                                                                        4771-18
+                                                                            4771-19
+                                                                                4771-20
+                                                                                    4771-21
+                                                                                        4771-22
+                                                                                            4771-23
+                                                                                                4771-24
+                                                                                                    4771-25
+
+We get a 'linear' conversation that does not branch out into subtrees.
+
+Back to the r/Cornell conversation, we can also configure this method to print the text at each Utterance, albeit truncated here for readability:
+
+>>> convo.print_conversation_structure(lambda utt: utt.text[:80])
+I'm an junior info science major and I'm thinking about completing a CS minor. H
+    I don't think there's a straight answer to this. :/ Especially since "useful" wi
+        What a *darn* shame..
+***
+^^Darn ^^Counter: ^^451121
+        Do u think I should try to stick with 3110 this semester?
+            I mean, you *could*. You missed a week, but the slides are online so you can cat
+            It's up to you! Being behind one week isn't bad at all (there are always office
+        I disagree with saying that you'll *never* use it. Functional ideas have made th
+            I agree with you! Functional concepts can be found in many languages that are us
+                Hmm, I guess my experience differs, then; I find myself using these concepts qui
+                    Thanks for your insight.  I probably wont be continuing with 3110 this semester
+                        I personally liked 3110 better, but this is very dependent on your own interests
+    1. Go to office hours in general when you get stuck. Also you can pm me if you n
+
+We can even verify this by finding the subreddit thread online:
+
+>>> convo.print_conversation_structure(lambda utt: utt.id)
+7yy032
+    duk1rlx
+        duk1rrw
+        duk2cue
+            duk99zc
+            dum629f
+        dukhv8f
+            dum5ufw
+                dum7epw
+                    dupzllr
+                        duqb609
+    dulmtzw
+
+>>> # Since the first utterance has ID '7yy032'
+>>> first_utt = corpus.get_utterance('7yy032')
+>>> first_utt.meta
+{'score': 7,
+ 'top_level_comment': None,
+ 'retrieved_on': 1520570304,
+ 'gilded': 0,
+ 'gildings': None,
+ 'subreddit': 'Cornell',
+ 'stickied': False,
+ 'permalink': '/r/Cornell/comments/7yy032/cs_minor_advice/',
+ 'author_flair_text': ''}
+
+Let's use the permalink to find the thread: https://old.reddit.com/r/Cornell/comments/7yy032/cs_minor_advice/
+
+We see that this thread has been reconstructed accurately in this r/Cornell corpus.
+
+**Conversation traversal**
+
+Because the conversation tree structure is preserved, we can even:
+
+>>> # Traverse the conversation tree in interesting ways
+>>> print("Breadth first:")
+>>> print([utt.speaker.id for utt in convo.traverse('bfs')],"\n")
+Breadth first:
+['smoothcarrot', 'alated', 'gandalf-the-gray', 'Darnit_Bot', 'smoothcarrot', 'l33tnerd', 'RadCentrism', 'alated', 'alated', 'l33tnerd', 'smoothcarrot', 'l33tnerd']
+
+>>> print("Depth first:")
+>>> print([utt.speaker.id  for utt in convo.traverse('dfs')],"\n")
+Depth first:
+['smoothcarrot', 'alated', 'Darnit_Bot', 'smoothcarrot', 'RadCentrism', 'alated', 'l33tnerd', 'alated', 'l33tnerd', 'smoothcarrot', 'l33tnerd', 'gandalf-the-gray']
+
+>>> print("Preorder:")
+>>> print([utt.speaker.id  for utt in convo.traverse('preorder')],"\n")
+Preorder:
+['smoothcarrot', 'alated', 'Darnit_Bot', 'smoothcarrot', 'RadCentrism', 'alated', 'l33tnerd', 'alated', 'l33tnerd', 'smoothcarrot', 'l33tnerd', 'gandalf-the-gray']
+
+>>> print("Postorder:")
+>>> print([utt.speaker.id  for utt in convo.traverse('postorder')],"\n")
+Postorder:
+['Darnit_Bot', 'RadCentrism', 'alated', 'smoothcarrot', 'l33tnerd', 'smoothcarrot', 'l33tnerd', 'alated', 'l33tnerd', 'alated', 'gandalf-the-gray', 'smoothcarrot']
+
+>>> print("For reference, here is the structure of the thread again:")
+>>> convo.print_conversation_structure()
+For reference, here is the structure of the thread again:
+smoothcarrot
+    alated
+        Darnit_Bot
+        smoothcarrot
+            RadCentrism
+            alated
+        l33tnerd
+            alated
+                l33tnerd
+                    smoothcarrot
+                        l33tnerd
+    gandalf-the-gray
+
+>>> # Get all conversational 'paths' (i.e. paths from root utterances to leaf utterances in this Conversation tree)
+>>> paths = convo.get_root_to_leaf_paths()
+>>> longest_paths = convo.get_longest_paths()
+>>> for path in longest_paths:
+>>>     print([utt.id for utt in path])
+['7yy032', 'duk1rlx', 'dukhv8f', 'dum5ufw', 'dum7epw', 'dupzllr', 'duqb609']
+
+In addition, using the timestamps of Utterances, we can get chronological outputs from Conversations:
+
+>>> [spkr.id for spkr in convo.get_chronological_speaker_list()]
+['smoothcarrot',
+ 'alated',
+ 'Darnit_Bot',
+ 'smoothcarrot',
+ 'RadCentrism',
+ 'l33tnerd',
+ 'gandalf-the-gray',
+ 'alated',
+ 'alated',
+ 'l33tnerd',
+ 'smoothcarrot',
+ 'l33tnerd']
+
+>>> [utt.id for utt in convo.get_chronological_utterance_list()]
+['7yy032',
+ 'duk1rlx',
+ 'duk1rrw',
+ 'duk2cue',
+ 'duk99zc',
+ 'dukhv8f',
+ 'dulmtzw',
+ 'dum5ufw',
+ 'dum629f',
+ 'dum7epw',
+ 'dupzllr',
+ 'duqb609']
+
+Transformers
+------------
+Finally, we introduce the concept of a **Transformer** -- a type of ConvoKit object that applies a transformation to a Corpus. These transformations/modifications usually come in the form of changed/added metadata for one of the Corpus components. And broadly, they come under three categories:
+
+#. Preprocessing
+
+#. Feature extraction
+
+#. Analysis
+
+Every Transformer has three main methods:
+
+#. ``fit()`` (optionally implemented) - trains/fits some internal model within the Transformer
+#. ``transform()`` - transforms/modifies the Corpus
+#. ``summarize()`` (optionally implemented) - generates a visually interpretable output that summarizes what the Transformer has learned in fit() or the modifications that have been made to the Corpus in transform()
+
+Read more about Transformers here: https://convokit.cornell.edu/documentation/architecture.html#transformer
+
+We demonstrate now an example of an Analysis Transformer, `FightingWords <https://convokit.cornell.edu/documentation/fightingwords.html>`_.
+This transformer identifies salient linguistic differences between two distinct groups of Utterances.
+For this example, we use `reddit-corpus-small` -  a Corpus with Utterances from 100 medium to large subreddits.
+
+>>> corpus = Corpus(download('reddit-corpus-small'))
+>>> corpus.print_summary_stats()
+Number of Speakers: 119889
+Number of Utterances: 297132
+Number of Conversations: 8286
+
+*Exploratory question:* How do utterances from r/atheism differ linguistically from utterances from r/Christianity?
 
 >>> from convokit import FightingWords
 >>> fw = FightingWords()
 Initializing default CountVectorizer...
 
-We have to define two groups of utterances between which we would like to find differences in speech:
+Using lambda functions, we define two groups of utterances between which we would like to find differences in speech:
 
-Let's find the differences between r/atheism and r/Christianity. We define (lambda) filter functions that select for utterances that are in these subreddits.
-These functions take an Utterance as input and return True if the Utterance should be included the group.
-
->>> atheism_only = lambda utt: utt.meta['subreddit'] == 'atheism'
->>> christianity_only = lambda utt: utt.meta['subreddit'] == 'Christianity'
-
-We then pass these filter functions to the ``fit()`` step of Fighting Words in order to train its internal model.
-
->>> fw.fit(corpus, class1_func=atheism_only, class2_func=christianity_only)
+>>> fw.fit(corpus, class1_func = lambda utt: utt.meta['subreddit'] == 'atheism',
+>>>        class2_func = lambda utt: utt.meta['subreddit'] == 'Christianity')
 class1_func returned 2736 valid utterances. class2_func returned 2659 valid utterances.
 Vocab size is 5059
 Comparing language...
 ngram zscores computed.
 
-The Fighting Words transformer uses these two functions to define the two classes (groups) of utterances it should compare.
-Now that the internal model has been fitted, our Fighting Words transformer has learned which n-grams (i.e. terms) are more important to one group than the other.
-
 We can see a summary of what it has learned using the ``summarize()`` method.
 
->>> fw.summarize(corpus)
-                        z-score   class
+>>> fw.summarize(corpus, plot=True, class1_name='r/Christianity', class2_name='r/atheism')
+                z-score           class
 ngram
-number number        -11.682425  class2
-number                -9.647558  class2
-god                   -9.557521  class2
-sin                   -9.168855  class2
-word                  -8.181490  class2
-the word              -8.120960  class2
-over and              -7.700137  class2
-over and over         -7.475561  class2
-and over              -7.475561  class2
-christ                -7.261349  class2
-jesus                 -7.077995  class2
-church                -6.887711  class2
-gay                   -6.701478  class2
-scripture             -6.672350  class2
-the church            -6.572954  class2
-number number number  -6.142094  class2
-homosexuality         -6.112424  class2
-of god                -5.946252  class2
-bible                 -5.435104  class2
-john                  -5.361175  class2
-the bible             -5.341622  class2
-love                  -5.261977  class2
-holy                  -5.243870  class2
-men                   -5.010706  class2
-israel                -4.994608  class2
-god and               -4.935127  class2
-with god              -4.829852  class2
-heaven                -4.819072  class2
-shall                 -4.772242  class2
-jewish                -4.753293  class2
-...                         ...     ...
-atheists               4.369893  class1
-government             4.369893  class1
-woman                  4.400545  class1
-her                    4.401597  class1
-atheism                4.574684  class1
-circumcision           4.574684  class1
-using                  4.583727  class1
-human                  4.621385  class1
-the article            4.664898  class1
-crazy                  4.727097  class1
-right to               4.828167  class1
-pretty                 4.832246  class1
-dont                   4.962440  class1
-the woman              4.988421  class1
-it                     5.052849  class1
-the baby               5.146490  class1
-abortion               5.283977  class1
-an                     5.318418  class1
-fucking                5.464411  class1
-story                  5.799971  class1
-article                5.804254  class1
-shit                   5.806718  class1
-url                    5.996616  class1
-trump                  6.258077  class1
-baby                   6.911191  class1
-body                   7.019837  class1
-science                7.113479  class1
-religious              7.646211  class1
-religion               7.817261  class1
-money                  7.979943  class1
+god           -9.664310       r/atheism
+sin           -9.203761       r/atheism
+word          -8.223430       r/atheism
+the word      -8.149449       r/atheism
+over and      -7.718249       r/atheism
+over and over -7.492056       r/atheism
+and over      -7.492056       r/atheism
+christ        -7.293253       r/atheism
+jesus         -7.132369       r/atheism
+church        -6.939498       r/atheism
+gay           -6.740083       r/atheism
+scripture     -6.690918       r/atheism
+the church    -6.603047       r/atheism
+homosexuality -6.133875       r/atheism
+of god        -5.980922       r/atheism
+bible         -5.498702       r/atheism
+the bible     -5.399591       r/atheism
+john          -5.370937       r/atheism
+love          -5.301349       r/atheism
+holy          -5.260555       r/atheism
+men           -5.042867       r/atheism
+israel        -5.008789       r/atheism
+god and       -4.960325       r/atheism
+and           -4.955100       r/atheism
+with god      -4.844839       r/atheism
+heaven        -4.836304       r/atheism
+shall         -4.787209       r/atheism
+jewish        -4.769047       r/atheism
+over          -4.669552       r/atheism
+jews          -4.621863       r/atheism
+...                 ...             ...
+atheists       4.351707  r/Christianity
+government     4.351707  r/Christianity
+her            4.352743  r/Christianity
+woman          4.369212  r/Christianity
+using          4.557780  r/Christianity
+circumcision   4.563754  r/Christianity
+atheism        4.563754  r/Christianity
+human          4.588668  r/Christianity
+the article    4.655261  r/Christianity
+crazy          4.712230  r/Christianity
+pretty         4.798202  r/Christianity
+right to       4.808016  r/Christianity
+it             4.863474  r/Christianity
+dont           4.943361  r/Christianity
+the woman      4.977405  r/Christianity
+the baby       5.138412  r/Christianity
+an             5.234585  r/Christianity
+abortion       5.269782  r/Christianity
+fucking        5.447746  r/Christianity
+story          5.779360  r/Christianity
+shit           5.783998  r/Christianity
+article        5.785429  r/Christianity
+url            5.948984  r/Christianity
+trump          6.235655  r/Christianity
+baby           6.896638  r/Christianity
+body           6.993762  r/Christianity
+science        7.084885  r/Christianity
+religious      7.605858  r/Christianity
+religion       7.769434  r/Christianity
+money          7.957425  r/Christianity
 
-We get a DataFrame mapping an n-gram to its z-score (a measure of how salient the n-gram is) and the class it belongs to.
+.. image:: img/fightingwordsplot.png
+
+Not only do we get a visual plot summarizing the differences, we get a DataFrame mapping an n-gram to its z-score (a measure of how salient the n-gram is) and the class it belongs to.
 
 As we can see, r/Christianity is comparatively more likely to use terms like 'god', 'sin', and 'christ', while r/atheism uses terms 'money', 'religion', and 'science'.
 
-We also note that there are some (seemingly odd) n-grams like 'number number' and 'url'. This is because FightingWords applies a text cleaner to the Utterance's text prior to model fitting.
-This cleaner converts all urls to [url] and numeric values to [number]. (This text cleaning function is configurable.)
+Other Transformers follow a similar pattern:
 
-This suggests that r/atheism speakers are more likely to include links in their comments.
-As for r/Christianity, their citation of biblical verses, e.g. John 3:16 -> John [number]:[number] -> John number number (after special punctuation is removed), is likely what causes 'number number' to be a salient n-gram.
-
-The Transformer also has other methods for analyzing n-grams now that it is fitted.
-
->>> # for example, we can check if a given term belongs more in class1 or class2
->>> fw.get_class('state')
-'class1'
->>> fw.get_zscore('state')
-3.7059870571350846
->>> fw.get_class('spirit')
-'class2'
->>> fw.get_zscore('spirit')
--4.136520649529806
-
-Now, we can imagine wanting to annotate Utterances with the fighting words they contain. Say we consider a salient fighting word to be an n-gram with an absolute z-score >= 4.
-
->>> fw.annot_method = 'threshold' # set the transformer to use the 'threshold' annotation method
->>> fw.threshold = 4 # set threshold value
-
-(Note that these 'annot_method' and 'threshold' parameters can be configured when initializing the Transformer for the first time and are otherwise initialized to default values if not explicitly set.)
-
->>> # as an example (do not run this)
->>> fw = FightingWords(annot_method='threshold', threshold=4)
-
-Seeing as the corpus contains other subreddits' Utterances that we are not interested in annotating, we can use a selector to get the Transformer to ignore those other Utterances during annotation.
-
->>> relevant = lambda utt: utt.meta['subreddit'] in ['Christianity', 'atheism']
->>> fw.transform(corpus, selector=relevant)
-
-Let's look at some corpus Utterances from r/Christianity that contain some salient fighting words:
-
->>> for utt in corpus.iter_utterances(selector=lambda utt: utt.meta['subreddit'] == 'Christianity'):
->>>     print(utt)
->>>     break
-Utterance('id': '9c0knf', 'root': 9c0knf, 'reply-to': None, 'speaker': Speaker('id': Aiming_For_The_Light, 'meta': {'num_posts': 1, 'num_comments': 8}), 'timestamp': 1535778411, 'text': '', 'meta': {'score': 25, 'top_level_comment': None, 'retrieved_on': 1540058137, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c0knf/states_expected_to_push_ahead_with_mandatory/', 'author_flair_text': 'Uniting Church in Australia', 'fighting_words_class1': [], 'fighting_words_class2': []})
-
-Notice that meta['fighting_words_class1'] and meta['fighting_words_class1'] are empty lists. This makes sense since this particular Utterance has no text.
-
-Let's refine our selector so that we get what we want:
-
->>> christianity_salient = lambda utt: utt.meta['subreddit'] == 'Christianity' and len(utt.meta['fighting_words_class2']) > 0
->>> for utt in corpus.iter_utterances(selector=christianity_salient):
->>>     print(utt)
->>>     break
-Utterance('id': '9c6un6', 'root': 9c6un6, 'reply-to': None, 'speaker': Speaker('id': alittlehappy, 'meta': {'num_posts': 1, 'num_comments': 0}), 'timestamp': 1535838106, 'text': "Parents are strict, Orthodox and religious. Father is a priest. I was born in a country where the majority were Orthodox so I've grown up with faith. We moved to American a decade ago and it's been the same since.\n\n\nBut now, I feel so disillusioned. I feel so guilty about this but I simply don't believe in God like I used to. I despise going to church because of how strict it is. My whole family has to get up at 4am and attend church from 5am-10am. Not only that, but we have to stand 95% of the time. Every Sunday, I'm exhausted, bored out of my mind because it's in a language I don't understand and self conscious whenever I sit.\n\n\nI don't know if it's just me losing faith or if I just *really* dislike my church environment. What I wouldn't give to go to a church in the afternoon or late morning with a 2 hour service where I could sit....but I can't even bring it up to my parents because they would 110% take it as a betrayal. I can see why considering my dad preaches/prays in our church so it's like he's not good enough/our religion isn't good enough but ugh.\n\n\nI fear that if they continue to force me and pressure me to go to church I'm going to end up hating Christianity. ", 'meta': {'score': 6, 'top_level_comment': None, 'retrieved_on': 1540061807, 'gilded': 0, 'gildings': {'gid_1': 0, 'gid_2': 0, 'gid_3': 0}, 'subreddit': 'Christianity', 'stickied': False, 'permalink': '/r/Christianity/comments/9c6un6/losing_faith/', 'author_flair_text': '', 'fighting_words_class1': ['religion', 'religious', 'an', 'it', 'her', 'get'], 'fighting_words_class2': ['sin', 'church', 'men', 'and', 'priest', 'am', 'our']})
-
-In summary
-----------
-We have gone through the application of the Fighting Words to a corpus. Other Transformers follow a similar pattern:
-
-- They are initialized with several configurable parameters.
+- They are initialized with several configuration parameters.
 - They may be ``fit()`` on the Corpus if the Transformer needs to learn something from the Corpus.
 - They can ``transform()`` the corpus to annotate its components with the output of the Transformer.
 - They can ``summarize()`` their results in a more visual and easily interpreted format -- though in most cases (but not this one), this requires that the Corpus be transformed first.
 - These ``fit()``, ``transform()``, ``summarize()`` functions have ``selector`` as an argument so you can further specify subsets of the Corpus to analyze.
-- Selectors and filters are typically lambda functions in order to maximize customisability.
 
 Other transformers can be applied in the same way, and even chained in sequence, as described in the :doc:`Core Concepts Tutorial </architecture>`.
 
 Additional notes
-----------------
+================
 
 1. Some corpora are particularly large and may not be initializable in their entirety without significant computational resources. However, it is possible to `partially load utterances from a dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/tests/notebook_testers/test_corpus_partial_load.ipynb>`_ to carry out processing of large corpora sequentially.
 

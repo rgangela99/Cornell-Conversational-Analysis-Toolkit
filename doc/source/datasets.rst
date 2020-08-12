@@ -22,3 +22,4 @@ Datasets
    Stanford Politeness Corpus (Wikipedia) <wiki_politeness.rst>
    Stanford Politeness Corpus (Stack Exchange) <stack_politeness.rst>
    Deception in Diplomacy Corpus <diplomacy.rst>
+   Group Affect and Performance (GAP) Corpus <gap.rst>

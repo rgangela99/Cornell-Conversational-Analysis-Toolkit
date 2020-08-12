@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer as CV
 from convokit import Transformer
-from convokit.model import Corpus, Utterance
+from convokit.model import Corpus, CorpusComponent
 from typing import List, Callable, Tuple
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -37,38 +37,51 @@ class FightingWords(Transformer):
 
     Implementation adapted from Jack Hessel's https://github.com/jmhessel/FightingWords
 
-    Identifies the fighting words of two groups of utterances, which we define as the groups: 'class1' and 'class2'
+    Identifies the fighting words of two groups of corpus components (e.g. two groups of utterances),
+    which we define as the groups: 'class1' and 'class2'
 
+    Runs on the Corpus's Speakers, Utterances, or Conversations (as specified by `obj_type`).
+    By default, the text used for the different object types:
+
+    - For utterances, this would be the utterance text.
+    - For conversations, this would be joined texts of all the utterances in the conversation
+    - For speakers, this would be the joined texts of all the utterances by the speaker
+
+    Other custom text configurations can be configured using the `text_func` argument
+
+    :param obj_type: 'utterance', 'conversation', or 'speaker'
+    :param text_func: function for getting text from the Corpus component object. By default, this is configured
+        based on the `obj_type`.
     :param cv: optional CountVectorizer. default: an sklearn CV with min_df=10, max_df=.5, and ngram_range=(1,3)
         with max 15000 features
     :param ngram_range: range of ngrams to use if using default cv
     :param prior: either a float describing a uniform prior, or a vector describing a prior over vocabulary items.
         If using a predefined vocabulary, make sure to specify that when you make your CountVectorizer object.
-    :param threshold: the z-score threshold for annotating utterances with identified ngrams
-    :param top_k: the top_k threshold for which ngrams to annotate utterances with
-    :param annot_method: "top_k" or "threshold" to specify which annotation method to use in transform()
-    :param string_sanitizer: optional function for cleaning strings prior to fighting words analysis:
-        uses default string sanitizer otherwise
 
     :ivar cv: modifiable countvectorizer
-    :ivar threshold: modifiable threshold value
-    :ivar top_k: modifiable top_k threshold value
-    :ivar annot_method: modifiable annotation method
-    :ivar string_sanitizer: modifiable string sanitizer
 
     """
-    def __init__(self, cv=None,
-                 ngram_range=None, prior=0.1, threshold=1, top_k=10, annot_method="top_k",
-                 string_sanitizer=lambda str_: FightingWords.clean_text(str_)):
+    def __init__(self, obj_type="utterance", text_func=None, cv=None,
+                 ngram_range=None, prior=0.1):
+        assert obj_type in ["speaker", "utterance", "conversation"]
+        self.obj_type = obj_type
+
+        if text_func is None:
+            if obj_type == 'utterance':
+                self.text_func = lambda utt: FightingWords.clean_text(utt.text)
+            elif obj_type == 'conversation':
+                self.text_func = lambda convo: \
+                    FightingWords.clean_text(' '.join([utt.text for utt in convo.iter_utterances()]))
+            else:
+                self.text_func = lambda spkr: \
+                    FightingWords.clean_text(' '.join([utt.text for utt in spkr.iter_utterances()]))
+        else:
+            self.text_func = text_func
+
         self.ngram_range = ngram_range
         self.prior = prior
         self.cv = cv
-        self.threshold = threshold
-        self.top_k = top_k
-        assert annot_method in ["top_k", "threshold"]
-        self.annot_method = annot_method
         self.ngram_zscores = None
-        self.string_sanitizer = string_sanitizer
         self._count_matrix = None
         if self.cv is None and type(self.prior) is not float:
             raise ValueError("If using a non-uniform prior, you must pass a count vectorizer with "
@@ -93,7 +106,7 @@ class FightingWords(Transformer):
         """
         return clean_str(in_string)
 
-    def _bayes_compare_language(self, class1: List[Utterance], class2: List[Utterance]):
+    def _bayes_compare_language(self, class1: List[CorpusComponent], class2: List[CorpusComponent]):
         """
         Arguments:
         - class1, class2; a list of strings from each language sample
@@ -102,8 +115,8 @@ class FightingWords(Transformer):
         - A dict of length |Vocab| with (n-gram, zscore) pairs.
         """
 
-        class1 = [self.string_sanitizer(utt.text) for utt in class1]
-        class2 = [self.string_sanitizer(utt.text) for utt in class2]
+        class1 = [self.text_func(obj) for obj in class1]
+        class2 = [self.text_func(obj) for obj in class2]
 
         counts_mat = self.cv.fit_transform(class1+class2).toarray()
         # Now sum over languages...
@@ -135,33 +148,35 @@ class FightingWords(Transformer):
         sorted_indices = np.argsort(z_scores)
         return {index_to_term[i]: z_scores[i] for i in sorted_indices}
 
-    def fit(self, corpus: Corpus, class1_func: Callable[[Utterance], bool],
-            class2_func: Callable[[Utterance], bool], y=None, selector: Callable[[Utterance], bool] = lambda utt: True):
+    def fit(self, corpus: Corpus, class1_func: Callable[[CorpusComponent], bool],
+            class2_func: Callable[[CorpusComponent], bool], y=None,
+            selector: Callable[[CorpusComponent], bool] = lambda utt: True):
         """
-        Learn the fighting words from a corpus, with an optional selector that selects for utterances prior to
-            grouping the utterances into class1 / class2.
+        Learn the fighting words from a corpus, with an optional selector that selects for corpus components prior to
+            grouping the corpus components into class1 / class2.
 
         :param corpus: target Corpus
-        :param class1_func: selector function for identifying utterances that belong to class 1
-        :param class2_func: selector function for identifying utterances that belong to class 2
-        :param selector: a (lambda) function that takes an Utterance and returns True/False; this selects for
-            utterances that should be included in this fitting step
+        :param class1_func: selector function for identifying corpus components that belong to class 1
+        :param class2_func: selector function for identifying corpus components that belong to class 2
+        :param selector: a (lambda) function that takes a CorpusComponent and returns True/False; this selects for
+            Corpus components that should be considered in this fitting step
         :return: fitted FightingWords Transformer
 
         """
         class1, class2 = [], []
-        for utt in corpus.iter_utterances(selector):
-            if class1_func(utt):
-                class1.append(utt)
-            elif class2_func(utt):
-                class2.append(utt)
+        for obj in corpus.iter_objs(self.obj_type, selector):
+            if class1_func(obj):
+                class1.append(obj)
+            elif class2_func(obj):
+                class2.append(obj)
 
         if len(class1) == 0:
-            raise ValueError("class1_func returned 0 valid utterances.")
+            raise ValueError("class1_func returned 0 valid corpus components.")
         if len(class2) == 0:
-            raise ValueError("class2_func returned 0 valid utterances.")
+            raise ValueError("class2_func returned 0 valid corpus components.")
 
-        print("class1_func returned {} valid utterances. class2_func returned {} valid utterances.".format(len(class1), len(class2)))
+        print("class1_func returned {} valid corpus components. "
+              "class2_func returned {} valid corpus components.".format(len(class1), len(class2)))
 
         self.ngram_zscores = self._bayes_compare_language(class1, class2)
         print("ngram zscores computed.")
@@ -171,7 +186,8 @@ class FightingWords(Transformer):
         """
         Get a DataFrame of ngrams and their corresponding zscores and class labels.
 
-        :param class1_name:
+        :param class1_name: readable name for objects in class1
+        :param class2_name: readable name for objects in class2
         :return: a DataFrame of ngrams with zscores and classes, indexed by the ngrams
         """
 
@@ -181,34 +197,33 @@ class FightingWords(Transformer):
         df['class'] = (df['z-score'] >= 0).apply(lambda x: [class2_name, class1_name][int(x)])
         return df
 
-    def get_top_k_ngrams(self, top_k=None) -> Tuple[List[str], List[str]]:
+    def get_top_k_ngrams(self, top_k: int = 10) -> Tuple[List[str], List[str]]:
         """
-        Returns the (ordered) top k ngrams for both classes
+        Returns the (ordered) top k ngrams for both classes.
 
-        :param top_k: if left as default None, FightingWords.top_k will be used.
-        :return: two ordered lists of ngrams (with descending z-score): first list is for class 1, second list is for class 2
+        :param top_k: by default, k = 10
+        :return: two ordered lists of ngrams (with descending z-score): first list is for class 1,
+            second list is for class 2.
         """
         if self.ngram_zscores is None:
             raise ValueError("fit() must be run on a corpus first.")
-        if top_k is None:
-            top_k = self.top_k
+
         ngram_zscores_list = list(zip(self.get_ngram_zscores().index, self.get_ngram_zscores()['z-score']))
         top_k_class1 = list(reversed([x[0] for x in ngram_zscores_list[-top_k:]]))
         top_k_class2 = [x[0] for x in ngram_zscores_list[:top_k]]
         return top_k_class1, top_k_class2
 
-    def get_ngrams_past_threshold(self, threshold: float = None) -> Tuple[List[str], List[str]]:
+    def get_ngrams_past_threshold(self, threshold: float = 1.0) -> Tuple[List[str], List[str]]:
         """
         Returns the (ordered) ngrams that have absolute z-scores that exceed a specified threshold, for both classes
 
-        :param threshold: if left as default None, FightingWords.threshold will be used.
+        :param threshold: by default, threshold z-score = 1
         :return: two ordered lists of ngrams (with descending z-score):
                 first list is for class 1, second list is for class 2
         """
         if self.ngram_zscores is None:
             raise ValueError("fit() must be run on a corpus first.")
-        if threshold is None:
-            threshold = self.threshold
+
         class1_ngrams = []
         class2_ngrams = []
         for ngram, zscore in self.ngram_zscores.items():
@@ -218,31 +233,39 @@ class FightingWords(Transformer):
                 class2_ngrams.append(ngram)
         return class1_ngrams[::-1], class2_ngrams
 
-    def transform(self, corpus: Corpus, selector: Callable[[Utterance], bool] = lambda x: True) -> Corpus:
+    def transform(self, corpus: Corpus, selector: Callable[[CorpusComponent], bool] = lambda x: True,
+                  config=None) -> Corpus:
         """
-        Annotates the corpus utterances with the lists of fighting words that the utterance contains.
+        Annotates the corpus component objects with the lists of fighting words that the object contains.
 
-        The relevant fighting words to use are specified by FightingWords.top_k or FightingWords.threshold,
-        with FightingWords.annot_method indicating which criterion to use.
+        The relevant fighting words to use are specified by the config parameter. By default, the annotation method
+        is to annotate the corpus components with the top 10 fighting words of each class.
 
         Lists are stored under metadata keys 'fighting_words_class1', 'fighting_words_class2'
 
         :param corpus: corpus to annotate
-        :param selector: a (lambda) function that takes an Utterance and returns True/False; this selects for utterances
-            that should be annotated with the fighting words
+        :param selector: a (lambda) function that takes a CorpusComponent and returns True/False; this selects for
+            corpus components that should be annotated with the fighting words
+        :param config: a dictionary of configuration parameters for setting which fighting words are significant enough
+            to annotate. The dictionary should hold the keys: annot_method ('top_k' or 'threshold'), and either
+            'threshold' (a float for the min absolute z-score to be considered significant) or 'top_k' (an int to set
+            the value of k). By default, config is {'annot_method': 'top_k', 'top_k': 10}.
 
         :return: annotated corpus
         """
-        class1_ngrams, class2_ngrams = self.get_top_k_ngrams() if self.annot_method == "top_k" \
-                                else self.get_ngrams_past_threshold()
+        config = {'top_k': 10, 'annot_method': 'top_k'} if config is None else config
 
-        for utt in corpus.iter_utterances(): # improve the efficiency of this; tricky because ngrams #TODO
-            if selector(utt):
-                utt.meta['fighting_words_class1'] = [ngram for ngram in class1_ngrams if ngram in utt.text]
-                utt.meta['fighting_words_class2'] = [ngram for ngram in class2_ngrams if ngram in utt.text]
+        class1_ngrams, class2_ngrams = self.get_top_k_ngrams(top_k=config['top_k']) if \
+            config['annot_method'] == "top_k" else self.get_ngrams_past_threshold(threshold=config['threshold'])
+
+        for obj in corpus.iter_objs(self.obj_type): # improve the efficiency of this; tricky because ngrams #TODO
+            if selector(obj):
+                obj_text = self.text_func(obj)
+                obj.meta['fighting_words_class1'] = [ngram for ngram in class1_ngrams if ngram in obj_text]
+                obj.meta['fighting_words_class2'] = [ngram for ngram in class2_ngrams if ngram in obj_text]
             else:
-                utt.meta['fighting_words_class1'] = None
-                utt.meta['fighting_words_class2'] = None
+                obj.meta['fighting_words_class1'] = None
+                obj.meta['fighting_words_class2'] = None
 
         return corpus
 
@@ -281,15 +304,15 @@ class FightingWords(Transformer):
 
         :param corpus: corpus to learn fighting words from if not already fitted
         :param plot: if True, generates a plot for the fighting words distribution
-        :param class1_name: descriptive name for class1 utterances
-        :param class2_name: descriptive name for class2 utterances
+        :param class1_name: descriptive name for class1 corpus component objects
+        :param class2_name: descriptive name for class2 corpus component objects
         :return: DataFrame of ngrams with zscores and classes, indexed by the ngrams (plot is optionally generated)
         """
         if plot:
             self.plot_fighting_words(class1_name=class1_name, class2_name=class2_name)
         return self.get_ngram_zscores(class1_name=class1_name, class2_name=class2_name)
 
-    def plot_fighting_words(self, max_label_size=15, class1_name='class1', class2_name='class2'):
+    def plot_fighting_words(self, max_label_size=15, class1_name='class1', class2_name='class2', config=None):
         """
         Plots the distribution of fighting words.
 
@@ -297,15 +320,22 @@ class FightingWords(Transformer):
 
         Specifically, the weighted log-odds ratio is plotted against frequency of word within topic.
 
-        Only the most significant ngrams will have text labels. The most significant ngrams are specified by
-        FightingWords.annot_method and (FightingWords.top_k or FightingWords.threshold)
+        Only the most significant ngrams will have text labels. The most significant ngrams are specified by the config
+        parameter. By default, the annotation method is to annotate the corpus components with the top 10 fighting words
+        of each class.
 
         :param max_label_size: For the text labels, set the largest possible size for any text label
             (the rest will be scaled accordingly)
-        :param class1_name: descriptive name for class1 utterances
-        :param class2_name: descriptive name for class2 utterances
+        :param class1_name: descriptive name for class1 corpus component objects
+        :param class2_name: descriptive name for class2 corpus component objects
+        :param config: a dictionary of configuration parameters for setting which fighting words are significant enough
+            to annotate. The dictionary should hold the keys: annot_method ('top_k' or 'threshold'), and either
+            'threshold' (a float for the min absolute z-score to be considered significant) or 'top_k' (an int to set
+            the value of k). By default, config is {'annot_method': 'top_k', 'top_k': 10}.
         :return: None (plot is generated)
         """
+        config = {'top_k': 10, 'annot_method': 'top_k'} if config is None else config
+
         if self.ngram_zscores is None:
             raise ValueError("fit() must be run on a corpus first.")
 
@@ -317,8 +347,8 @@ class FightingWords(Transformer):
         neg_color, pos_color, insig_color = ('orange', 'purple', 'grey')
         annots = []
 
-        class1_sig_ngrams, class2_sig_ngrams = self.get_top_k_ngrams() if self.annot_method == "top_k" \
-                                        else self.get_ngrams_past_threshold()
+        class1_sig_ngrams, class2_sig_ngrams = self.get_top_k_ngrams(top_k=config['top_k']) \
+            if config['annot_method'] == "top_k" else self.get_ngrams_past_threshold(threshold=config['threshold'])
         class1_sig_ngrams = set(class1_sig_ngrams)
         class2_sig_ngrams = set(class2_sig_ngrams)
 

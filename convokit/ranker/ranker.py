@@ -1,6 +1,6 @@
 from convokit.model import Corpus
 from typing import List, Callable, Union
-from convokit import Transformer, CorpusObject
+from convokit import Transformer, CorpusComponent
 import pandas as pd
 
 class Ranker(Transformer):
@@ -13,14 +13,14 @@ class Ranker(Transformer):
     :param rank_feat_name: metadata feature name to use in annotation for the rank value, default: "[score_feat_name]_rank"
     """
     def __init__(self, obj_type: str,
-                 score_func: Callable[[CorpusObject], Union[int, float]],
+                 score_func: Callable[[CorpusComponent], Union[int, float]],
                  score_feat_name: str = "score", rank_feat_name: str = None):
         self.obj_type = obj_type
         self.score_func = score_func
         self.score_feat_name = score_feat_name
         self.rank_feat_name = score_feat_name + "_rank" if rank_feat_name is None else rank_feat_name
 
-    def transform(self, corpus: Corpus, y=None, selector: Callable[[CorpusObject], bool] = lambda obj: True) -> Corpus:
+    def transform(self, corpus: Corpus, y=None, selector: Callable[[CorpusComponent], bool] = lambda obj: True) -> Corpus:
         """
         Annotate corpus objects with scores and rankings.
 
@@ -45,7 +45,7 @@ class Ranker(Transformer):
                 obj.add_meta(self.rank_feat_name, None)
         return corpus
 
-    def transform_objs(self, objs: List[CorpusObject]):
+    def transform_objs(self, objs: List[CorpusComponent]):
         """
         Annotate list of Corpus objects with scores and rankings.
 
@@ -61,7 +61,7 @@ class Ranker(Transformer):
             obj.add_meta(self.rank_feat_name, df.loc[obj.id][self.rank_feat_name])
         return objs
 
-    def summarize(self, corpus: Corpus, selector: Callable[[CorpusObject], bool] = lambda obj: True):
+    def summarize(self, corpus: Corpus, selector: Callable[[CorpusComponent], bool] = lambda obj: True):
         """
         Generate a dataframe indexed by object id, containing score + rank, and sorted by rank (in ascending order) of the objects in an annotated corpus, with an optional selector selecting which objects to be included in the dataframe
 
@@ -80,7 +80,7 @@ class Ranker(Transformer):
 
         return df
 
-    def summarize_objs(self, objs: List[CorpusObject]):
+    def summarize_objs(self, objs: List[CorpusComponent]):
         """
         Generate a dataframe indexed by object id, containing score + rank, and sorted by rank (in ascending order) of the objects in an annotated corpus, or a list of corpus objects
 

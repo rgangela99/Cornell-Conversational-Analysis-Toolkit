@@ -13,7 +13,7 @@
 
 This toolkit contains tools to extract conversational features and analyze social phenomena in conversations, using a [single unified interface](https://convokit.cornell.edu/documentation/architecture.html) inspired by (and compatible with) scikit-learn.  Several large [conversational datasets](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit#datasets) are included together with scripts exemplifying the use of the toolkit on these datasets. The latest version is [2.3.2](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/releases/tag/v2.3.2) (released 03 Jun 2020); follow the [project on GitHub](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit) to keep track of updates.
 
-Read the documentation [here](https://convokit.cornell.edu/documentation).
+Read our [documentation](https://convokit.cornell.edu/documentation) or try ConvoKit in our [interactive tutorial](https://colab.research.google.com/github/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/Introduction_to_ConvoKit.ipynb).
 
 The toolkit currently implements features for:
 
@@ -150,6 +150,12 @@ Conversational dataset with intended and perceived deception labels. Over 17,000
 
 Name for download: `diplomacy-corpus`
 
+### [Group Affect and Performance (GAP) Corpus](https://convokit.cornell.edu/documentation/gap.html)
+
+A conversational dataset comprising group meetings of two to four participants that deliberate in a group decision-making exercise. This dataset contains 28 group meetings with a total of 84 participants.
+
+Name for download: `gap-corpus`
+
 ### ...And your own corpus!
 
 In addition to the provided datasets, you may also use ConvoKit with your own custom datasets by loading them into a `convokit.Corpus` object. [This example script](https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/converting_movie_corpus.ipynb) shows how to construct a Corpus from custom data.
@@ -166,7 +172,10 @@ Alternatively, visit our [Github Page](https://github.com/CornellNLP/Cornell-Con
 **If you encounter difficulties with installation**, check out our **[Troubleshooting Guide](https://convokit.cornell.edu/documentation/troubleshooting.html)** for a list of solutions to common issues.
 
 ## Documentation
-Documentation is hosted [here](https://convokit.cornell.edu/documentation/). If you are new to ConvoKit, great places to get started are the [Core Concepts tutorial](https://convokit.cornell.edu/documentation/architecture.html) for an overview of the ConvoKit "philosophy" and object model, and the [High-level tutorial](https://convokit.cornell.edu/documentation/tutorial.html) for an walkthrough of how to import ConvoKit into your project, load a Corpus, and use ConvoKit functions.
+Documentation is hosted [here](https://convokit.cornell.edu/documentation/). If you are new to ConvoKit, great places to get started are the [Core Concepts tutorial](https://convokit.cornell.edu/documentation/architecture.html) for an overview of the ConvoKit "philosophy" and object model, and the [High-level tutorial](https://convokit.cornell.edu/documentation/tutorial.html) for a walkthrough of how to import ConvoKit into your project, load a Corpus, and use ConvoKit functions.
+
+For an overview, watch our SIGDIAL talk introducing the toolkit:
+[![SIGDIAL 2020: Introducing ConvoKit](http://i3.ytimg.com/vi/nofzyxM4h1k/hqdefault.jpg)](https://youtu.be/nofzyxM4h1k "SIGDIAL 2020: Introducing ConvoKit")
 
 ## Contributing
 

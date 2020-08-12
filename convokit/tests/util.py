@@ -109,6 +109,13 @@ def parsed_burr_sir_corpus():
     for info_dict, utterance in zip(utterance_infos, corpus.iter_utterances()):
         utterance.meta = info_dict
     
+    sentence_lists = [
+        [BURR_SIR_SENTENCE_1, BURR_SIR_SENTENCE_2],
+        [BURR_SIR_SENTENCE_3, BURR_SIR_SENTENCE_4]
+    ]
+    for utterance, sentences in zip(corpus.iter_utterances(), sentence_lists):
+        utterance.set_info('sentences', sentences)
+    
     return corpus
 
 

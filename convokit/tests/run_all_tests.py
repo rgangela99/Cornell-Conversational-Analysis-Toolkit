@@ -6,6 +6,8 @@ if __name__ == "__main__":
     testRunner = TextTestRunner()
     test_results = testRunner.run(tests)
 
-    if len(test_results.errors) > 0:
+    if test_results.wasSuccessful():
+        exit(0)
+    else:
         exit(1)
 

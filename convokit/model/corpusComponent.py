@@ -1,15 +1,18 @@
 from .convoKitMeta import ConvoKitMeta
 from convokit.util import warn, deprecation
+from typing import List, Optional
 
-class CorpusObject:
 
-    def __init__(self, obj_type: str, owner=None, id=None, meta=None):
+class CorpusComponent:
+
+    def __init__(self, obj_type: str, owner=None, id=None, vectors: List[str]=None, meta=None):
         self.obj_type = obj_type  # utterance, speaker, conversation
         self._owner = owner
         if meta is None:
             meta = dict()
         self.meta = self.init_meta(meta)
         self.id = id
+        self.vectors = vectors if vectors is not None else []
 
     def get_owner(self):
         return self._owner
@@ -52,16 +55,17 @@ class CorpusObject:
         """
         Retrieves a value stored under the key of the metadata of corpus object
 
-        :param key: name of metadata
-        :return: value (if key not found, raises an error)
+        :param key: name of metadata attribute
+        :return: value
         """
-        return self.meta[key]
+        return self.meta.get(key, None)
 
     def add_meta(self, key: str, value) -> None:
         """
         Adds a key-value pair to the metadata of the corpus object
 
-        :param key: name of metadata
+        :param key: name of metadata attribute
+        :param value: value of metadata attribute
         :return: None
         """
         self.meta[key] = value
@@ -87,23 +91,65 @@ class CorpusObject:
         deprecation("set_info()", "add_meta()")
         self.meta[key] = value
 
-    def del_info(self, key):
-        if key in self.meta:
-            del self.meta[key]
+    def get_vector(self, vector_name: str, as_dataframe: bool = False, columns: Optional[List[str]] = None):
+        """
+        Get the vector stored as `vector_name` for this object.
+
+        :param vector_name: name of vector
+        :param as_dataframe: whether to return the vector as a dataframe (True) or in its raw array form (False). False
+            by default.
+        :param columns: optional list of named columns of the vector to include. All columns returned otherwise. This
+            parameter is only used if as_dataframe is set to True
+        :return: a numpy / scipy array
+        """
+        if vector_name not in self.vectors:
+            raise ValueError("This {} has no vector stored as '{}'.".format(self.obj_type, vector_name))
+
+        return self.owner.get_vector_matrix(vector_name).get_vectors(ids=[self.id], as_dataframe=as_dataframe,
+                                                                     columns=columns)
+
+    def add_vector(self, vector_name: str):
+        """
+        Logs in the Corpus component object's internal vectors list that the component object has a vector row
+        associated with it in the vector matrix named `vector_name`.
+
+        Transformers that add vectors to the Corpus should use this to update the relevant component objects during
+        the transform() step.
+
+        :param vector_name: name of vector matrix
+        :return: None
+        """
+        if vector_name not in self.vectors:
+            self.vectors.append(vector_name)
+
+    def has_vector(self, vector_name: str):
+        return vector_name in self.vectors
+
+    def delete_vector(self, vector_name: str):
+        """
+        Delete a vector associated with this Corpus component object.
+
+        :param vector_name:
+        :return: None
+        """
+        self.vectors.remove(vector_name)
 
     def __str__(self):
-        return "{}('id': {}, 'meta': {})".format(self.obj_type.capitalize(),
-                                                 self.id,
-                                                 self.meta)
+        return "{}(id: {}, vectors: {}, meta: {})".format(self.obj_type.capitalize(), self.id, self.vectors, self.meta)
 
     def __hash__(self):
         return hash(self.obj_type + str(self.id))
 
     def __repr__(self):
         copy = self.__dict__.copy()
-        deleted_keys = ['utterances', 'conversations', 'user']
+        deleted_keys = ['utterances', 'conversations', 'user', '_root', '_utterance_ids', '_speaker_ids']
         for k in deleted_keys:
             if k in copy:
+                del copy[k]
+
+        for k in copy:
+            if k.startswith('_'):
+                copy[k[1:]] = copy[k]
                 del copy[k]
         try:
             return self.obj_type.capitalize() + "(" + str(copy) + ")"

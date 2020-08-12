@@ -1,10 +1,11 @@
 {
   "cur_version": {
     "chromium-corpus": 0, 
-    "conversations-gone-awry-cmv-corpus": 1,
+    "conversations-gone-awry-cmv-corpus": 2,
     "conversations-gone-awry-corpus": 4,
     "diplomacy-corpus": 2,
-    "friends-corpus": 2,
+    "friends-corpus": 3,
+    "gap-corpus": 1,
     "iq2-corpus": 1,
     "movie-corpus": 2,
     "parliament-corpus": 3,
@@ -15,14 +16,14 @@
     "stack-exchange-politeness-corpus": 1,
     "subreddit": 0,
     "supreme-corpus": 3,
-    "switchboard-corpus": 0,
+    "switchboard-corpus": 1,
     "tennis-corpus": 3,
     "wiki-corpus": 3,
     "wiki-politeness-annotated": 0,
     "wikiconv": 0,
     "wikiconv-corpus": 1,
     "wikipedia-politeness-corpus": 1,
-    "winning-args-corpus": 1,
+    "winning-args-corpus": 1
   },
     "DatasetURLs": {
     "chromium-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/chromium-corpus/chromium-corpus.zip",
@@ -30,6 +31,7 @@
     "conversations-gone-awry-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/conversations-gone-awry-corpus/conversations-gone-awry-corpus.zip",
     "diplomacy-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/diplomacy-corpus/diplomacy-corpus.zip",
     "friends-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/friends-corpus/friends-corpus.zip",
+    "gap-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/gap-corpus/gap-corpus.zip",
     "iq2-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/iq2-corpus/iq2_corpus.zip",
     "movie-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/movie-corpus/movie-corpus.zip",
     "parliament-corpus": "http://zissou.infosci.cornell.edu/convokit/datasets/parliament-corpus/parliament-corpus.zip",

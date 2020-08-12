@@ -1,8 +1,8 @@
 from typing import Callable
-from convokit import Transformer, CorpusObject, Corpus
+from convokit import Transformer, CorpusComponent, Corpus
 from .util import *
 from collections import defaultdict
-from random import shuffle
+from random import shuffle, choice
 
 class Pairer(Transformer):
     """
@@ -11,37 +11,45 @@ class Pairer(Transformer):
 
     Pairer sets this pairing up. For this example:
 
-    - the obj_type is 'utterance' (since we compare utterances)
-    - the pairing_func is supposed to extract the identifier that would identify the object as part of the pair.
-    In this case, that would be the Utterance's conversation id since we want utterances from the same conversation.
-    - we need to distinguish between utterances where Rachel speaks to Monica vs. Chandler. the pos_label_func and neg_label_func is how we can specify this (e.g. lambda utt: utt.meta['target']), where positive instances might be arbitrarily refer to targetting Monica, and negative for targetting Chandler.
-    - pair_mode denotes how many pairs to use per context. For example, a Conversation will likely have Rachel address Monica and Chandler each multiple times. This means that there are multiple positive and negative instances that can be used to form pairs. We could randomly pick one pair of instances ('random'), or the first pair of instances ('first') or the maximum pairs of instances ('maximize').
+    - The obj_type is 'utterance' (since we compare utterances)
+    - The pairing_func is supposed to extract the identifier that would identify the object as part of the pair. In this case, that would be the Utterance's conversation id since we want utterances from the same conversation.
+    - We need to distinguish between utterances where Rachel speaks to Monica vs. Chandler.
+        the pos_label_func and neg_label_func is how we can specify this (e.g. lambda utt: utt.meta['target']), where positive instances might be arbitrarily refer to targetting Monica, and negative for targetting Chandler.
+    - pair_mode denotes how many pairs to use per context.
+        For example, a Conversation will likely have Rachel address Monica and Chandler each multiple times.
+        This means that there are multiple positive and negative instances that can be used to form pairs.
+        We could randomly pick one pair of instances ('random'), or the first pair of instances ('first'),
+        or the maximum pairs of instances ('maximize').
 
     Pairer saves this pairing information into the object metadata.
 
-    - pair_id is the 'id' that uniquely identifies a pair of positive and negative instances, and is the output from the pairing_func.
+    - pair_id is the 'id' that uniquely identifies a pair of positive and negative instances,
+        and is the output from the pairing_func.
     - label (or pair_obj_label) denotes whether the object is the positive or negative instance of the pair
-    - pair_orientation denotes whether to use the pair itself as a positive or negative data point in a predictive classifier. 'pos' means the difference between the objects in the pair should be computed as [+ve obj features] - [-ve obj features], and 'neg' means it should be computed as [-ve obj features] - [+ve obj features].
+    - pair_orientation denotes whether to use the pair itself as a positive or negative data point in a predictive
+        classifier. 'pos' means the difference between the objects in the pair should be computed as
+        [+ve obj features] - [-ve obj features], and 'neg' means it should be computed as
+        [-ve obj features] - [+ve obj features].
     """
 
     def __init__(self, obj_type: str,
-                 pairing_func: Callable[[CorpusObject], str],
-                 pos_label_func: Callable[[CorpusObject], bool],
-                 neg_label_func: Callable[[CorpusObject], bool],
+                 pairing_func: Callable[[CorpusComponent], str],
+                 pos_label_func: Callable[[CorpusComponent], bool],
+                 neg_label_func: Callable[[CorpusComponent], bool],
                  pair_mode: str = "random",
-                 pair_id_feat_name: str = "pair_id",
-                 label_feat_name: str = "pair_obj_label",
-                 pair_orientation_feat_name: str = "pair_orientation"):
+                 pair_id_attribute_name: str = "pair_id",
+                 label_attribute_name: str = "pair_obj_label",
+                 pair_orientation_attribute_name: str = "pair_orientation"):
 
         """
-        :param pairing_func: the Corpus object characteristic to pair on, e.g. to pair on the first 10 characters of a well-structured id, use lambda obj: obj.id[:10]
+        :param pairing_func: the Corpus object characteristic to pair on, e.g. to pair on the first 10 characters of a
+            well-structured id, use lambda obj: obj.id[:10]
         :param pos_label_func: The function to check if the object is a positive instance
         :param neg_label_func: The function to check if the object is a negative instance
         :param pair_mode: 'random': pick a single positive and negative object pair randomly (default), 'maximize': pick the maximum number of positive and negative object pairs possible randomly, or 'first': pick the first positive and negative object pair found.
-        :param clf: optional classifier to be used in the paired prediction
-        :param pair_id_feat_name: metadata feature name to use in annotating object with pair id, default: "pair_id". The value is determined by the output of pairing_func. If pair_mode is 'maximize', the value is the output of pairing_func + "_[i]", where i is the ith pair extracted from a given context.
-        :param label_feat_name: metadata feature name to use in annotating object with whether it is positive or negative, default: "pair_obj_label"
-        :param pair_orientation_feat_name: metadata feature name to use in annotating object with pair orientation, default: "pair_orientation"
+        :param pair_id_attribute_name: metadata feature name to use in annotating object with pair id, default: "pair_id". The value is determined by the output of pairing_func. If pair_mode is 'maximize', the value is the output of pairing_func + "_[i]", where i is the ith pair extracted from a given context.
+        :param label_attribute_name: metadata feature name to use in annotating object with whether it is positive or negative, default: "pair_obj_label"
+        :param pair_orientation_attribute_name: metadata feature name to use in annotating object with pair orientation, default: "pair_orientation"
 
         """
         assert obj_type in ["speaker", "utterance", "conversation"]
@@ -50,9 +58,9 @@ class Pairer(Transformer):
         self.pos_label_func = pos_label_func
         self.neg_label_func = neg_label_func
         self.pair_mode = pair_mode
-        self.pair_id_feat_name = pair_id_feat_name
-        self.label_feat_name = label_feat_name
-        self.pair_orientation_feat_name = pair_orientation_feat_name
+        self.pair_id_attribute_name = pair_id_attribute_name
+        self.label_attribute_name = label_attribute_name
+        self.pair_orientation_attribute_name = pair_orientation_attribute_name
 
     def _get_pos_neg_objects(self, corpus: Corpus, selector):
         """
@@ -129,7 +137,7 @@ class Pairer(Transformer):
             flip = not flip
         return pair_orientations
 
-    def transform(self, corpus: Corpus, selector: Callable[[CorpusObject], bool] = lambda x: True) -> Corpus:
+    def transform(self, corpus: Corpus, selector: Callable[[CorpusComponent], bool] = lambda x: True) -> Corpus:
         """
         Annotate corpus objects with pair information (label, pair_id, pair_orientation), with an optional selector indicating which objects should be considered for pairing.
 
@@ -142,19 +150,19 @@ class Pairer(Transformer):
         pair_orientations = self._assign_pair_orientations(obj_pairs)
 
         for pair_id, (pos_obj, neg_obj) in obj_pairs.items():
-            pos_obj.add_meta(self.label_feat_name, "pos")
-            neg_obj.add_meta(self.label_feat_name, "neg")
-            pos_obj.add_meta(self.pair_id_feat_name, pair_id)
-            neg_obj.add_meta(self.pair_id_feat_name, pair_id)
-            pos_obj.add_meta(self.pair_orientation_feat_name, pair_orientations[pair_id])
-            neg_obj.add_meta(self.pair_orientation_feat_name, pair_orientations[pair_id])
+            pos_obj.add_meta(self.label_attribute_name, "pos")
+            neg_obj.add_meta(self.label_attribute_name, "neg")
+            pos_obj.add_meta(self.pair_id_attribute_name, pair_id)
+            neg_obj.add_meta(self.pair_id_attribute_name, pair_id)
+            pos_obj.add_meta(self.pair_orientation_attribute_name, pair_orientations[pair_id])
+            neg_obj.add_meta(self.pair_orientation_attribute_name, pair_orientations[pair_id])
 
         for obj in corpus.iter_objs(self.obj_type):
             # unlabelled objects include both objects that did not pass the selector
             # and objects that were not selected in the pairing step
-            if self.label_feat_name not in obj.meta:
-                obj.add_meta(self.label_feat_name, None)
-                obj.add_meta(self.pair_id_feat_name, None)
-                obj.add_meta(self.pair_orientation_feat_name, None)
+            if self.label_attribute_name not in obj.meta:
+                obj.add_meta(self.label_attribute_name, None)
+                obj.add_meta(self.pair_id_attribute_name, None)
+                obj.add_meta(self.pair_orientation_attribute_name, None)
 
         return corpus

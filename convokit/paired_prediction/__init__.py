@@ -1,4 +1,4 @@
 from .pairedPrediction import *
 from .util import *
 from .pairer import Pairer
-from .pairedBoW import PairedBoW
+from .pairedVectorPrediction import PairedVectorPrediction

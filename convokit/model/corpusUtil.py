@@ -39,7 +39,7 @@ def get_utterances_dataframe(obj, selector = lambda utt: True,
 def get_conversations_dataframe(obj, selector = lambda convo: True,
                                 exclude_meta: bool = False):
     """
-    Get a DataFrame of the conversationsof a given object with fields and metadata attributes,
+    Get a DataFrame of the conversations of a given object with fields and metadata attributes,
     with an optional selector that filters for conversations that should be included.
     Edits to the DataFrame do not change the corpus in any way.
 

@@ -56,17 +56,17 @@ class CRAFTModel(ForecasterModel):
     :param device_type: 'cpu' or 'cuda', default: 'cpu'
     :param model_path: filepath to CRAFT model if loading a custom CRAFT model
     :param options: configuration options for the neural network: uses default options otherwise.
-    :param forecast_feat_name: name of DataFrame column containing predictions, default: "prediction"
-    :param forecast_prob_feat_name: name of DataFrame column containing prediction scores, default: "score"
+    :param forecast_attribute_name: name of DataFrame column containing predictions, default: "prediction"
+    :param forecast_prob_attribute_name: name of DataFrame column containing prediction scores, default: "score"
     """
 
     def __init__(self, device_type: str = 'cpu',
                  model_path: str = None,
                  options: Dict = None,
-                 forecast_feat_name: str = "prediction",
-                 forecast_prob_feat_name: str = "pred_score"):
+                 forecast_attribute_name: str = "prediction",
+                 forecast_prob_attribute_name: str = "pred_score"):
 
-        super().__init__(forecast_feat_name=forecast_feat_name, forecast_prob_feat_name=forecast_prob_feat_name)
+        super().__init__(forecast_attribute_name=forecast_attribute_name, forecast_prob_attribute_name=forecast_prob_attribute_name)
         assert device_type in ['cuda', 'cpu']
         # device: controls GPU usage: 'cuda' to enable GPU, 'cpu' to run on CPU only.
         self.device = torch.device(device_type)
@@ -136,8 +136,8 @@ class CRAFTModel(ForecasterModel):
         n_iters = len(dataset) // self.options['batch_size'] + int(len(dataset) % self.options['batch_size'] > 0)
         output_df = {
             "id": [],
-            self.forecast_feat_name: [],
-            self.forecast_prob_feat_name: []
+            self.forecast_attribute_name: [],
+            self.forecast_prob_attribute_name: []
         }
         for iteration in range(1, n_iters+1):
             batch, batch_dialogs, true_batch_size = next(batch_iterator)
@@ -155,8 +155,8 @@ class CRAFTModel(ForecasterModel):
                 pred = predictions[i].item()
                 score = scores[i].item()
                 output_df["id"].append(utt_id)
-                output_df[self.forecast_feat_name].append(pred)
-                output_df[self.forecast_prob_feat_name].append(score)
+                output_df[self.forecast_attribute_name].append(pred)
+                output_df[self.forecast_prob_attribute_name].append(score)
 
             print("Iteration: {}; Percent complete: {:.1f}%".format(iteration, iteration / n_iters * 100))
 

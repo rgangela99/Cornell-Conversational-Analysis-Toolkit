@@ -2,16 +2,15 @@ from typing import Dict, List, Callable, Generator, Optional
 from .utterance import Utterance
 from .speaker import Speaker
 from convokit.util import deprecation, warn
-from .corpusObject import CorpusObject
+from .corpusComponent import CorpusComponent
 from collections import defaultdict
 from .utteranceNode import UtteranceNode
-import pandas as pd
 from .corpusUtil import *
 
 
-class Conversation(CorpusObject):
-    """Represents a discrete subset of utterances in the dataset, connected by a
-    reply-to chain.
+class Conversation(CorpusComponent):
+    """
+    Represents a discrete subset of utterances in the dataset, connected by a reply-to chain.
 
     :param owner: The Corpus that this Conversation belongs to
     :param id: The unique ID of this Conversation
@@ -44,10 +43,8 @@ class Conversation(CorpusObject):
 
         :return: a list of IDs of Utterances in the Conversation
         """
-        # we construct a new list instead of returning self._utterance_ids in
-        # order to prevent the speaker from accidentally modifying the internal
-        # ID list (since lists are mutable)
-        return [ut_id for ut_id in self._utterance_ids]
+        # pass a copy of the list
+        return self._utterance_ids[:]
 
     def get_utterance(self, ut_id: str) -> Utterance:
         """Looks up the Utterance associated with the given ID. Raises a
@@ -116,7 +113,7 @@ class Conversation(CorpusObject):
             self._speaker_ids = set()
             for ut_id in self._utterance_ids:
                 ut = self._owner.get_utterance(ut_id)
-                self._speaker_ids.add(ut.speaker.name)
+                self._speaker_ids.add(ut.speaker.id)
         return list(self._speaker_ids)
 
     def get_speaker(self, speaker_id: str) -> Speaker:
@@ -188,8 +185,11 @@ class Conversation(CorpusObject):
         :param selector: (lambda) function for which speakers should be included; all speakers are included by default
         :return: list of speakers for each chronological utterance
         """
-        chrono_utts = sorted(list(self.iter_utterances()), key=lambda utt: utt.timestamp)
-        return [utt.speaker for utt in chrono_utts if selector(utt.speaker)]
+        try:
+            chrono_utts = sorted(list(self.iter_utterances()), key=lambda utt: utt.timestamp)
+            return [utt.speaker for utt in chrono_utts if selector(utt.speaker)]
+        except TypeError as e:
+            raise ValueError(str(e) + "\nUtterance timestamps may not have been set correctly.")
 
     def check_integrity(self, verbose: bool = True) -> bool:
         """
@@ -224,6 +224,11 @@ class Conversation(CorpusObject):
 
         if utts_replying_to_none > 1:
             if verbose: warn("ERROR: Found more than one Utterance replying to None.")
+            return False
+
+        circular = [utt_id for utt_id, utt_reply_to in utt_reply_tos.items() if utt_id == utt_reply_to]
+        if len(circular) > 0:
+            if verbose: warn("ERROR: Found utterances with .reply_to pointing to themselves: {}".format(circular))
             return False
 
         if verbose: print("No issues found.\n")
@@ -323,12 +328,14 @@ class Conversation(CorpusObject):
 
     def print_conversation_structure(self, utt_info_func: Callable[[Utterance], str] = lambda utt: utt.speaker.id, limit: int = None) -> None:
         """
-        Prints an indented representation of utterances in the Conversation with conversation reply-to structure determining the indented level. The details of each utterance to be printed can be configured.
+        Prints an indented representation of utterances in the Conversation with conversation reply-to structure
+        determining the indented level. The details of each utterance to be printed can be configured.
 
-        If limit is set to a value other than None, this will annotate utterances with an 'order' metadata indicating their temporal order in the conversation, where the first utterance in the conversation is annotated with 1.
+        If limit is set to a value other than None, this will annotate utterances with an 'order' metadata indicating
+        their temporal order in the conversation, where the first utterance in the conversation is annotated with 1.
 
         :param utt_info_func: callable function taking an utterance as input and returning a string of the desired
-                              utterance information. By default, this is a lambda function returning the utterance's speaker's id
+            utterance information. By default, this is a lambda function returning the utterance's speaker's id
         :param limit: maximum number of utterances to print out. if k, this includes the first k utterances.
         :return: None. Prints to stdout.
         """
@@ -367,7 +374,10 @@ class Conversation(CorpusObject):
         :param selector: function for which utterances should be included; all utterances are included by default
         :return: list of utterances, sorted by timestamp
         """
-        return sorted([utt for utt in self.iter_utterances(selector)], key=lambda utt: utt.timestamp)
+        try:
+            return sorted([utt for utt in self.iter_utterances(selector)], key=lambda utt: utt.timestamp)
+        except TypeError as e:
+            raise ValueError(str(e) + "\nUtterance timestamps may not have been set correctly.")
 
     def _get_path_from_leaf_to_root(self, leaf_utt: Utterance, root_utt: Utterance) -> List[Utterance]:
         """

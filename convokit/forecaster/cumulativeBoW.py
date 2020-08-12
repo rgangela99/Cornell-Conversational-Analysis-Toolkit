@@ -13,13 +13,13 @@ class CumulativeBoW(ForecasterModel):
     :param vectorizer: optional vectorizer; default CV (min_df=10, max_df=0.5, ngram_range=(1,1), max_features=15000)
     :param clf_model: optional classifier model; default standard-scaled logistic regression
     :param use_tokens: if using default vectorizer, set this to true if input is already tokenized
-    :param forecast_feat_name: name for DataFrame column containing predictions, default: "prediction"
-    :param forecast_prob_feat_name: name for column containing prediction scores, default: "score"
+    :param forecast_attribute_name: name for DataFrame column containing predictions, default: "prediction"
+    :param forecast_prob_attribute_name: name for column containing prediction scores, default: "score"
     """
     def __init__(self, vectorizer=None, clf_model=None, use_tokens=False,
-                 forecast_feat_name: str = "prediction", forecast_prob_feat_name: str = "score"):
+                 forecast_attribute_name: str = "prediction", forecast_prob_attribute_name: str = "score"):
 
-        super().__init__(forecast_feat_name=forecast_feat_name, forecast_prob_feat_name=forecast_prob_feat_name)
+        super().__init__(forecast_attribute_name=forecast_attribute_name, forecast_prob_attribute_name=forecast_prob_attribute_name)
         if vectorizer is None:
             print("Initializing default unigram CountVectorizer...")
             if use_tokens:
@@ -79,6 +79,6 @@ class CumulativeBoW(ForecasterModel):
         ids = [id_ for id_, _ in id_to_context_reply_label.items()]
         preds, pred_probs = self.clf_model.predict(X), self.clf_model.predict_proba(X)[:, 1]
         return pd.DataFrame(data=list(zip(ids, preds, pred_probs)),
-                            columns=["id", self.forecast_feat_name, self.forecast_prob_feat_name]).set_index('id')
+                            columns=["id", self.forecast_attribute_name, self.forecast_prob_attribute_name]).set_index('id')
 
 

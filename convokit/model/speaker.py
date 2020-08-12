@@ -1,13 +1,12 @@
 from functools import total_ordering
 from typing import Dict, List, Optional, Callable
 from convokit.util import deprecation
-from .corpusObject import CorpusObject
-import pandas as pd
+from .corpusComponent import CorpusComponent
 from .corpusUtil import *
 
 
 @total_ordering
-class Speaker(CorpusObject):
+class Speaker(CorpusComponent):
     """
     Represents a single speaker in a dataset.
 
@@ -167,4 +166,3 @@ class Speaker(CorpusObject):
             return self.id == other.id
         except AttributeError:
             return self.__dict__['_name'] == other.__dict__['_name']
-

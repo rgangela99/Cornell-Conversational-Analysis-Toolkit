@@ -33,7 +33,7 @@ venv-triadmotif/
 .ipynb_checkpoints
 *.tar
 *.DS_Store
-.DS_Store
 *.xlsx
-*.tsv
 *.csv
+*.tsv
+!/doc/source/img/*

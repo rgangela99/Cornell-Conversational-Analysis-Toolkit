@@ -17,7 +17,7 @@ class CorpusIndexMeta(unittest.TestCase):
         first_utt.meta['hey'] = 9
 
         # correct class type stored
-        self.assertEqual(corpus1.meta_index.utterances_index['hey'], repr(type(9)))
+        self.assertEqual(corpus1.meta_index.utterances_index['hey'], [repr(type(9))])
 
         # keyErrors result in None output
         self.assertRaises(KeyError, lambda: first_utt.meta['nonexistent key'])
@@ -40,16 +40,16 @@ class CorpusIndexMeta(unittest.TestCase):
 
         corpus1.get_speaker("alice").meta['surname'] = 1.0
 
-        self.assertEqual(corpus1.meta_index.utterances_index['foo'], str(type('bar')))
-        self.assertEqual(corpus1.meta_index.conversations_index['convo_meta'], str(type(1)))
-        self.assertEqual(corpus1.meta_index.speakers_index['surname'], str(type(1.0)))
+        self.assertEqual(corpus1.meta_index.utterances_index['foo'], [str(type('bar'))])
+        self.assertEqual(corpus1.meta_index.conversations_index['convo_meta'], [str(type(1))])
+        self.assertEqual(corpus1.meta_index.speakers_index['surname'], [str(type(1.0))])
 
-        # test that deleting a key from an utterance removes it from the index
+        # test that deleting an attribute from an individual utterance fails to remove it
         del corpus1.get_utterance("2").meta['hey']
-        self.assertRaises(KeyError, lambda: corpus1.meta_index.utterances_index['hey'])
+        corpus1.get_utterance("2").meta['hey']
 
-        # test that deleting a key from an utterance removes it from the index and from all other objects of same type
-        del corpus1.get_utterance("1").meta['foo']
+        # test that delete_metadata works
+        corpus1.delete_metadata('utterance', 'foo')
         self.assertRaises(KeyError, lambda: corpus1.meta_index.utterances_index['foo'])
         self.assertRaises(KeyError, lambda: corpus1.get_utterance("0").meta["foo"])
 
@@ -93,6 +93,20 @@ class CorpusIndexMeta(unittest.TestCase):
         self.assertEqual(corpus1.meta_index.speakers_index, corpus2.meta_index.speakers_index)
         self.assertEqual(corpus1.meta_index.conversations_index, corpus2.meta_index.conversations_index)
         self.assertEqual(corpus1.meta_index.overall_index, corpus2.meta_index.overall_index)
+
+    def test_multiple_types(self):
+        corpus1 = Corpus(utterances = [
+            Utterance(id="0", text="hello world", speaker=Speaker(id="alice")),
+            Utterance(id="1", text="my name is bob", speaker=Speaker(id="bob")),
+            Utterance(id="2", text="this is a test", speaker=Speaker(id="charlie")),
+        ])
+
+        corpus1.get_utterance('2').meta['hey'] = None
+        self.assertEqual(corpus1.meta_index.utterances_index.get('hey', None), None)
+        corpus1.get_utterance('0').meta['hey'] = 5
+        self.assertEqual(corpus1.meta_index.utterances_index['hey'], [str(type(5))])
+        corpus1.get_utterance('1').meta['hey'] = 'five'
+        self.assertEqual(corpus1.meta_index.utterances_index['hey'], [str(type(5)), str(type('five'))])
 
 if __name__ == '__main__':
     unittest.main()

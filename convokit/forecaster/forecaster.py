@@ -10,14 +10,14 @@ class Forecaster(Transformer):
     Implements basic Forecaster behavior.
 
     :param forecaster_model: ForecasterModel to use, e.g. cumulativeBoW or CRAFT
-    :param forecast_mode: 'future' to annotate leaf utterances with forecasts for the next future utterance (that has not occurred yet), 'past' for annotating all non-root utterances with the forecasts for all existing utterances based on prior utterances
+    :param forecast_mode: 'future' or 'past'. 'future' (the default behavior) annotates each utterance with a forecast score using all context up to and including that utterance (i.e., a prediction of the future state of the conversation after this utterance). 'past' annotates each utterance with a forecast score using all context prior to that utterance (i.e., what the model believed this utterance would look like prior to actually seeing it)
     :param convo_structure: conversations in expected corpus are 'branched' or 'linear', default: "branched"
     :param text_func: optional function for extracting the text of the utterance, default: uses utterance's text attribute
     :param label_func: callable function for getting the utterance's forecast label (True or False); only used in training
     :param use_last_only: if forecast_mode is 'past' and use_last_only is True, for each dialog, use only the context-reply pair where the reply is the last utterance in the dialog
     :param skip_broken_convos: if True and convo_structure is 'branched', exclude all conversations that have broken reply-to structures, default: True
-    :param forecast_feat_name: metadata feature name to use in annotation for forecast result, default: "forecast"
-    :param forecast_prob_feat_name: metadata feature name to use in annotation for forecast result probability, default: "forecast_prob"
+    :param forecast_attribute_name: metadata feature name to use in annotation for forecast result, default: "forecast"
+    :param forecast_prob_attribute_name: metadata feature name to use in annotation for forecast result probability, default: "forecast_prob"
     """
     def __init__(self, forecaster_model: ForecasterModel = None,
                  forecast_mode: str = "future",
@@ -26,8 +26,8 @@ class Forecaster(Transformer):
                  label_func: Callable[[Utterance], bool] = lambda utt: True,
                  use_last_only: bool = False,
                  skip_broken_convos: bool = True,
-                 forecast_feat_name: str = "forecast",
-                 forecast_prob_feat_name: str = "forecast_prob"
+                 forecast_attribute_name: str = "forecast",
+                 forecast_prob_attribute_name: str = "forecast_prob"
                  ):
 
         assert convo_structure in ["branched", "linear"]
@@ -35,8 +35,8 @@ class Forecaster(Transformer):
 
         if forecaster_model is None:
             print("No model passed to Forecaster. Initializing default forecaster model: Cumulative Bag-of-words...")
-            self.forecaster_model = CumulativeBoW(forecast_feat_name=forecast_feat_name,
-                                                  forecast_prob_feat_name=forecast_prob_feat_name)
+            self.forecaster_model = CumulativeBoW(forecast_attribute_name=forecast_attribute_name,
+                                                  forecast_prob_attribute_name=forecast_prob_attribute_name)
         else:
             self.forecaster_model = forecaster_model
         self.forecast_mode = forecast_mode
@@ -44,8 +44,8 @@ class Forecaster(Transformer):
         self.text_func = text_func
         self.use_last_only = use_last_only
         self.skip_broken_convos = skip_broken_convos
-        self.forecast_feat_name = forecast_feat_name
-        self.forecast_prob_feat_name = forecast_prob_feat_name
+        self.forecast_attribute_name = forecast_attribute_name
+        self.forecast_prob_attribute_name = forecast_prob_attribute_name
 
     def _get_context_reply_label_dict(self, corpus: Corpus, convo_selector, utt_excluder, include_label=True):
         """
@@ -73,22 +73,26 @@ class Forecaster(Transformer):
 
         id_to_context_reply_label = dict()
 
-        if self.forecast_mode == 'future':
-            for dialog in dialogs:
-                id_to_context_reply_label[dialog[-1].id] = (dialog, dialog[-1], None)
+        # this flag determines whether the dictionary entry for each utterance ID should include that
+        # utterance in the context (True corresponds to "future" behavior). This needs to be always
+        # False when include_label = True, since include_label assumes that the label comes from the
+        # utterance after the last utterance in the context. This override logic won't affect
+        # forecast_mode however, since that argument only applies to transform() while include_label
+        # is only True when called from fit()
+        include_current = (self.forecast_mode == 'future') and (not include_label)
 
         for dialog in dialogs:
             if self.use_last_only:
                 reply = self.text_func(dialog[-1])
-                context = [self.text_func(utt) for utt in dialog[:-1]]
+                context = [self.text_func(utt) for utt in (dialog if include_current else dialog[:-1])]
                 label = self.label_func(dialog[-1]) if include_label else None
                 id_to_context_reply_label[dialog[-1].id] = (context, reply, label)
             else:
-                for idx in range(1, len(dialog)):
+                for idx in range(0 if include_current else 1, len(dialog)):
                     reply = self.text_func(dialog[idx])
                     label = self.label_func(dialog[idx]) if include_label else None
                     reply_id = dialog[idx].id
-                    context = [self.text_func(utt) for utt in dialog[:idx]]
+                    context = [self.text_func(utt) for utt in (dialog[:(idx+1)] if include_current else dialog[:idx])]
                     id_to_context_reply_label[reply_id] = (context, reply, label) if include_label else (context, reply, None)
 
         return id_to_context_reply_label
@@ -123,11 +127,11 @@ class Forecaster(Transformer):
 
         for utt in corpus.iter_utterances():
             if utt.id in forecast_df.index:
-                utt.add_meta(self.forecast_feat_name, forecast_df.loc[utt.id][self.forecast_feat_name])
-                utt.add_meta(self.forecast_prob_feat_name, forecast_df.loc[utt.id][self.forecast_prob_feat_name])
+                utt.add_meta(self.forecast_attribute_name, forecast_df.loc[utt.id][self.forecast_attribute_name])
+                utt.add_meta(self.forecast_prob_attribute_name, forecast_df.loc[utt.id][self.forecast_prob_attribute_name])
             else:
-                utt.add_meta(self.forecast_feat_name, None)
-                utt.add_meta(self.forecast_prob_feat_name, None)
+                utt.add_meta(self.forecast_attribute_name, None)
+                utt.add_meta(self.forecast_prob_attribute_name, None)
 
         return corpus
 
@@ -152,9 +156,9 @@ class Forecaster(Transformer):
         utt_forecast_prob = []
         for convo in corpus.iter_conversations(selector):
             for utt in convo.iter_utterances(lambda x: not ignore_utterances(x)):
-                utt_forecast_prob.append((utt.id, utt.meta[self.forecast_feat_name], utt.meta[self.forecast_prob_feat_name]))
-        forecast_df = pd.DataFrame(utt_forecast_prob, columns=["utt_id", self.forecast_feat_name, self.forecast_prob_feat_name]) \
-            .set_index('utt_id').sort_values(self.forecast_prob_feat_name, ascending=False)
+                utt_forecast_prob.append((utt.id, utt.meta[self.forecast_attribute_name], utt.meta[self.forecast_prob_attribute_name]))
+        forecast_df = pd.DataFrame(utt_forecast_prob, columns=["utt_id", self.forecast_attribute_name, self.forecast_prob_attribute_name]) \
+            .set_index('utt_id').sort_values(self.forecast_prob_attribute_name, ascending=False)
         if exclude_na:
             forecast_df = forecast_df.dropna()
         return forecast_df

@@ -24,9 +24,9 @@ class PhrasingMotifs(TextProcessor):
         :param output_field: name of attribute to write phrasings to in transform step. sink phrasings will be written to field <output_field>__sink.
         :param fit_field: name of attribute to use as input in fit. 
         :param min_support: the minimum frequency of phrasings to return
-        :param fit_filter:  a boolean function of signature `fit_filter(utterance, aux_input)`. during the fit step phrasings will only be computed over utterances where `fit_filter` returns `True`. By default, will always return `True`, meaning that all utterances will be used.
+        :param fit_filter:  a boolean function of signature `fit_filter(utterance)`. during the fit step phrasings will only be computed over utterances where `fit_filter` returns `True`. By default, will always return `True`, meaning that all utterances will be used.
         :param transform_field: name of attribute to use as input in transform; defaults to the same field used in fit.
-        :param transform_filter: a boolean function of signature `transform_filter(utterance, aux_input)`. during the transform step phrasings will only be computed over utterances where `transform_filter` returns `True`. defaults to filter used in fit step.
+        :param transform_filter: a boolean function of signature `transform_filter(utterance)`. during the transform step phrasings will only be computed over utterances where `transform_filter` returns `True`. defaults to filter used in fit step.
         :param deduplication_threshold: merges phrasings into a single phrasing if phrasings co-occur above this frequency (i.e., pr(phrasing 1 | phrasing 2) and vice versa)
         :param max_naive_itemset_size: maximum size of subsets to compute. above this size, a variant of the a-priori algorithm will be used in lieu of enumerating all possible subsets.
         :param max_itemset_size: maximum size of subsets to consider as phrasings. setting lower will run faster but miss more complex phrasings.
@@ -48,7 +48,7 @@ class PhrasingMotifs(TextProcessor):
 
         self.fit_field = fit_field
         if fit_filter is None:
-            self.fit_filter = lambda utt, aux: True
+            self.fit_filter = lambda utt: True
         else:
             self.fit_filter = fit_filter
         if transform_field is None:
@@ -79,7 +79,7 @@ class PhrasingMotifs(TextProcessor):
     def _get_sent_arcset_dict(self, corpus):
         sent_dict = {}
         for utterance in corpus.iter_utterances():
-            if self.fit_filter(utterance, {}):
+            if self.fit_filter(utterance):
                 for idx, sent in enumerate(utterance.get_info(self.input_field)):
 
                     sent_dict['%s__%d' % (utterance.id, idx)] = sent.split()

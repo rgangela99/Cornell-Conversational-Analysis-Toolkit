@@ -3,19 +3,25 @@ Examples
 
 An index of useful examples to help you interactively explore ConvoKit's features.
 
-Be sure to take a look at the `high-level tutorial <https://convokit.cornell.edu/documentation/tutorial.html>`_ before exploring these examples!
+Be sure to take a look at the `introductory tutorial <https://convokit.cornell.edu/documentation/tutorial.html>`_ before exploring these examples!
+
+General ConvoKit usage (starting resource)
+------------------------------------------
+- `Introductory tutorial to ConvoKit <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/Introduction_to_ConvoKit.ipynb>`_
+- `Creating a ConvoKit Corpus from existing data <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/converting_movie_corpus.ipynb>`_
+- `Using vector data in ConvoKit <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/vectors/vector_demo.ipynb>`_
+- `Pre-processing text, e.g. computing dependency parses <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/text-processing/text_preprocessing_demo.ipynb>`_
+
+Intermediate corpus functionality
+---------------------------------
+- `Merging two different Corpora (even when there are overlaps or conflicts in Corpus data) <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/merging/corpus_merge_demo.ipynb>`_
+- `Partially loading utterances from an included dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/tests/notebook_testers/test_corpus_partial_load.ipynb>`_
 
 Classifier
 ------------
-- `Extracting Bag-of-Words vectors from utterances and using them in various classification tasks <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/classifier/demo/bow_demo.ipynb>`_
+- `Extracting bag-of-Words vectors from utterances and using them in various classification tasks <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/vectors/bag-of-words-demo.ipynb>`_
 - `Using common politeness strategies for various predictive tasks <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/politeness-strategies/politeness_demo.ipynb>`_
 
-Conversational data loading and processing with ConvoKit
---------------------------------------------------------
-- `Converting custom data to a ConvoKit Corpus <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/converting_movie_corpus.ipynb>`_
-- `Merging two different Corpora (even when there are overlaps or conflicts in Corpus data) <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/merging/corpus_merge_demo.ipynb>`_
-- `Partially loading utterances from an included dataset <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/tests/notebook_testers/test_corpus_partial_load.ipynb>`_
-- `Pre-processing text, e.g. computing dependency parses <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/text-processing/text_preprocessing_demo.ipynb>`_
 
 Coordination
 ------------
@@ -35,10 +41,6 @@ Hyperconvo
 ----------
 - `Categorizing and analyzing subreddits using Hyperconvo features <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/hyperconvo/demo.ipynb>`_
 - `Using Hyperconvo features to predict conversation growth on Reddit in a paired setting <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/examples/hyperconvo/predictive_tasks.ipynb>`_
-
-Paired Prediction
------------------
-- `Paired prediction for whether a scene in Friends goes on to have all six friends participating, based on features from the first 5 utterances <https://github.com/CornellNLP/Cornell-Conversational-Analysis-Toolkit/blob/master/convokit/paired_prediction/demo/paired_prediction_demo.ipynb>`_
 
 Prompt Types
 ------------
