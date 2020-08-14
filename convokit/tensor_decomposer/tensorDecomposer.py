@@ -1,7 +1,7 @@
 import numpy as np
 from convokit.transformer import Transformer
 from typing import Optional, Callable, List
-from convokit.model import Corpus, Conversation, CorpusObject
+from convokit.model import Corpus, Conversation, CorpusComponent
 from tensorly.decomposition import parafac
 import matplotlib.pyplot as plt
 import os
@@ -16,6 +16,7 @@ from sklearn.cluster import KMeans
 from statistics import mode
 import tensortools as tt
 import random
+from convokit import ConvoKitMatrix
 
 
 class TensorDecomposer(Transformer):
@@ -32,7 +33,8 @@ class TensorDecomposer(Transformer):
     def __init__(self, feature_set: List[str], obj_type: str = "conversation", rank: int = 9,
                  normalize_func=lambda tensor: tensor, tensor_func="tensorly",
                  thread_anomaly_threshold=3, feat_anomaly_threshold=1.5,
-                 impute_na: float = -1, group_func = lambda obj: obj.id):
+                 impute_na: float = -1, group_func = lambda obj: obj.id,
+                 factor1_name='comment_index', factor2_name='threads', factor3_name='annotations'):
         self.obj_type = obj_type
         self.feature_set = feature_set
         self.rank = rank
@@ -49,7 +51,15 @@ class TensorDecomposer(Transformer):
         self.factors = None
         self.groups = None # equivalent of subreddits
 
-    def _construct_tensor(self, corpus, selector: Optional[Callable[[CorpusObject], bool]] = lambda obj: True):
+        self.factor1_name = factor1_name
+        self.factor2_name = factor2_name
+        self.factor3_name = factor3_name
+
+        self.factor1_matrix = None
+        self.factor2_matrix = None
+        self.factor3_matrix = None
+
+    def _construct_tensor(self, corpus, selector: Optional[Callable[[CorpusComponent], bool]] = lambda obj: True):
         """
         Constructs the 3-way data tensor
         :param corpus: input corpus
@@ -91,7 +101,7 @@ class TensorDecomposer(Transformer):
             tensor[:, :, i] = TensorDecomposer._min_max_scale(tensor[:, :, i])
         return tensor
 
-    def fit(self, corpus: Corpus, y=None, selector: Optional[Callable[[CorpusObject], bool]] = lambda obj: True):
+    def fit(self, corpus: Corpus, y=None, selector: Optional[Callable[[CorpusComponent], bool]] = lambda obj: True):
         """
         Retrieves features from the Corpus Conversations using retrieve_feats() and annotates Conversations with this feature set
 
@@ -121,6 +131,17 @@ class TensorDecomposer(Transformer):
             raise ValueError("Invalid tensor function.")
         print("Done.")
 
+        # get descriptors
+        obj_ids = [obj.id for obj in corpus.iter_objs(self.obj_type, selector)]
+        random_obj = corpus.get_object(self.obj_type, obj_ids[0])
+        feat_names = list(random_obj.meta[self.feature_set[0]])
+
+        columns = ['Component_{}'.format(idx) for idx in range(1, self.rank+1)]
+        self.factor1_matrix = ConvoKitMatrix(name=self.factor1_name, matrix=self.factors[0], columns=columns)
+        self.factor2_matrix = ConvoKitMatrix(name=self.factor2_name, matrix=self.factors[1], columns=columns,
+                                             ids=obj_ids)
+        self.factor3_matrix = ConvoKitMatrix(name=self.factor3_name, matrix=self.factors[2].T, columns=feat_names,
+                                             ids=columns)
         return self
 
     def _generate_plots(self, factors, axis_names, output_dir, d=3):
@@ -214,11 +235,13 @@ class TensorDecomposer(Transformer):
                                 graph_filepath=os.path.join(output_dir, "graphs"))
             )
 
+    def transform(self, corpus: Corpus, selector: Optional[Callable[[CorpusComponent], bool]] = lambda obj: True) -> Corpus:
+        corpus.append_vector_matrix(self.factor1_matrix)
+        corpus.append_vector_matrix(self.factor2_matrix)
+        corpus.append_vector_matrix(self.factor3_matrix)
 
-    def transform(self, corpus: Corpus, selector: Optional[Callable[[CorpusObject], bool]] = lambda obj: True) -> Corpus:
-        obj_factor = self.factors[1]
-        for idx, obj in enumerate(corpus.iter_objs(self.obj_type, selector)):
-            obj.meta['tensor_factor'] = obj_factor[idx]
+        for obj in corpus.iter_objs(self.obj_type, selector):
+            obj.add_vector(self.factor2_matrix.name)
         return corpus
 
     def summarize(self, corpus: Corpus, axis_names: List[str], output_dir: str = '.',
