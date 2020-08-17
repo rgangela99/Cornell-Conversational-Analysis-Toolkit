@@ -25,10 +25,33 @@ clean_str = lambda s: clean(s,
                             lang="en"
                             )
 
+
 class TextCleaner(TextProcessor):
+    """
+    Transformer that cleans the text of utterances in an input Corpus. By default, the text cleaner assumes the
+    text is in English. It fixes unicode errors, transliterates text to the closest ASCII representation,
+    lowercases text, removes line breaks, and replaces URLs, emails, phone numbers, numbers, currency symbols with
+    special tokens.
+
+    This transformer can be configured with any custom text cleaning function that takes a text as input
+    and outputs the cleaned version of the text.
+
+    :param text_cleaner: an optional function for cleaning text. If unfilled, uses ConvoKit's default text cleaner
+        as described above.
+    :param input_field: name of attribute to use as input. This attribute must point to a string, and defaults to utterance.text.
+    :param input_filter: a boolean function of signature `input_filter(utterance, aux_input)`.
+        Text cleaning will only be applied to utterances where `input_filter` returns `True`.
+        By default, will always return `True`, meaning that all utterances will be cleaned.
+    :param verbosity: frequency of status messages
+    :param replace_text: whether to replace the text being cleaned with the cleaned version. True by default.
+        If False, the cleaned text is stored under attribute 'cleaned'.
+    :param save_original: if replacing text, whether to save the original version of the text. If True, saves it
+        under the 'original' attribute.
+    """
     def __init__(self, text_cleaner: Optional[Callable[[str], str]]=None,
                  input_field=None, input_filter=lambda utt, aux: True,
                  verbosity: int = 100, replace_text: bool = True, save_original: bool = True):
+
         if replace_text:
             if save_original:
                 output_field = 'original'
@@ -53,5 +76,5 @@ class TextCleaner(TextProcessor):
                 utt.text = cleaned_text
 
             if not self.save_original:
-                next(corpus.iter_utterances(selector)).del_info(self.output_field) # deletes for all
+                corpus.delete_metadata('utterance', self.output_field)
         return corpus

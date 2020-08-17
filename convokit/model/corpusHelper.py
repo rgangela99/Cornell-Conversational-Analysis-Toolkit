@@ -5,12 +5,14 @@ Contains functions that help with the construction / dumping of a Corpus
 import os
 import json
 from collections import defaultdict
+from typing import Dict
 import pickle
+
 from .speaker import Speaker
 from .utterance import Utterance
 from .conversation import Conversation
-from typing import Dict
 from .convoKitMeta import ConvoKitMeta
+from convokit.util import warn
 
 BIN_DELIM_L, BIN_DELIM_R = "<##bin{", "}&&@**>"
 KeyId = "id"
@@ -197,6 +199,10 @@ def initialize_speakers_and_utterances_objects(corpus, utt_dict, utterances, spe
         u = defaultdict(lambda: None, u)
         speaker_key = u[KeySpeaker]
         if speaker_key not in speakers_dict:
+            if u[KeySpeaker] not in speakers_data:
+                warn("CorpusLoadWarning: Missing speaker metadata for speaker ID: {}. "
+                     "Initializing default empty metadata instead.".format(u[KeySpeaker]))
+                speakers_data[u[KeySpeaker]] = {}
             if KeyMeta in speakers_data[u[KeySpeaker]]:
                 speakers_dict[speaker_key] = Speaker(owner=corpus, id=u[KeySpeaker],
                                                      meta=speakers_data[u[KeySpeaker]][KeyMeta])

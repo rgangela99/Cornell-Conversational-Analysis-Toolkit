@@ -23,21 +23,24 @@ class VectorClassifier(Classifier):
     :param obj_type: "speaker", "utterance", or "conversation"
     :param vector_name: the metadata key where the Corpus object text vector is stored
     :param columns: list of column names of vector matrix to use; uses all columns by default.
-    :param labeller: a (lambda) function that takes a Corpus object and returns True (y=1) or False (y=0) - i.e. labeller defines the y value of the object for fitting
+    :param labeller: a (lambda) function that takes a Corpus object and returns True (y=1) or False (y=0) - i.e.
+        labeller defines the y value of the object for fitting
     :param clf: a sklearn Classifier. By default, clf is a Pipeline with StandardScaler and LogisticRegression
-    :param clf_feat_name: the metadata key to store the classifier prediction value under; default: "prediction"
-    :param clf_prob_feat_name: the metadata key to store the classifier prediction score under; default: "pred_score"
+    :param clf_attribute_name: the metadata attribute name to store the classifier prediction value under; default:
+        "prediction"
+    :param clf_prob_attribute_name: the metadata attribute name to store the classifier prediction score under;
+        default: "pred_score"
     """
     def __init__(self, obj_type: str, vector_name: str, columns: List[str] = None,
                  labeller: Callable[[CorpusComponent], bool] = lambda x: True,
-                 clf=None, clf_feat_name: str = "prediction", clf_prob_feat_name: str = "pred_score"):
+                 clf=None, clf_attribute_name: str = "prediction", clf_prob_attribute_name: str = "pred_score"):
         if clf is None:
             clf = Pipeline([("standardScaler", StandardScaler(with_mean=False)),
                             ("logreg", LogisticRegression(solver='liblinear'))])
             print("Initialized default classification model (standard scaled logistic regression).")
 
         super().__init__(obj_type=obj_type, pred_feats=[], labeller=labeller,
-                         clf=clf, clf_feat_name=clf_feat_name, clf_prob_feat_name=clf_prob_feat_name)
+                         clf=clf, clf_attribute_name=clf_attribute_name, clf_prob_attribute_name=clf_prob_attribute_name)
         self.vector_name = vector_name
         self.columns = columns
 
@@ -82,8 +85,8 @@ class VectorClassifier(Classifier):
             if selector(obj):
                 objs.append(obj)
             else:
-                obj.add_meta(self.clf_feat_name, None)
-                obj.add_meta(self.clf_prob_feat_name, None)
+                obj.add_meta(self.clf_attribute_name, None)
+                obj.add_meta(self.clf_prob_attribute_name, None)
 
         obj_ids = [obj.id for obj in objs]
         X = corpus.get_vector_matrix(self.vector_name).get_vectors(obj_ids, self.columns)
@@ -92,11 +95,14 @@ class VectorClassifier(Classifier):
 
         for idx, (clf, clf_prob) in enumerate(list(zip(clfs, clfs_probs))):
             obj = objs[idx]
-            obj.add_meta(self.clf_feat_name, clf)
-            obj.add_meta(self.clf_prob_feat_name, clf_prob)
+            obj.add_meta(self.clf_attribute_name, clf)
+            obj.add_meta(self.clf_prob_attribute_name, clf_prob)
         return corpus
 
     def transform_objs(self, objs: List[CorpusComponent]) -> List[CorpusComponent]:
+        """
+        Not implemented for VectorClassifier.
+        """
         # """
         # Run classifier on list of Corpus component objects and annotate them with their predictions and
         # prediction scores.
@@ -132,29 +138,30 @@ class VectorClassifier(Classifier):
         objId_clf_prob = []
 
         for obj in corpus.iter_objs(self.obj_type, selector):
-            objId_clf_prob.append((obj.id, obj.meta[self.clf_feat_name], obj.meta[self.clf_prob_feat_name]))
+            objId_clf_prob.append((obj.id, obj.meta[self.clf_attribute_name], obj.meta[self.clf_prob_attribute_name]))
 
         return pd.DataFrame(list(objId_clf_prob),
-                            columns=['id', self.clf_feat_name, self.clf_prob_feat_name])\
-                            .set_index('id').sort_values(self.clf_prob_feat_name, ascending=False)
+                            columns=['id', self.clf_attribute_name, self.clf_prob_attribute_name])\
+                            .set_index('id').sort_values(self.clf_prob_attribute_name, ascending=False)
 
     def summarize_objs(self, objs: List[CorpusComponent]):
         """
-        Generate a pandas DataFrame (indexed by object id, with prediction and prediction score columns) of
-        classification results.
-
-        Runs on a list of Corpus objects.
-
-        :param objs: list of Corpus objects
-        :return: pandas DataFrame indexed by Corpus object id
+        Not implemented for VectorClassifier.
         """
+        # Generate a pandas DataFrame (indexed by object id, with prediction and prediction score columns) of
+        # classification results.
+        #
+        # Runs on a list of Corpus objects.
+        #
+        # :param objs: list of Corpus objects
+        # :return: pandas DataFrame indexed by Corpus object id
         # objId_clf_prob = []
         # for obj in objs:
-        #     objId_clf_prob.append((obj.id, obj.meta[self.clf_feat_name], obj.meta[self.clf_prob_feat_name]))
+        #     objId_clf_prob.append((obj.id, obj.meta[self.clf_attribute_name], obj.meta[self.clf_prob_attribute_name]))
         #
         # return pd.DataFrame(list(objId_clf_prob),
-        #                     columns=['id', self.clf_feat_name, self.clf_prob_feat_name]).set_index('id').sort_values(
-        #                     self.clf_prob_feat_name)
+        #                     columns=['id', self.clf_attribute_name, self.clf_prob_attribute_name]).set_index('id').sort_values(
+        #                     self.clf_prob_attribute_name)
         raise NotImplementedError("VectorClassifier can only be run on corpora, not arbitrary lists of corpus "
                                   "component objects.")
 

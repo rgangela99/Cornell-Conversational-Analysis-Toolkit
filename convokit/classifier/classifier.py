@@ -16,20 +16,20 @@ class Classifier(Transformer):
     :param labeller: a (lambda) function that takes a Corpus object and returns True (y=1) or False (y=0)
         - i.e. labeller defines the y value of the object for fitting
     :param clf: optional sklearn classifier model, an SVM with linear kernel will be initialized by default
-    :param clf_feat_name: the metadata key to store the classifier prediction value under; default: "prediction"
-    :param clf_prob_feat_name: the metadata key to store the classifier prediction score under; default: "pred_score"
+    :param clf_attribute_name: the metadata attribute name to store the classifier prediction value under; default: "prediction"
+    :param clf_prob_attribute_name: the metadata attribute name to store the classifier prediction score under; default: "pred_score"
 
     """
     def __init__(self, obj_type: str, pred_feats: List[str],
                  labeller: Callable[[CorpusComponent], bool] = lambda x: True,
-                 clf=None, clf_feat_name: str = "prediction", clf_prob_feat_name: str = "pred_score"):
+                 clf=None, clf_attribute_name: str = "prediction", clf_prob_attribute_name: str = "pred_score"):
         self.pred_feats = pred_feats
         self.labeller = labeller
         self.obj_type = obj_type
 
         self.clf = svm.SVC(C=0.02, kernel='linear', probability=True) if clf is None else clf
-        self.clf_feat_name = clf_feat_name
-        self.clf_prob_feat_name = clf_prob_feat_name
+        self.clf_attribute_name = clf_attribute_name
+        self.clf_prob_attribute_name = clf_prob_attribute_name
 
     def fit(self, corpus: Corpus, y=None, selector: Callable[[CorpusComponent], bool] = lambda x: True):
         """
@@ -64,13 +64,13 @@ class Classifier(Transformer):
 
         for idx, (clf, clf_prob) in enumerate(list(zip(clfs, clfs_probs))):
             corpus_obj = corpus.get_object(self.obj_type, idx_to_id[idx])
-            corpus_obj.add_meta(self.clf_feat_name, clf)
-            corpus_obj.add_meta(self.clf_prob_feat_name, clf_prob)
+            corpus_obj.add_meta(self.clf_attribute_name, clf)
+            corpus_obj.add_meta(self.clf_prob_attribute_name, clf_prob)
 
         for obj in corpus.iter_objs(self.obj_type, selector):
-            if self.clf_feat_name not in obj.meta:
-                obj.meta[self.clf_feat_name] = None
-                obj.meta[self.clf_prob_feat_name] = None
+            if self.clf_attribute_name not in obj.meta:
+                obj.meta[self.clf_attribute_name] = None
+                obj.meta[self.clf_prob_attribute_name] = None
 
         return corpus
 
@@ -92,8 +92,8 @@ class Classifier(Transformer):
 
         for idx, (clf, clf_prob) in enumerate(list(zip(clfs, clfs_probs))):
             obj = objs[idx]
-            obj.add_meta(self.clf_feat_name, clf)
-            obj.add_meta(self.clf_prob_feat_name, clf_prob)
+            obj.add_meta(self.clf_attribute_name, clf)
+            obj.add_meta(self.clf_prob_attribute_name, clf_prob)
 
         return objs
 
@@ -111,10 +111,10 @@ class Classifier(Transformer):
         objId_clf_prob = []
 
         for obj in corpus.iter_objs(self.obj_type, selector):
-            objId_clf_prob.append((obj.id, obj.meta[self.clf_feat_name], obj.meta[self.clf_prob_feat_name]))
+            objId_clf_prob.append((obj.id, obj.meta[self.clf_attribute_name], obj.meta[self.clf_prob_attribute_name]))
 
         return pd.DataFrame(list(objId_clf_prob),
-                            columns=['id', self.clf_feat_name, self.clf_prob_feat_name]).set_index('id').sort_values(self.clf_prob_feat_name)
+                            columns=['id', self.clf_attribute_name, self.clf_prob_attribute_name]).set_index('id').sort_values(self.clf_prob_attribute_name)
 
     def summarize_objs(self, objs: List[CorpusComponent]):
         """
@@ -127,10 +127,10 @@ class Classifier(Transformer):
         """
         objId_clf_prob = []
         for obj in objs:
-            objId_clf_prob.append((obj.id, obj.meta[self.clf_feat_name], obj.meta[self.clf_prob_feat_name]))
+            objId_clf_prob.append((obj.id, obj.meta[self.clf_attribute_name], obj.meta[self.clf_prob_attribute_name]))
 
         return pd.DataFrame(list(objId_clf_prob),
-                            columns=['id', self.clf_feat_name, self.clf_prob_feat_name]).set_index('id').sort_values(self.clf_prob_feat_name)
+                            columns=['id', self.clf_attribute_name, self.clf_prob_attribute_name]).set_index('id').sort_values(self.clf_prob_attribute_name)
 
     def evaluate_with_train_test_split(self, corpus: Corpus = None,
                                        objs: List[CorpusComponent] = None,
@@ -207,7 +207,7 @@ class Classifier(Transformer):
 
     def confusion_matrix(self, corpus, selector: Callable[[CorpusComponent], bool] = lambda x: True):
         """
-        Generate confusion matrix for transformed corpus using labeller for y_true and clf_feat_name as y_pred
+        Generate confusion matrix for transformed corpus using labeller for y_true and clf_attribute_name as y_pred
 
         :param corpus: target Corpus
         :param selector: (lambda) function selecting objects to include in this confusion_matrix; uses all objects by default
@@ -217,7 +217,7 @@ class Classifier(Transformer):
         y_pred = []
         for obj in corpus.iter_objs(self.obj_type, selector):
             y_true.append(self.labeller(obj))
-            y_pred.append(obj.meta[self.clf_feat_name])
+            y_pred.append(obj.meta[self.clf_attribute_name])
 
         return confusion_matrix(y_true=y_true, y_pred=y_pred)
 
@@ -256,13 +256,13 @@ class Classifier(Transformer):
         y_pred = []
         for obj in corpus.iter_objs(self.obj_type, selector):
             y_true.append(self.labeller(obj))
-            y_pred.append(obj.meta[self.clf_feat_name])
+            y_pred.append(obj.meta[self.clf_attribute_name])
 
         return y_true, y_pred
 
     def classification_report(self, corpus, selector: Callable[[CorpusComponent], bool] = lambda x: True):
         """
-        Generate classification report for transformed corpus using labeller for y_true and clf_feat_name as y_pred
+        Generate classification report for transformed corpus using labeller for y_true and clf_attribute_name as y_pred
 
         :param corpus: target Corpus
         :param selector: (lambda) function selecting objects to include in this classification report
@@ -272,7 +272,7 @@ class Classifier(Transformer):
         y_pred = []
         for obj in corpus.iter_objs(self.obj_type, selector):
             y_true.append(self.labeller(obj))
-            y_pred.append(obj.meta[self.clf_feat_name])
+            y_pred.append(obj.meta[self.clf_attribute_name])
 
         return classification_report(y_true=y_true, y_pred=y_pred)
 

@@ -130,7 +130,7 @@ def get_coefs_helper(clf, feature_names: List[str] = None, coef_func=None):
             coefs = clf.named_steps['logreg'].coef_[0].tolist()
         except AttributeError:
             warn("Classifier is not a pipeline with a logistic regression component, so default coefficient getter function"
-                  " did not work. Choose a valid coef_func argument.")
+                 " did not work. Choose a valid coef_func argument.")
             return
     else:
         coefs = coef_func(clf)

@@ -75,8 +75,8 @@ class Speaker(CorpusComponent):
 
     def iter_utterances(self, selector=lambda utt: True): #-> Generator[Utterance, None, None]:
         """
-        Get utterances made by the Speaker, with an optional selector that filters for Utterances that should be
-        included.
+        Get utterances made by the Speaker, with an optional selector that selects for Utterances that
+        should be included.
 
 		:param selector: a (lambda) function that takes an Utterance and returns True or False (i.e. include / exclude).
 			By default, the selector includes all Utterances in the Corpus.
