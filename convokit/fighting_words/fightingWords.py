@@ -57,12 +57,16 @@ class FightingWords(Transformer):
     :param ngram_range: range of ngrams to use if using default cv
     :param prior: either a float describing a uniform prior, or a vector describing a prior over vocabulary items.
         If using a predefined vocabulary, make sure to specify that when you make your CountVectorizer object.
+    :param class1_attribute_name: metadata attribute name to store class1 ngrams under during the `transform()` step.
+        Default is 'fighting_words_class1'.
+    :param class2_attribute_name: metadata attribute name to store class2 ngrams under during the `transform()` step.
+        Default is 'fighting_words_class2'.
 
     :ivar cv: modifiable countvectorizer
 
     """
-    def __init__(self, obj_type="utterance", text_func=None, cv=None,
-                 ngram_range=None, prior=0.1):
+    def __init__(self, obj_type="utterance", text_func=None, cv=None, ngram_range=None, prior=0.1,
+                 class1_attribute_name='fighting_words_class1', class2_attribute_name='fighting_words_class2'):
         assert obj_type in ["speaker", "utterance", "conversation"]
         self.obj_type = obj_type
 
@@ -94,6 +98,9 @@ class FightingWords(Transformer):
             self.cv = CV(decode_error='ignore', min_df=10, max_df=.5, ngram_range=self.ngram_range,
                          binary=False, max_features=15000)
             print("Done.")
+
+        self.class1_attribute_name = class1_attribute_name
+        self.class2_attribute_name = class2_attribute_name
 
 
     @staticmethod
@@ -241,7 +248,7 @@ class FightingWords(Transformer):
         The relevant fighting words to use are specified by the config parameter. By default, the annotation method
         is to annotate the corpus components with the top 10 fighting words of each class.
 
-        Lists are stored under metadata keys 'fighting_words_class1', 'fighting_words_class2'
+        Lists are stored under the metadata attributes defined when initializing the FightingWords Transformer.
 
         :param corpus: corpus to annotate
         :param selector: a (lambda) function that takes a CorpusComponent and returns True/False; this selects for
@@ -261,11 +268,11 @@ class FightingWords(Transformer):
         for obj in corpus.iter_objs(self.obj_type): # improve the efficiency of this; tricky because ngrams #TODO
             if selector(obj):
                 obj_text = self.text_func(obj)
-                obj.meta['fighting_words_class1'] = [ngram for ngram in class1_ngrams if ngram in obj_text]
-                obj.meta['fighting_words_class2'] = [ngram for ngram in class2_ngrams if ngram in obj_text]
+                obj.meta[self.class1_attribute_name] = [ngram for ngram in class1_ngrams if ngram in obj_text]
+                obj.meta[self.class2_attribute_name] = [ngram for ngram in class2_ngrams if ngram in obj_text]
             else:
-                obj.meta['fighting_words_class1'] = None
-                obj.meta['fighting_words_class2'] = None
+                obj.meta[self.class1_attribute_name] = None
+                obj.meta[self.class2_attribute_name] = None
 
         return corpus
 

@@ -25,8 +25,8 @@ Utterance-level information
 For each utterance, we provide:
 
 * id: index of the utterance (unique comment identification provided by Reddit)
-* user: the unique id of the user who authored the utterance
-* root: comment identifier of the original post in the thread that this comment was posted in
+* speaker: the unique id of the user who authored the utterance
+* conversation_id: comment identifier of the original post in the thread that this comment was posted in
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: utterance timestamp provided by Reddit API
 * text: the full text (in string) of the comment
@@ -71,7 +71,7 @@ We provide a `Jupyter notebook <https://github.com/CornellNLP/Cornell-Conversati
 
 Additional notes
 ----------------
-- To see the original posts in each conversation, note that the 'root' metadata of an Utterance (i.e. Reddit comment) would be the same as the 'id' metadata (this only holds true for original posts).
+- To see the original posts in each conversation, note that the 'conversation_id' field of an Utterance (i.e. Reddit comment) would be the same as the 'id' metadata (this only holds true for original posts).
 - The main indicator of interest in this data is whether an argument succeeded in changing the original poster's (OP's) view. To denote a successful argument: the "success" field of an utterance takes the value of 1 (these utterances were the comments in the original post that succeeded in changing OP's mind), or the "success" field takes the value of 0 (this collection of utterances were a comment thread that are similar in nature to a successful argument in the full thread(matched on pair_id), but this argument failed to change OP's mind -- See section 4 of the cited paper for selection criteria of successful/unsuccessful arguments. All other comments take a 'success' value of None.
 - Note for pair_ids: the successful-unsuccessful argument pairs originally compiled by the authors are not unique at the Conversation-level nor Utterance-level (i.e. the original posts to the ChangeMyView subreddit can have multiple successful-unsuccessful comment pairs in their full-comment threads and some comments can have multiple opposing pairs -- see the relevant metadata fields at Conversation-level and Utterance-level below).
 - Note on missing data: 530 'Reddit comments' were included from the original data which did not have text nor an author. These were included for completeness, each utterance has Speaker(name='[missing]').

@@ -7,6 +7,5 @@ Miscellaneous utility functions for managing datasets
    :maxdepth: 2
 
    Util <util.rst>
-   Text Processing Utilities <preprocessing.rst>
    Speaker Conversation Utilities <speaker_convo_helpers.rst>
    Pipeline <convokitPipeline.rst>

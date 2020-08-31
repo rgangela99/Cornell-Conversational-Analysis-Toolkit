@@ -26,7 +26,7 @@ Each conversational turn on the talk page is viewed as an utterance. For each ut
 
 * id: index of the utterance
 * speaker: the speaker who author the utterance
-* root: index of the conversation root of the utterance
+* conversation_id: id of the first utterance in the conversation this utterance belongs to
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
 * text: textual content of the utterance
@@ -45,7 +45,7 @@ Metadata for each conversation include:
 
 * page_title: the title of the talk page the comment came from
 * page_id: the unique numerical ID of the talk page the comment came from
-* pair_id: the conversation ID (root) of the conversation that this comment's conversation is paired with
+* pair_id: the id of the conversation that this comment's conversation is paired with
 * conversation_has_personal_attack: whether any comment in this comment's conversation contains a personal attack according to crowdsourced annotators
 * verified: whether the personal attack label has been double-checked by an internal annotator and confirmed to be correct 
 * pair_verified: whether the personal attack label for the paired conversation has been double-checked by an internal annotator and confirmed to be correct 

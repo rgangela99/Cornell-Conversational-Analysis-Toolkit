@@ -64,9 +64,14 @@ class CRAFTModel(ForecasterModel):
                  model_path: str = None,
                  options: Dict = None,
                  forecast_attribute_name: str = "prediction",
-                 forecast_prob_attribute_name: str = "pred_score"):
+                 forecast_feat_name=None,
+                 forecast_prob_attribute_name: str = "pred_score",
+                 forecast_prob_feat_name=None):
 
-        super().__init__(forecast_attribute_name=forecast_attribute_name, forecast_prob_attribute_name=forecast_prob_attribute_name)
+        super().__init__(forecast_attribute_name=forecast_attribute_name,
+                         forecast_feat_name=forecast_feat_name,
+                         forecast_prob_attribute_name=forecast_prob_attribute_name,
+                         forecast_prob_feat_name=forecast_prob_feat_name)
         assert device_type in ['cuda', 'cpu']
         # device: controls GPU usage: 'cuda' to enable GPU, 'cpu' to run on CPU only.
         self.device = torch.device(device_type)

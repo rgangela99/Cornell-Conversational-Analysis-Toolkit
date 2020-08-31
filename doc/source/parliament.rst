@@ -29,9 +29,9 @@ Utterance-level information
 Each question or answer is viewed as an utterance. For each utterance, we provide:
 
 * id: index of the utterance
-* speaker: the speaker who author the utterance
-* root: index of the conversation root of the utterance
-* reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
+* speaker: the speaker who authored the utterance
+* conversation_id: id of the first utterance in the conversation this utterance belongs to
+* reply_to: id of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
 * text: textual content of the utterance
 

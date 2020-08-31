@@ -23,8 +23,8 @@ Utterance-level information
 For each Utterance we provide:
 
 - id: ``<str>``, the index of the utterance in the format `sAA_eBB_cCC_uDDDD`, where *AA* is the season number, *BB* is the episode number, *CC* is the scene/conversation number, and *DDDD* is the number of the utterance in the scene (e.g. *s01_e18_c05_u021*).
-- user: ``<str>``, the user who authored the utterance, aka the speaker, e.g. Monica Geller
-- root: ``<str>``, the id of the conversation root of the utterance. We assume conversations begin at the start of a new scene.
+- speaker: ``<str>``, the speaker who authored the utterance, e.g. Monica Geller
+- conversation_id: ``<str>``, conversation_id: id of the first utterance in the conversation this utterance belongs to. We assume conversations begin at the start of a new scene.
 - reply_to: ``<str>``, the id of the utterance to which this utterance replies to. `None` if the utterance is the first in a conversation.
 - timestamp: ``None``. Our dataset does not contain timestamp information for utterances.
 - text: ``<str>``, the textual content of the utterance.

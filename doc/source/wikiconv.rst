@@ -29,7 +29,7 @@ Each conversational turn on the talk page is viewed as an utterance. For each ut
 
 - id: A unique identifier assigned by the original WikiConv reconstruction pipeline
 - speaker: Wikipedia user name of the editor
-- root: ID of the conversation root of the utterance
+- conversation_id: ID of the first utterance in the conversation this utterance belongs to
 - reply_to: ID of the utterance to which this utterance replies to (None if the utterance is not a reply)
 - timestamp: Time of the utterance
 - text: Textual content of the utterance

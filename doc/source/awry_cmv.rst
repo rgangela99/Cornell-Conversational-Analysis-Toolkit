@@ -19,8 +19,8 @@ Utterance-level information
 Each utterance corresponds to a Reddit comment. For each utterance, we provide:
 
 * id: Reddit ID of the comment represented by the utterance
-* user: the user who author the utterance
-* root: Reddit ID of the top-level comment whose thread this utterance belongs to. Note that this differs from how "root" is treated in ConvoKit's general Reddit corpora: in those corpora a conversation is considered to start with a Reddit post, whereas in this corpus a conversation is considered to start with a top-level reply to a post.
+* speaker: the speaker who authored the utterance
+* conversation_id: id of the first utterance in the conversation this utterance belongs to. Note that this differs from how 'conversation_id' is treated in ConvoKit's general Reddit corpora: in those corpora a conversation is considered to start with a Reddit post utterance, whereas in this corpus a conversation is considered to start with a top-level reply to a post.
 * reply_to: Reddit ID of the utterance to which this utterance replies to (None if the utterance represents a top-level comment, i.e., a reply to a post)
 * timestamp: time of the utterance
 * text: textual content of the utterance
@@ -42,7 +42,7 @@ Conversational-level information
 
 Metadata for each conversation include:
 
-* pair_id: the conversation ID (root) of the conversation that this conversation is paired with
+* pair_id: the id of the conversation that this conversation is paired with
 * has_removed_comment: whether the final comment in this thread was removed by CMV moderators for violation of Rule 2
 * split: which split (train, val, or test) this conversation was used in for the experiments described in "Trouble on the Horizon"
 

@@ -78,7 +78,7 @@ Each utterance from the GAP corpus possesses the following information, which ar
 
 - id: unique speaker utterance, e.g. 1.Green.70
 - speaker: speaker name with group number, e.g. 1.Green
-- root: id of the first utterance of each group, e.g. 1.Pink.1
+- conversation_id: id of the first utterance in the conversation this utterance belongs to, e.g. 1.Pink.1
 - reply_to: previous idx, e.g. 1.Blue.105
 - timestamp: start time in format MM:SS.ds, where ds is deciseconds (only ever one decimal value), e.g. 02:10.5
 - text: sentence of utterance, without punctuation

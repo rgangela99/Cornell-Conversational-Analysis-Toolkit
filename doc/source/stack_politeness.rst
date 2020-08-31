@@ -15,9 +15,9 @@ Utterance-level information
 Each utterance corresponds to a Stack Exchange request. For each utterance, we provide:
 
 * id: row index of the request given in the original data release. 
-* user: we use a generic "user" to represent the author of the utterance. 
-* root: The id of the utterance.
-* reply_to: None. In this dataset, each request is seen as a full conversation, and thus all utterances are roots.  
+* speaker: the author of the utterance.
+* conversation_id: id of the first utterance in the conversation this utterance belongs to, which in this case is the id of the utterance itself
+* reply_to: None. In this dataset, each request is seen as a full conversation, and thus all utterances are at the 'root' of the conversations
 * timestamp: "NOT_RECORDED".
 * text: textual content of the utterance.
 

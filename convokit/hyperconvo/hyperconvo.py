@@ -2,9 +2,10 @@ import numpy as np
 import scipy.stats
 import pandas as pd
 from scipy.sparse import csr_matrix
-
-from convokit.transformer import Transformer
 from typing import Dict, Optional, Callable
+
+from convokit.util import deprecation
+from convokit.transformer import Transformer
 from convokit.model import Corpus, Conversation
 from .hypergraph import Hypergraph
 
@@ -57,14 +58,17 @@ class HyperConvo(Transformer):
 
     :param prefix_len: Use the first [prefix_len] utterances of each conversation to construct the hypergraph
     :param min_convo_len: Only consider conversations of at least this length
-    :param attribute_name: feature name to store hyperconvo features under
+    :param vector_name: feature name to store hyperconvo features under
     :param invalid_val: value to use for invalid hyperconvo features, default is np.nan
     """
 
-    def __init__(self, prefix_len: int = 10, min_convo_len: int = 10, attribute_name: str = "hyperconvo", invalid_val: float = np.nan):
+    def __init__(self, prefix_len: int = 10, min_convo_len: int = 10, vector_name: str = "hyperconvo", feat_name=None,
+                 invalid_val: float = np.nan):
         self.prefix_len = prefix_len
         self.min_convo_len = min_convo_len
-        self.attribute_name = attribute_name
+        self.vector_name = vector_name if feat_name is not None else feat_name
+        if feat_name is not None: deprecation("HyperConvo's feat_name parameter", "vector_name")
+
         self.invalid_val = invalid_val
 
     def transform(self, corpus: Corpus, selector: Optional[Callable[[Conversation], bool]] = lambda convo: True) -> Corpus:
@@ -79,13 +83,13 @@ class HyperConvo(Transformer):
 
         convo_id_to_feats = self.retrieve_feats(corpus, selector)
         df = pd.DataFrame(convo_id_to_feats).T
-        corpus.set_vector_matrix(name=self.attribute_name,
+        corpus.set_vector_matrix(name=self.vector_name,
                                  ids=list(df.index),
                                  columns=list(df.columns),
                                  matrix=csr_matrix(df.values.astype('float64')))
 
         for convo in corpus.iter_conversations(selector):
-            convo.add_vector(self.attribute_name)
+            convo.add_vector(self.vector_name)
         return corpus
 
     def sliding_transform(self, corpus: Corpus, selector=lambda convo:True):

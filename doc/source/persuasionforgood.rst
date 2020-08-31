@@ -75,9 +75,9 @@ Utterance-level information
 Each utterance corresponds to a turn in a dialogue.
 
 * id: index of the utterance
-* user: the author of the utterance
-* root: the index of the first utterance in the dialogue (and hence the conversation id)
-* reply_to: the index of the utterance to which this utterance is a reply (None if the utterance is at the root)
+* speaker: the author of the utterance
+* conversation_id: id of the first utterance in the dialogue this utterance belongs to
+* reply_to: the id of the utterance to which this utterance is a reply (None if the utterance starts the conversation)
 * text: content of the utterance
 
 Additional metadata includes:

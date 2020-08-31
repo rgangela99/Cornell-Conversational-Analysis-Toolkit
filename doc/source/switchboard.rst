@@ -34,7 +34,7 @@ Each utterance corresponds to a turn by one speaker.
 
 * id: the unique ID of the utterance. It is formatted as "_conversation_id_"-"_position_of_utterance_". For example, ID 4325-0 is the first utterance in the conversation with ID 4325.
 * speaker: the Speaker giving the utterance
-* root: id of the root utterance of the conversation. For example, the root of the utterance with ID 4325-1 would be 4325-0.
+* conversation_id: id of the first utterance in the conversation this utterance belongs to. For example, the conversation_id of the utterance with ID 4325-1 would be 4325-0.
 * reply_to: id of the utterance this replies to (None if the utterance is not a reply)
 * timestamp: timestamp of the utterance (not applicable in SwDA, set to None)
 * text: textual content of the utterance
@@ -47,7 +47,7 @@ Additional metadata includes:
 Conversation-level information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Conversations are indexed by the id of the root utterance. 
+Conversations are indexed by the id of the utterance that starts the conversation.
 
 Additional metadata include:
 

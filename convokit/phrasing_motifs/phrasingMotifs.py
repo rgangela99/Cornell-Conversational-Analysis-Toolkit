@@ -111,6 +111,14 @@ class PhrasingMotifs(TextProcessor):
             print('reading meta information')
         with open(os.path.join(model_dir, 'meta.json')) as f:
             self.phrasing_motif_info['min_support'] = json.load(f)['min_support']
+
+    def get_model(self):
+        '''
+        Returns the PhrasingMotifs model. See class docstring for description of fields.
+
+        :return: PhrasingMotifs model
+        '''
+        return self.phrasing_motif_info
     
     def dump_model(self, model_dir):
         """

@@ -1094,7 +1094,7 @@ class Corpus:
             # if field not in self.aux_info:
             #     raise ValueError("field %s not in index" % field)
             iterator = self.iter_objs(obj_type)
-            entries = {obj.id: obj.get_info(field) for obj in iterator}
+            entries = {obj.id: obj.retrieve_meta(field) for obj in iterator}
             # self.dump_jsonlist_from_dict(self.aux_info[field],
             #     os.path.join(dir_name, 'feat.%s.jsonl' % field))
             dump_jsonlist_from_dict(entries, os.path.join(dir_name, 'info.%s.jsonl' % field))
@@ -1153,7 +1153,7 @@ class Corpus:
             entry = dict()
             entry['id'] = obj.id
             for attr in attrs:
-                entry[attr] = obj.get_info(attr)
+                entry[attr] = obj.retrieve_meta(attr)
             table_entries.append(entry)
         return pd.DataFrame(table_entries).set_index('id')
 
@@ -1225,11 +1225,11 @@ class Corpus:
                 self.set_speaker_convo_info(speaker, convo, 'n_utterances', len(sorted_utts))
         for speaker in self.iter_speakers():
             try:
-                speaker.set_info('n_convos', len(speaker.get_info('conversations')))
+                speaker.set_info('n_convos', len(speaker.retrieve_meta('conversations')))
             except:
                 continue
 
-            sorted_convos = sorted(speaker.get_info('conversations').items(),
+            sorted_convos = sorted(speaker.retrieve_meta('conversations').items(),
                                    key=lambda x: (x[1]['start_time'], x[1]['utterance_ids'][0]))
             speaker.set_info('start_time', sorted_convos[0][1]['start_time'])
             for idx, (convo_id, _) in enumerate(sorted_convos):

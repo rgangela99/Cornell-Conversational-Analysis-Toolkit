@@ -31,9 +31,9 @@ Utterance-level information
 Each utterance represents either a top-level Reddit post or a comment on a post. For each utterance, we provide: 
 
 * id: unique_id of the utterance. This is the Reddit ID of the post or comment; posts start with t3 and comments with t1
-* user: author of the post/comment as an object
-* root: root id/post id that the comment belongs to. For posts, this is the same as id
-* reply_to: the comment/post that it replies to
+* speaker: author of the post/comment
+* conversation_id: id of the first utterance in the conversation this utterance belongs to. For post utterances, the conversation_id is the same as the utterance id
+* reply_to: the id of the comment/post that this utterance replies to
 * text:  textual content of the utterance, none if there is no body in the text
 
 

@@ -32,7 +32,7 @@ For each utterance, we provide:
 
 * id: index of the utterance
 * speaker: the player who authored the utterance
-* root: index of the conversation
+* conversation_id: conversation_id: id of the first utterance in the conversation this utterance belongs to
 * reply_to: index of the utterance to which this is a reply to (None if the utterance is not a reply)
 * timestamp: the index of the utterance in the game
 * text: textual content of the utterance

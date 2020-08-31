@@ -41,8 +41,8 @@ utterances.jsonl
 Each utterance is stored on its own line and represented as a json object, with six mandatory fields:
 
 * id: index of the utterance
-* speaker: the speaker who author the utterance
-* root: index of the conversation root of the utterance
+* speaker: the speaker who authored the utterance
+* conversation_id: id of the first utterance in the conversation this utterance belongs to
 * reply_to: index of the utterance to which this utterance replies to (None if the utterance is not a reply)
 * timestamp: time of the utterance
 * text: textual content of the utterance
@@ -55,7 +55,7 @@ utterances.jsonl contains a list of such utterances. An example utterance is sho
 
 ::
 
- {'id': '200', 'speaker': 'mr. srinivasan', 'root': '145', 'reply_to': '199', 'timestamp': None, 'text': 'It -- it does.', 'meta': {'case': '02-1472', 'side': 'respondent'}}
+ {'id': '200', 'speaker': 'mr. srinivasan', 'conversation_id': '145', 'reply_to': '199', 'timestamp': None, 'text': 'It -- it does.', 'meta': {'case': '02-1472', 'side': 'respondent'}}
 ::
 
 
