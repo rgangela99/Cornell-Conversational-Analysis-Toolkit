@@ -184,7 +184,7 @@ class ConvoKitMatrix:
         :return: a new ConvoKitMatrix
         """
         assert len(matrices) > 1
-        stacked = hstack([csr_matrix(m.matrix) for m in matrices])
+        stacked = hstack([csr_matrix(m.matrix) for m in matrices]).tocsr()
         columns = []
         for m in matrices:
             columns.extend(m.columns)
@@ -202,7 +202,7 @@ class ConvoKitMatrix:
         :return: a new ConvoKitMatrix
         """
         assert len(matrices) > 1
-        stacked = vstack([csr_matrix(m.matrix) for m in matrices])
+        stacked = vstack([csr_matrix(m.matrix) for m in matrices]).tocsr()
         ids = []
         for m in matrices:
             ids.extend(list(m.ids))
