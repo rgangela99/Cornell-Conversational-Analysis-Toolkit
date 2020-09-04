@@ -17,6 +17,14 @@ from statistics import mode
 import tensortools as tt
 import random
 from convokit import ConvoKitMatrix
+from scipy.interpolate import interp1d
+
+
+def resample(data, desired_length):
+    x = np.linspace(0, 100, num=len(data))
+    f = interp1d(x, data)
+    xnew = np.linspace(0, 100, num=desired_length)
+    return f(xnew)
 
 
 class TensorDecomposer(Transformer):
