@@ -26,6 +26,7 @@ setup(
                 "convokit.text_processing",
                 "convokit.speaker_convo_helpers",
                 "convokit.speakerConvoDiversity",
+                "convokit.surprise",
               ],
     package_data={"convokit": ["data/*.txt"]},
     install_requires=[
